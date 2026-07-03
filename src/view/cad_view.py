@@ -108,8 +108,22 @@ class CadView(QGraphicsView):
 
     def zoom_extents(self):
         self._save_viewport()
-        self.fitInView(self.scene().itemsBoundingRect(),
-                       Qt.AspectRatioMode.KeepAspectRatio)
+        # Only consider entity items (skip grid)
+        rect = self.scene().sceneRect()  # fallback
+        items_rect = None
+        for item in self.scene().items():
+            if hasattr(item, 'entity'):
+                br = item.sceneBoundingRect()
+                if items_rect is None:
+                    items_rect = br
+                else:
+                    items_rect = items_rect.united(br)
+        if items_rect is not None and not items_rect.isEmpty():
+            rect = items_rect
+            # Add 10% margin
+            rect.adjust(-rect.width() * 0.1, -rect.height() * 0.1,
+                         rect.width() * 0.1, rect.height() * 0.1)
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def zoom_window(self, rect):
         self._save_viewport()

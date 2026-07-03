@@ -111,6 +111,8 @@ class GfxTextItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
+        # Keep text readable at any zoom level
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations, True)
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
@@ -122,7 +124,8 @@ class GfxTextItem(QGraphicsItem):
         pen.setWidthF(0)
         painter.setPen(pen)
         font = painter.font()
-        font.setPointSizeF(self.entity.height * 3)
+        # Use pixel size for consistent readability
+        font.setPixelSize(max(8, int(self.entity.height * 40)))
         painter.setFont(font)
         painter.drawText(
             QPointF(self.entity.position.x, self.entity.position.y),
@@ -135,6 +138,7 @@ class GfxDimensionItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations, True)
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
@@ -164,7 +168,7 @@ class GfxDimensionItem(QGraphicsItem):
         # Text
         dist = e.measured_distance()
         font = painter.font()
-        font.setPointSizeF(8)
+        font.setPixelSize(10)
         painter.setFont(font)
         text = f"{dist:.2f}"
         mid_x = (e.def_point1.x + e.def_point2.x) / 2

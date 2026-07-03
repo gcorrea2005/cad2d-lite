@@ -173,13 +173,13 @@ def label(x, y, text, size=0.3):
     doc.add_entity(TextEntity(
         Point(x, y), text, height=size, layer_name="TEXT"))
 
-label(1.75, 1.4, "BEDROOM 1", 0.28)
-label(4.5, 1.4, "BATH 1", 0.22)
-label(7.0, 3.6, "KITCHEN", 0.25)
-label(9.75, 1.4, "BEDROOM 2", 0.25)
-label(9.75, 3.6, "BATH 2", 0.22)
-label(3.5, 0.6, "LIVING / DINING", 0.30)
-label(5.5, 5.4, "TERRACE", 0.28)
+label(1.75, 1.4, "BEDROOM 1", 0.30)
+label(4.5, 1.4, "BATH 1", 0.25)
+label(7.0, 3.6, "KITCHEN", 0.28)
+label(9.75, 1.4, "BEDROOM 2", 0.28)
+label(9.75, 3.6, "BATH 2", 0.25)
+label(3.5, 0.6, "LIVING / DINING", 0.32)
+label(5.5, 5.4, "TERRACE", 0.30)
 
 # ===== DIMENSIONS =====
 def dim_line(p1, p2, text_y):

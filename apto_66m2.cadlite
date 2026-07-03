@@ -56,7 +56,7 @@
   "entities": [
     {
       "type": "Line",
-      "uuid": "c8a36ef2-aabe-4922-8a9c-748d8b7ad8f9",
+      "uuid": "b0508d2d-bc3d-4678-ad5e-4ce3f6a35fe9",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -71,7 +71,7 @@
     },
     {
       "type": "Line",
-      "uuid": "025fe5e1-692c-4b95-89eb-51e04d072a9c",
+      "uuid": "f114b6e1-10b5-4b3a-b28e-158527f84861",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -86,7 +86,7 @@
     },
     {
       "type": "Line",
-      "uuid": "eb7c4b63-af82-451e-9b1f-0c8349b1ee79",
+      "uuid": "d35513f9-974a-430a-a064-1a8b6a19fbea",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -101,7 +101,7 @@
     },
     {
       "type": "Line",
-      "uuid": "89b7cf5a-70a1-476d-80f6-69ea4f6e7632",
+      "uuid": "0f67a04e-6cfd-429f-806b-139cb28cfe1d",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -116,7 +116,7 @@
     },
     {
       "type": "Line",
-      "uuid": "0cb44112-2982-4d48-a659-5a64e92b6b09",
+      "uuid": "3b52e99a-3328-4554-ac12-d0c465d0f016",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -131,7 +131,7 @@
     },
     {
       "type": "Line",
-      "uuid": "5a66720e-271c-4940-b730-c5456ce4fb20",
+      "uuid": "dec2d172-5596-48b4-81d3-f7d2d8fbf4d7",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -146,7 +146,7 @@
     },
     {
       "type": "Line",
-      "uuid": "9cf5ea3b-7166-4a8b-8863-e89eef33a48e",
+      "uuid": "2093c38e-9f23-46c1-a007-7b6fe44676d2",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -161,7 +161,7 @@
     },
     {
       "type": "Line",
-      "uuid": "5a0da0eb-5a9a-4153-b0af-586fd695c271",
+      "uuid": "14d115cf-ccb8-4c43-b783-16572ebf5557",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -176,7 +176,7 @@
     },
     {
       "type": "Line",
-      "uuid": "41a6e728-7a43-4f67-97cf-15cabb2537f4",
+      "uuid": "98e6aa0d-b2ea-4d8c-8462-c56131ecee0f",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -191,7 +191,7 @@
     },
     {
       "type": "Line",
-      "uuid": "abcbe240-2ef7-4a84-9614-a0683b9e176b",
+      "uuid": "088d0dff-f1bb-43a6-a5f8-886037533dbb",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -206,7 +206,7 @@
     },
     {
       "type": "Line",
-      "uuid": "d13d027e-bb66-42e5-9994-ab38cc2c4bae",
+      "uuid": "08ab57eb-3453-4bac-a69b-11f8d5ed6c01",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -221,7 +221,7 @@
     },
     {
       "type": "Line",
-      "uuid": "3dddf1a2-daa9-4cca-8c0e-b7ec8bd7736e",
+      "uuid": "8773e133-7e2b-4cbd-bca3-3c364f34d0da",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -236,7 +236,7 @@
     },
     {
       "type": "Line",
-      "uuid": "4ff8eccb-5c5c-45d2-881c-89c0f5e08c77",
+      "uuid": "50744136-101c-442a-b55a-0a47da2bbe6c",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -251,7 +251,7 @@
     },
     {
       "type": "Line",
-      "uuid": "232f42ae-6b90-4566-8139-03bc4424fbaf",
+      "uuid": "8a23db7d-f797-42c0-9248-f876cc219cc9",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -266,7 +266,7 @@
     },
     {
       "type": "Line",
-      "uuid": "3b850c35-7c14-48e8-a31a-4df125988550",
+      "uuid": "aacb7fd3-7eb5-481d-945d-247a8496cdac",
       "layer_name": "WALLS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -281,7 +281,7 @@
     },
     {
       "type": "Line",
-      "uuid": "f269a98a-7023-451f-85d5-3c7f5513f41d",
+      "uuid": "7c4901d1-8b2d-48e9-bb7e-0eda7d0c9175",
       "layer_name": "DOORS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -296,7 +296,7 @@
     },
     {
       "type": "Line",
-      "uuid": "846b1bf0-d20c-40dc-8c19-f57d91d1367d",
+      "uuid": "eec61851-722f-446e-82f6-85511fa0dceb",
       "layer_name": "DOORS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -311,7 +311,7 @@
     },
     {
       "type": "Line",
-      "uuid": "eaa5014c-1efa-45b5-97a3-f04821520688",
+      "uuid": "e315234b-d654-41e6-a730-17039f4ea7c9",
       "layer_name": "DOORS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -326,7 +326,7 @@
     },
     {
       "type": "Line",
-      "uuid": "a269ae1a-8c97-4ca6-90ed-172a6dc15c80",
+      "uuid": "ce05572a-25a3-46b1-b330-42cdae10d6ef",
       "layer_name": "DOORS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -341,7 +341,7 @@
     },
     {
       "type": "Line",
-      "uuid": "5e5055e4-310c-4c5d-a75a-add4b0b4c41e",
+      "uuid": "eefa7465-56c2-49d4-b3ef-40d1981a87dd",
       "layer_name": "DOORS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -356,7 +356,7 @@
     },
     {
       "type": "Line",
-      "uuid": "acb9b5a7-3c4c-4982-bf2c-cea689977e23",
+      "uuid": "96ff496f-c372-40a2-b113-1e9abf65df36",
       "layer_name": "DOORS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -371,7 +371,7 @@
     },
     {
       "type": "Line",
-      "uuid": "5e0ddbd0-6d0c-4d2b-9c30-f3d0826b3a1f",
+      "uuid": "2bbf9a80-0e30-4b69-b0bf-4b3d3ce57a0f",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -386,7 +386,7 @@
     },
     {
       "type": "Line",
-      "uuid": "090db815-74ef-4a0c-aed8-ad069e46f596",
+      "uuid": "1cbc2e9e-02b8-483b-a8ea-0ff51d9fefe8",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -401,7 +401,7 @@
     },
     {
       "type": "Line",
-      "uuid": "c4002abd-ae3a-4c45-9154-1089f22833f8",
+      "uuid": "692c78f0-65df-4040-b0b9-85d6fcc9b109",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -416,7 +416,7 @@
     },
     {
       "type": "Line",
-      "uuid": "277c42df-cc1f-4ac8-8523-e8c95fb9affa",
+      "uuid": "a773fc5a-8a2d-4cc8-bf61-e7f6fadbf833",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -431,7 +431,7 @@
     },
     {
       "type": "Text",
-      "uuid": "acfda575-2be1-462a-bd8b-8416538fc19f",
+      "uuid": "be19d9d4-fa07-4faa-b0f8-72f6ed085566",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -440,12 +440,12 @@
         1.4
       ],
       "content": "BEDROOM 1",
-      "height": 0.28,
+      "height": 0.3,
       "rotation": 0.0
     },
     {
       "type": "Text",
-      "uuid": "394f39ae-e4ac-4c8c-aee6-322c662b4a5d",
+      "uuid": "391606e0-7f03-4960-bd71-0da467312259",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -454,12 +454,12 @@
         1.4
       ],
       "content": "BATH 1",
-      "height": 0.22,
+      "height": 0.25,
       "rotation": 0.0
     },
     {
       "type": "Text",
-      "uuid": "db7682ae-b720-4f7a-9ffd-cb39ee83997b",
+      "uuid": "4aadd963-37ba-4438-a55a-fe5cc9d09e64",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -468,12 +468,12 @@
         3.6
       ],
       "content": "KITCHEN",
-      "height": 0.25,
+      "height": 0.28,
       "rotation": 0.0
     },
     {
       "type": "Text",
-      "uuid": "b98edc2b-575e-45c6-b41d-3e4f06ceb60e",
+      "uuid": "a501729f-4ec5-4a85-b631-94d8808bbb98",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -482,12 +482,12 @@
         1.4
       ],
       "content": "BEDROOM 2",
-      "height": 0.25,
+      "height": 0.28,
       "rotation": 0.0
     },
     {
       "type": "Text",
-      "uuid": "a8cccc57-8b7b-44cb-a91e-98fee2b22f30",
+      "uuid": "2f299941-3046-4e04-b6f3-01c875e6dfae",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -496,12 +496,12 @@
         3.6
       ],
       "content": "BATH 2",
-      "height": 0.22,
+      "height": 0.25,
       "rotation": 0.0
     },
     {
       "type": "Text",
-      "uuid": "02d025d8-3f88-480e-bb4b-c0245f38f95d",
+      "uuid": "d28859d8-b0c8-4354-a741-331f973ab266",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -510,12 +510,12 @@
         0.6
       ],
       "content": "LIVING / DINING",
-      "height": 0.3,
+      "height": 0.32,
       "rotation": 0.0
     },
     {
       "type": "Text",
-      "uuid": "62fbb5e7-53c7-46ec-a9ac-2d24d27c8f88",
+      "uuid": "8ccb7eb5-e9cb-43e6-bd19-39ff414a8576",
       "layer_name": "TEXT",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -524,12 +524,12 @@
         5.4
       ],
       "content": "TERRACE",
-      "height": 0.28,
+      "height": 0.3,
       "rotation": 0.0
     },
     {
       "type": "Dimension",
-      "uuid": "f9da2bc8-68da-4a83-a5ea-6e49931cdc30",
+      "uuid": "3347bd66-f56f-4966-88ae-62f41048af7d",
       "layer_name": "DIMS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -548,7 +548,7 @@
     },
     {
       "type": "Dimension",
-      "uuid": "01d7c698-db96-4cd1-b4d6-f05653b3de9c",
+      "uuid": "c06442fb-3175-40bd-8c1e-fbccb657509d",
       "layer_name": "DIMS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -567,7 +567,7 @@
     },
     {
       "type": "Dimension",
-      "uuid": "4e99b41c-1e25-475e-b23e-adb9cb580644",
+      "uuid": "0c4ef9b3-794b-4936-9da1-ce929900e270",
       "layer_name": "DIMS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -586,7 +586,7 @@
     },
     {
       "type": "Dimension",
-      "uuid": "590cfa25-cc79-4396-9a91-b01ed080b215",
+      "uuid": "c6fd6f0c-0db4-4a8b-b3ad-e61b053cd227",
       "layer_name": "DIMS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -605,7 +605,7 @@
     },
     {
       "type": "Dimension",
-      "uuid": "040fa756-63ec-4438-8710-53fdffd2277d",
+      "uuid": "506e3f32-d012-44ee-aced-b9b78011cc89",
       "layer_name": "DIMS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -624,7 +624,7 @@
     },
     {
       "type": "Line",
-      "uuid": "10a7323f-202f-41a1-999e-29c554d39b24",
+      "uuid": "dcaa6121-5a50-4726-beec-d12ba439a138",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -639,7 +639,7 @@
     },
     {
       "type": "Line",
-      "uuid": "5edb2060-38a1-4938-a8b4-57710386b87f",
+      "uuid": "de8d3805-580d-412e-8c42-92c60c37ecbc",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -654,7 +654,7 @@
     },
     {
       "type": "Line",
-      "uuid": "95d786af-a2b0-4f9b-a908-621b80d20a0b",
+      "uuid": "ad077fb4-ced0-4254-9b57-70dd0fb82a2e",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -669,7 +669,7 @@
     },
     {
       "type": "Line",
-      "uuid": "cbe06cd3-1887-4614-93a1-25134761a8c4",
+      "uuid": "11dab4d4-6914-40cb-a356-5af715e4ec24",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -684,7 +684,7 @@
     },
     {
       "type": "Line",
-      "uuid": "79e5a740-8061-4277-8a22-e9c141c218ed",
+      "uuid": "abb66533-39ce-49f0-9f13-bcc64ec442b4",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -699,7 +699,7 @@
     },
     {
       "type": "Line",
-      "uuid": "7c30fce4-770f-43de-b44b-367e54579da5",
+      "uuid": "d840577f-fbeb-4c31-897a-618ea3d439a9",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -714,7 +714,7 @@
     },
     {
       "type": "Line",
-      "uuid": "77394bc9-93c7-4fd0-9de6-14cf7d069b8c",
+      "uuid": "90157bc1-e576-466a-8bc8-a8dd4b95c90d",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -729,7 +729,7 @@
     },
     {
       "type": "Line",
-      "uuid": "cacb712a-7501-4123-87b6-9b23bc2224dd",
+      "uuid": "99b1faaf-effc-4ef4-99f9-83b7476753a3",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -744,7 +744,7 @@
     },
     {
       "type": "Line",
-      "uuid": "b918a894-f2de-44da-a129-2fb3058e111f",
+      "uuid": "6e12a5e4-1453-43f1-868e-3ca622d1eace",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -759,7 +759,7 @@
     },
     {
       "type": "Line",
-      "uuid": "57e68d80-35aa-41d0-9f95-7523a39b0d63",
+      "uuid": "b31f19c2-a19e-4101-b9e5-19f7176ae7c1",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -774,7 +774,7 @@
     },
     {
       "type": "Line",
-      "uuid": "18cc51f2-8a8f-4298-a42d-7a9a7a3aeb61",
+      "uuid": "e45754d0-9516-48ba-a88d-20e0928228b8",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -789,7 +789,7 @@
     },
     {
       "type": "Line",
-      "uuid": "72c3fc7f-1161-42e1-b498-1c48d5af416e",
+      "uuid": "e6373f44-6f07-4744-81f7-adff6c6684ea",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -804,7 +804,7 @@
     },
     {
       "type": "Line",
-      "uuid": "7029d6e9-23fc-4e6e-8b6b-592dfdc1efe3",
+      "uuid": "16d19979-56ce-4465-b6cb-e7b6a010a984",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -819,7 +819,7 @@
     },
     {
       "type": "Line",
-      "uuid": "ab9be18e-d30d-4983-9d47-a89ca12874f7",
+      "uuid": "52660ca6-22b2-46bb-87b3-187af4b31526",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -834,7 +834,7 @@
     },
     {
       "type": "Line",
-      "uuid": "7fc85906-d8ca-48d7-bf87-2ad77f53e02f",
+      "uuid": "2d8b0ff6-a300-4ea2-b1dd-6106d969b04d",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -849,7 +849,7 @@
     },
     {
       "type": "Line",
-      "uuid": "de287251-273e-47f6-bf09-40d6a5edac10",
+      "uuid": "247cac79-0ccc-4608-b60f-87827b9336a6",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -864,7 +864,7 @@
     },
     {
       "type": "Line",
-      "uuid": "2d6e31a2-35c1-41ae-9c7f-b2a0c7def7af",
+      "uuid": "f4b1067a-a94a-440c-bbbd-a25b47ece9a7",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -879,7 +879,7 @@
     },
     {
       "type": "Line",
-      "uuid": "fc62ab9e-e159-4aec-9d8e-28445a3a70a2",
+      "uuid": "4c6c8795-6bc8-44cc-b2ae-6f3ad3ed1f15",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -894,7 +894,7 @@
     },
     {
       "type": "Line",
-      "uuid": "fcb249fb-350a-4b77-b5d2-40a28376afee",
+      "uuid": "bd202da3-1337-466d-b222-4e1945947117",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -909,7 +909,7 @@
     },
     {
       "type": "Line",
-      "uuid": "4e561e4a-86dc-4345-9de6-9a9c139ed718",
+      "uuid": "0ca3e27a-d750-4b07-bd02-09cb75932d34",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -924,7 +924,7 @@
     },
     {
       "type": "Line",
-      "uuid": "22614e97-6b48-4399-a9c0-6265a519b088",
+      "uuid": "c88ce358-6006-4ac6-89b2-ba2054c661ff",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
@@ -939,7 +939,7 @@
     },
     {
       "type": "Line",
-      "uuid": "8dfaf074-520a-4e74-8d17-2806537a8799",
+      "uuid": "b243c319-6e2d-4847-86e3-8719d88c6493",
       "layer_name": "WINDOWS",
       "color": "#FFFFFF",
       "linetype": "CONTINUOUS",
