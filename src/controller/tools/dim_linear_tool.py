@@ -18,7 +18,7 @@ class DimLinearTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        pt = Point(scene_pos.x(), scene_pos.y())
+        pt = self._snap(scene_pos)
         if self._p1 is None:
             self._p1 = pt
         elif self._p2 is None:
@@ -32,11 +32,12 @@ class DimLinearTool(BaseTool):
             self._p1 = None
             self._p2 = None
             self._clear_preview()
+            self._clear_snap_indicator()
 
     def mouse_move(self, event, scene_pos: QPointF):
         if self._p1 is not None and self._p2 is not None:
             self._clear_preview()
-            pt = Point(scene_pos.x(), scene_pos.y())
+            pt = self._snap(scene_pos)
             preview = Dimension(self._p1, self._p2, pt, color="#888888")
             self._preview_item = GfxDimensionItem(preview)
             self.view.scene().addItem(self._preview_item)
@@ -50,3 +51,4 @@ class DimLinearTool(BaseTool):
         self._clear_preview()
         self._p1 = None
         self._p2 = None
+        super().deactivate()

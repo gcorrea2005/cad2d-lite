@@ -17,7 +17,7 @@ class RectangleTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        pt = Point(scene_pos.x(), scene_pos.y())
+        pt = self._snap(scene_pos)
         if self._corner1 is None:
             self._corner1 = pt
         else:
@@ -33,11 +33,12 @@ class RectangleTool(BaseTool):
             self.view.scene().addItem(gfx)
             self._corner1 = None
             self._clear_preview()
+            self._clear_snap_indicator()
 
     def mouse_move(self, event, scene_pos: QPointF):
         if self._corner1 is not None:
             self._clear_preview()
-            pt = Point(scene_pos.x(), scene_pos.y())
+            pt = self._snap(scene_pos)
             x1, y1 = self._corner1.x, self._corner1.y
             x2, y2 = pt.x, pt.y
             preview = Polyline(
@@ -55,3 +56,4 @@ class RectangleTool(BaseTool):
     def deactivate(self):
         self._clear_preview()
         self._corner1 = None
+        super().deactivate()

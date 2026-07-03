@@ -17,7 +17,7 @@ class CircleTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        pt = Point(scene_pos.x(), scene_pos.y())
+        pt = self._snap(scene_pos)
         if self._center is None:
             self._center = pt
         else:
@@ -29,11 +29,12 @@ class CircleTool(BaseTool):
             self.view.scene().addItem(gfx)
             self._center = None
             self._clear_preview()
+            self._clear_snap_indicator()
 
     def mouse_move(self, event, scene_pos: QPointF):
         if self._center is not None:
             self._clear_preview()
-            pt = Point(scene_pos.x(), scene_pos.y())
+            pt = self._snap(scene_pos)
             radius = self._center.distance_to(pt)
             preview = Circle(self._center, radius, color="#888888")
             self._preview_item = GfxCircleItem(preview)
@@ -47,3 +48,4 @@ class CircleTool(BaseTool):
     def deactivate(self):
         self._clear_preview()
         self._center = None
+        super().deactivate()
