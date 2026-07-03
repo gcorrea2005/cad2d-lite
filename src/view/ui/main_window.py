@@ -31,6 +31,13 @@ from src.controller.tools.pan_tool import PanTool
 from src.controller.tools.dist_tool import DistTool
 from src.controller.tools.id_tool import IdTool
 from src.controller.tools.area_tool import AreaTool
+from src.controller.tools.mirror_tool import MirrorTool
+from src.controller.tools.scale_tool import ScaleTool
+from src.controller.tools.offset_tool import OffsetTool
+from src.controller.tools.trim_tool import TrimTool
+from src.controller.tools.extend_tool import ExtendTool
+from src.controller.tools.fillet_tool import FilletTool
+from src.controller.tools.chamfer_tool import ChamferTool
 from src.io.cad_file import save_document, load_document
 from src.io.dxf_export import export_dxf
 
@@ -176,6 +183,13 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("dist", DistTool(v, d, self._echo))
         self._tool_manager.register_tool("id", IdTool(v, d, self._echo))
         self._tool_manager.register_tool("area", AreaTool(v, d, self._echo))
+        self._tool_manager.register_tool("mirror", MirrorTool(v, d))
+        self._tool_manager.register_tool("scale", ScaleTool(v, d))
+        self._tool_manager.register_tool("offset", OffsetTool(v, d))
+        self._tool_manager.register_tool("trim", TrimTool(v, d))
+        self._tool_manager.register_tool("extend", ExtendTool(v, d))
+        self._tool_manager.register_tool("fillet", FilletTool(v, d))
+        self._tool_manager.register_tool("chamfer", ChamferTool(v, d))
 
         # Add info toolbar below menus (ACAD 10 style)
         self._info_bar = QToolBar("Info")
@@ -363,9 +377,9 @@ class MainWindow(QMainWindow):
                 (" MOVE   ", "move"),
                 (" COPY   ", "copy"),
                 (" ROTATE ", "rotate"),
-                (" MIRROR ", "ni_MIRROR"),
-                (" TRIM   ", "ni_TRIM"),
-                (" EXTEND ", "ni_EXTEND"),
+                (" MIRROR ", "mirror"),
+                (" TRIM   ", "trim"),
+                (" EXTEND ", "extend"),
                 ("", None),
                 (" _next_ ", "menu_edit2"),
                 (" [<-BACK]", "root"),
@@ -374,10 +388,10 @@ class MainWindow(QMainWindow):
             items = [
                 ("  EDIT 2", None),
                 ("", None),
-                (" FILLET ", "ni_FILLET"),
-                (" CHAMFER", "ni_CHAMFER"),
-                (" OFFSET ", "ni_OFFSET"),
-                (" SCALE  ", "ni_SCALE"),
+                (" FILLET ", "fillet"),
+                (" CHAMFER", "chamfer"),
+                (" OFFSET ", "offset"),
+                (" SCALE  ", "scale"),
                 (" ARRAY  ", "ni_ARRAY"),
                 (" BREAK  ", "ni_BREAK"),
                 (" EXPLODE", "ni_EXPLODE"),
