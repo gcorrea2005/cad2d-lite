@@ -68,7 +68,21 @@ class CadView(QGraphicsView):
             self.setCursor(Qt.CursorShape.ArrowCursor)
             event.accept()
             return
+        # Forward release to tool
+        if self.tool_manager and self.tool_manager._active_tool:
+            scene_pos = self.mapToScene(event.pos())
+            self.tool_manager._active_tool.mouse_release(event, scene_pos)
+            event.accept()
+            return
         super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event):
+        # Forward key events to active tool
+        if self.tool_manager and self.tool_manager._active_tool:
+            self.tool_manager._active_tool.key_press(event)
+            event.accept()
+            return
+        super().keyPressEvent(event)
 
     def zoom_extents(self):
         self.fitInView(self.scene().itemsBoundingRect(),

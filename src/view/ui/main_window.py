@@ -14,7 +14,16 @@ from src.model.document import Document
 from src.controller.tool_manager import ToolManager
 from src.controller.tools.line_tool import LineTool
 from src.controller.tools.circle_tool import CircleTool
+from src.controller.tools.arc_tool import ArcTool
+from src.controller.tools.polyline_tool import PolylineTool
+from src.controller.tools.rectangle_tool import RectangleTool
+from src.controller.tools.text_tool import TextTool
+from src.controller.tools.dim_linear_tool import DimLinearTool
 from src.controller.tools.select_tool import SelectTool
+from src.controller.tools.move_tool import MoveTool
+from src.controller.tools.copy_tool import CopyTool
+from src.controller.tools.rotate_tool import RotateTool
+from src.controller.tools.delete_tool import DeleteTool
 from src.io.cad_file import save_document, load_document
 from src.io.dxf_export import export_dxf
 
@@ -49,10 +58,25 @@ class MainWindow(QMainWindow):
     def _init_tools(self):
         lm = self._document.layer_manager
         d = self._document
-        self._tool_manager = ToolManager(self._view, d)
-        self._tool_manager.register_tool("line", LineTool(self._view, d, lm))
-        self._tool_manager.register_tool("circle", CircleTool(self._view, d, lm))
-        self._tool_manager.register_tool("select", SelectTool(self._view, d))
+        v = self._view
+        self._tool_manager = ToolManager(v, d)
+
+        # Draw tools
+        self._tool_manager.register_tool("select", SelectTool(v, d))
+        self._tool_manager.register_tool("line", LineTool(v, d, lm))
+        self._tool_manager.register_tool("circle", CircleTool(v, d, lm))
+        self._tool_manager.register_tool("arc", ArcTool(v, d, lm))
+        self._tool_manager.register_tool("polyline", PolylineTool(v, d, lm))
+        self._tool_manager.register_tool("rectangle", RectangleTool(v, d, lm))
+        self._tool_manager.register_tool("text", TextTool(v, d, lm))
+        self._tool_manager.register_tool("dim", DimLinearTool(v, d, lm))
+
+        # Modify tools
+        self._tool_manager.register_tool("move", MoveTool(v, d))
+        self._tool_manager.register_tool("copy", CopyTool(v, d))
+        self._tool_manager.register_tool("rotate", RotateTool(v, d))
+        self._tool_manager.register_tool("delete", DeleteTool(v, d))
+
         self._view.tool_manager = self._tool_manager
         self._tool_manager.activate_tool("select")
 
@@ -111,7 +135,7 @@ class MainWindow(QMainWindow):
         def add_tool_btn(text, shortcut, tool_name):
             action = QAction(text, self)
             action.setShortcut(QKeySequence(shortcut))
-            action.triggered.connect(lambda: self._tool_manager.activate_tool(tool_name))
+            action.triggered.connect(lambda _n=tool_name: self._tool_manager.activate_tool(_n))
             draw_tb.addAction(action)
 
         # Select (escape)
@@ -120,8 +144,20 @@ class MainWindow(QMainWindow):
         sel_action.triggered.connect(lambda: self._tool_manager.activate_tool("select"))
         draw_tb.addAction(sel_action)
 
+        draw_tb.addSeparator()
         add_tool_btn("Line", "L", "line")
         add_tool_btn("Circle", "C", "circle")
+        add_tool_btn("Arc", "A", "arc")
+        add_tool_btn("Polyline", "P", "polyline")
+        add_tool_btn("Rectangle", "R", "rectangle")
+        add_tool_btn("Text", "T", "text")
+        add_tool_btn("Dim", "D", "dim")
+
+        draw_tb.addSeparator()
+        add_tool_btn("Move", "M", "move")
+        add_tool_btn("Copy", "Ctrl+C", "copy")
+        add_tool_btn("Rotate", "Ctrl+R", "rotate")
+        add_tool_btn("Delete", "Del", "delete")
 
     def _setup_layer_panel(self):
         dock = QDockWidget("Layers", self)
@@ -194,10 +230,21 @@ class MainWindow(QMainWindow):
             return
         parts = text.upper().split()
         cmd = parts[0]
-        if cmd in ("L", "LINE"):
-            self._tool_manager.activate_tool("line")
-        elif cmd in ("C", "CIRCLE"):
-            self._tool_manager.activate_tool("circle")
+        aliases = {
+            "L": "line", "LINE": "line",
+            "C": "circle", "CIRCLE": "circle",
+            "A": "arc", "ARC": "arc",
+            "P": "polyline", "PL": "polyline", "POLYLINE": "polyline",
+            "R": "rectangle", "REC": "rectangle", "RECTANGLE": "rectangle",
+            "T": "text", "TEXT": "text", "MTEXT": "text",
+            "D": "dim", "DIM": "dim", "DIMLINEAR": "dim",
+            "M": "move", "MOVE": "move",
+            "CO": "copy", "COPY": "copy",
+            "RO": "rotate", "ROTATE": "rotate",
+            "E": "delete", "ERASE": "delete", "DEL": "delete",
+        }
+        if cmd in aliases:
+            self._tool_manager.activate_tool(aliases[cmd])
 
     def _setup_statusbar(self):
         self._coord_label = QStatusBar()
@@ -303,8 +350,18 @@ class MainWindow(QMainWindow):
         self._tool_manager = ToolManager(self._view, self._document)
         lm = self._document.layer_manager
         d = self._document
-        self._tool_manager.register_tool("line", LineTool(self._view, d, lm))
-        self._tool_manager.register_tool("circle", CircleTool(self._view, d, lm))
-        self._tool_manager.register_tool("select", SelectTool(self._view, d))
+        v = self._view
+        self._tool_manager.register_tool("select", SelectTool(v, d))
+        self._tool_manager.register_tool("line", LineTool(v, d, lm))
+        self._tool_manager.register_tool("circle", CircleTool(v, d, lm))
+        self._tool_manager.register_tool("arc", ArcTool(v, d, lm))
+        self._tool_manager.register_tool("polyline", PolylineTool(v, d, lm))
+        self._tool_manager.register_tool("rectangle", RectangleTool(v, d, lm))
+        self._tool_manager.register_tool("text", TextTool(v, d, lm))
+        self._tool_manager.register_tool("dim", DimLinearTool(v, d, lm))
+        self._tool_manager.register_tool("move", MoveTool(v, d))
+        self._tool_manager.register_tool("copy", CopyTool(v, d))
+        self._tool_manager.register_tool("rotate", RotateTool(v, d))
+        self._tool_manager.register_tool("delete", DeleteTool(v, d))
         self._view.tool_manager = self._tool_manager
         self._tool_manager.activate_tool("select")
