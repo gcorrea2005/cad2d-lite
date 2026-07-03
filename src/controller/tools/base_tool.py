@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QCursor, QMouseEvent, QKeyEvent, QPen, QColor, QPainter
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from src.model.entities.base import Point
@@ -6,15 +6,17 @@ from src.model.snap import SnapEngine, SnapType, SnapResult
 
 
 class SnapIndicator(QGraphicsEllipseItem):
-    """Visual indicator for snap points — small yellow circle."""
+    """Visual indicator for snap points — green crosshair circle."""
     def __init__(self):
         super().__init__()
         self.setZValue(10000)
-        self.setRect(-5, -5, 10, 10)
-        pen = QPen(QColor("#FFFF00"))
+        # Use ItemIgnoresTransformations so it stays a constant size on screen
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations, True)
+        self.setRect(-6, -6, 12, 12)
+        pen = QPen(QColor("#00FF00"))
         pen.setWidthF(2)
         self.setPen(pen)
-        self.setBrush(QColor(255, 255, 0, 60))
+        self.setBrush(QColor(0, 255, 0, 50))
         self.hide()
 
 
@@ -29,6 +31,8 @@ class BaseTool:
         }
         self._snap_indicator = SnapIndicator()
         self._last_snap: SnapResult | None = None
+        # Pixel-based snap tolerance (converted to scene units dynamically)
+        self._snap_pixels = 20
 
     def activate(self):
         if self._snap_indicator.scene() is None:
@@ -42,9 +46,23 @@ class BaseTool:
     def cursor(self) -> QCursor:
         return QCursor(Qt.CursorShape.ArrowCursor)
 
+    def _pixel_to_scene_distance(self) -> float:
+        """Convert snap_pixels to scene units based on current zoom level."""
+        viewport = self.view.viewport()
+        if viewport is None or viewport.width() == 0:
+            return 15.0
+        # Map a pixel distance to scene coordinates
+        p1 = self.view.mapToScene(0, 0)
+        p2 = self.view.mapToScene(self._snap_pixels, 0)
+        dx = p2.x() - p1.x()
+        return abs(dx)
+
     def _snap(self, scene_pos: QPointF) -> Point:
         """Snap the given scene position to nearby geometry. Returns snapped or original point."""
         cursor = Point(scene_pos.x(), scene_pos.y())
+        # Update snap distance based on current zoom
+        self._snap_engine.snap_distance = self._pixel_to_scene_distance()
+
         result = self._snap_engine.find_snap(
             cursor, self.document.entities, self._active_snaps
         )
