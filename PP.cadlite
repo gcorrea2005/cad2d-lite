@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "layers": {
+    "layers": [
+      {
+        "name": "0",
+        "color": "#FFFFFF",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      }
+    ],
+    "current": "0"
+  },
+  "entities": []
+}

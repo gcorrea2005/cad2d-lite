@@ -7,6 +7,7 @@ from src.model.entities.arc import Arc
 from src.model.entities.polyline import Polyline
 from src.model.entities.text import TextEntity
 from src.model.entities.dimension import Dimension
+from src.model.entities.point_entity import PointEntity
 import math
 
 
@@ -168,3 +169,23 @@ class GfxDimensionItem(QGraphicsItem):
         text = f"{dist:.2f}"
         mid_x = (e.def_point1.x + e.def_point2.x) / 2
         painter.drawText(QPointF(mid_x - 10, e.text_position.y - 2), text)
+
+
+class GfxPointItem(QGraphicsItem):
+    def __init__(self, entity: PointEntity):
+        super().__init__()
+        self.entity = entity
+        self.setZValue(0)
+
+    def boundingRect(self) -> QRectF:
+        return QRectF(QPointF(self.entity.position.x - 3, self.entity.position.y - 3),
+                      QPointF(self.entity.position.x + 3, self.entity.position.y + 3))
+
+    def paint(self, painter: QPainter, option, widget=None):
+        color = QColor(self.entity.color)
+        pen = QPen(color)
+        pen.setWidthF(0)
+        painter.setPen(pen)
+        p = self.entity.position
+        painter.drawLine(QPointF(p.x - 2, p.y - 2), QPointF(p.x + 2, p.y + 2))
+        painter.drawLine(QPointF(p.x + 2, p.y - 2), QPointF(p.x - 2, p.y + 2))

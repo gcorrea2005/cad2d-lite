@@ -38,6 +38,12 @@ from src.controller.tools.trim_tool import TrimTool
 from src.controller.tools.extend_tool import ExtendTool
 from src.controller.tools.fillet_tool import FilletTool
 from src.controller.tools.chamfer_tool import ChamferTool
+from src.controller.tools.explode_tool import ExplodeTool
+from src.controller.tools.break_tool import BreakTool
+from src.controller.tools.array_tool import ArrayTool
+from src.controller.tools.hatch_tool import HatchTool
+from src.controller.tools.point_tool import PointTool
+from src.controller.tools.solid_tool import SolidTool
 from src.io.cad_file import save_document, load_document
 from src.io.dxf_export import export_dxf
 
@@ -190,6 +196,12 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("extend", ExtendTool(v, d))
         self._tool_manager.register_tool("fillet", FilletTool(v, d))
         self._tool_manager.register_tool("chamfer", ChamferTool(v, d))
+        self._tool_manager.register_tool("explode", ExplodeTool(v, d))
+        self._tool_manager.register_tool("break", BreakTool(v, d))
+        self._tool_manager.register_tool("array", ArrayTool(v, d))
+        self._tool_manager.register_tool("hatch", HatchTool(v, d))
+        self._tool_manager.register_tool("point", PointTool(v, d, lm))
+        self._tool_manager.register_tool("solid", SolidTool(v, d, lm))
 
         # Add info toolbar below menus (ACAD 10 style)
         self._info_bar = QToolBar("Info")
@@ -361,10 +373,10 @@ class MainWindow(QMainWindow):
             items = [
                 ("  DRAW 2", None),
                 ("", None),
-                (" HATCH  ", "ni_HATCH"),
+                (" HATCH  ", "hatch"),
                 (" INSERT ", "ni_INSERT"),
-                (" POINT  ", "ni_POINT"),
-                (" SOLID  ", "ni_SOLID"),
+                (" POINT  ", "point"),
+                (" SOLID  ", "solid"),
                 ("", None),
                 (" _prev_ ", "menu_draw"),
                 (" [<-BACK]", "root"),
@@ -392,9 +404,9 @@ class MainWindow(QMainWindow):
                 (" CHAMFER", "chamfer"),
                 (" OFFSET ", "offset"),
                 (" SCALE  ", "scale"),
-                (" ARRAY  ", "ni_ARRAY"),
-                (" BREAK  ", "ni_BREAK"),
-                (" EXPLODE", "ni_EXPLODE"),
+                (" ARRAY  ", "array"),
+                (" BREAK  ", "break"),
+                (" EXPLODE", "explode"),
                 ("", None),
                 (" _prev_ ", "menu_edit"),
                 (" [<-BACK]", "root"),
@@ -459,8 +471,8 @@ class MainWindow(QMainWindow):
                 (" SNAP ON", "snap_toggle"),
                 (" GRID ON", "grid_toggle"),
                 (" ORTHO  ", "ortho_toggle"),
-                (" UNITS  ", "ni_UNITS"),
-                (" LIMITS ", "ni_LIMITS"),
+                (" UNITS  ", "units"),
+                (" LIMITS ", "limits"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -468,7 +480,7 @@ class MainWindow(QMainWindow):
             items = [
                 ("  PLOT   ", None),
                 ("", None),
-                (" PLOT   ", "ni_PLOT"),
+                (" PLOT   ", "plot"),
                 (" DXF OUT", "dxf"),
                 ("", None),
                 (" [<-BACK]", "root"),
@@ -479,7 +491,7 @@ class MainWindow(QMainWindow):
                 ("", None),
                 (" UNDO   ", "undo"),
                 (" REDO   ", "redo"),
-                (" PURGE  ", "ni_PURGE"),
+                (" PURGE  ", "purge"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -605,6 +617,16 @@ class MainWindow(QMainWindow):
             self._on_status()
         elif action == "area":
             self._activate_tool("area")
+        elif action == "purge":
+            self._on_purge()
+        elif action == "units":
+            self._on_units()
+        elif action == "limits":
+            self._on_limits()
+        elif action == "plot":
+            self._on_plot()
+        elif action == "insert_cmd":
+            self._activate_tool("insert")
         # ── Not implemented echo ──
         elif action and action.startswith("ni_"):
             cmd_name = action[3:].upper()
@@ -880,6 +902,99 @@ class MainWindow(QMainWindow):
         self._echo(f"Snap: {'ON' if self._snap_active else 'OFF'}")
         self._echo(f"Ortho: {'ON' if self._ortho_active else 'OFF'}")
         self._echo(f"Grid: {'ON' if self._grid.isVisible() else 'OFF'}")
+        self._echo("Command:")
+
+    def _on_purge(self):
+        """PURGE — remove unused (empty) layers."""
+        lm = self._document.layer_manager
+        used = {e.layer_name for e in self._document.entities}
+        used.add("0")  # never purge layer 0
+        purged = []
+        for name in list(lm.layers.keys()):
+            if name not in used:
+                lm.delete_layer(name)
+                purged.append(name)
+        if purged:
+            self._echo(f"Purged layers: {', '.join(purged)}")
+        else:
+            self._echo("No unused layers to purge.")
+        self._echo("Command:")
+
+    def _on_units(self):
+        """UNITS — show/set drawing units and precision."""
+        from PySide6.QtWidgets import QDialog, QFormLayout, QComboBox, QSpinBox, QDialogButtonBox, QVBoxLayout
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Drawing Units")
+        layout = QVBoxLayout(dlg)
+
+        form = QFormLayout()
+        unit_combo = QComboBox()
+        unit_combo.addItems(["Decimal", "Engineering", "Architectural", "Fractional", "Scientific"])
+        prec_spin = QSpinBox()
+        prec_spin.setRange(0, 8)
+        prec_spin.setValue(4)
+        form.addRow("Units:", unit_combo)
+        form.addRow("Precision:", prec_spin)
+        layout.addLayout(form)
+
+        btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        btns.accepted.connect(dlg.accept)
+        btns.rejected.connect(dlg.reject)
+        layout.addWidget(btns)
+
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            self._echo(f"Units: {unit_combo.currentText()}  Precision: {prec_spin.value()}")
+        self._echo("Command:")
+
+    def _on_limits(self):
+        """LIMITS — set drawing limits."""
+        from PySide6.QtWidgets import QDialog, QFormLayout, QDoubleSpinBox, QDialogButtonBox, QVBoxLayout
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Drawing Limits")
+        layout = QVBoxLayout(dlg)
+        form = QFormLayout()
+
+        xmin = QDoubleSpinBox(); xmin.setRange(-100000, 100000); xmin.setValue(-100)
+        ymin = QDoubleSpinBox(); ymin.setRange(-100000, 100000); ymin.setValue(-100)
+        xmax = QDoubleSpinBox(); xmax.setRange(-100000, 100000); xmax.setValue(100)
+        ymax = QDoubleSpinBox(); ymax.setRange(-100000, 100000); ymax.setValue(100)
+
+        form.addRow("Lower-left X:", xmin)
+        form.addRow("Lower-left Y:", ymin)
+        form.addRow("Upper-right X:", xmax)
+        form.addRow("Upper-right Y:", ymax)
+        layout.addLayout(form)
+
+        btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        btns.accepted.connect(dlg.accept)
+        btns.rejected.connect(dlg.reject)
+        layout.addWidget(btns)
+
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            from PySide6.QtCore import QRectF
+            from src.view.graphics.grid_item import GridItem
+            rect = QRectF(xmin.value(), ymin.value(),
+                          xmax.value() - xmin.value(),
+                          ymax.value() - ymin.value())
+            self._scene.setSceneRect(rect)
+            self._scene.removeItem(self._grid)
+            self._grid = GridItem(rect, spacing=10.0)
+            self._scene.addItem(self._grid)
+            self._echo(f"Limits: ({xmin.value():.2f},{ymin.value():.2f}) to ({xmax.value():.2f},{ymax.value():.2f})")
+        self._echo("Command:")
+
+    def _on_plot(self):
+        """PLOT — print current view."""
+        from PySide6.QtPrintSupport import QPrintDialog, QPrinter
+        from PySide6.QtGui import QPainter
+        printer = QPrinter()
+        printer.setPageSize(QPrinter.PageSize.A4)
+        dlg = QPrintDialog(printer, self)
+        if dlg.exec() == QPrintDialog.DialogCode.Accepted:
+            painter = QPainter(printer)
+            self._view.render(painter)
+            painter.end()
+            self._echo("Plot sent to printer.")
         self._echo("Command:")
 
     # ── Layer dialog ───────────────────────────────────────
