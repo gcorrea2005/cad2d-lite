@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QGraphicsItem
 from PySide6.QtCore import QRectF, Qt
-from PySide6.QtGui import QPen, QPainter
+from PySide6.QtGui import QPen, QPainter, QColor
 
 
 class GridItem(QGraphicsItem):
