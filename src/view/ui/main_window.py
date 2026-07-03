@@ -297,98 +297,195 @@ class MainWindow(QMainWindow):
     def _refresh_screen_menu(self):
         self._screen_menu.clear()
 
-        if self._screen_menu_state == "root":
+        S = self._screen_menu_state
+
+        if S == "root":
             items = [
+                ("AutoCAD", None),
                 ("* * * *", None),
                 ("", None),
-                ("  DRAW  ", "menu_draw"),
-                ("  EDIT  ", "menu_edit"),
-                ("  DISPLAY", "menu_display"),
-                ("  LAYER  ", "menu_layer"),
-                ("  SETTINGS", "menu_settings"),
+                ("DISPLAY", "menu_display"),
+                ("DRAW   ", "menu_draw"),
+                ("EDIT   ", "menu_edit"),
+                ("INQUIRY", "menu_inquiry"),
+                ("LAYER: ", "menu_layer"),
+                ("SETTINGS","menu_settings"),
+                ("PLOT   ", "menu_plot"),
+                ("UTILITY", "menu_utility"),
                 ("", None),
-                ("  SAVE   ", "save"),
-                ("  OPEN   ", "open"),
-                ("  DXF OUT", "dxf"),
+                ("  SAVE  ", "save"),
+                ("  OPEN  ", "open"),
+                ("  DXF OUT","dxf"),
                 ("", None),
-                ("  QUIT   ", "quit"),
+                ("  QUIT  ", "quit"),
             ]
-        elif self._screen_menu_state == "menu_draw":
+        elif S == "menu_draw":
             items = [
-                ("  DRAW   ", None),
+                ("  DRAW  ", None),
                 ("", None),
-                (" LINE    ", "line"),
-                (" CIRCLE  ", "circle"),
-                (" ARC     ", "arc"),
-                (" PLINE   ", "polyline"),
-                (" RECTANG ", "rectangle"),
-                (" TEXT    ", "text"),
-                (" DIM     ", "dim"),
+                (" LINE   ", "line"),
+                (" ARC    ", "arc"),
+                (" CIRCLE ", "circle"),
+                (" PLINE  ", "polyline"),
+                (" RECTANG", "rectangle"),
+                (" TEXT   ", "text"),
+                (" DIM    ", "dim"),
                 ("", None),
-                (" [<- BACK]", "root"),
+                (" _next_ ", "menu_draw2"),
+                (" [<-BACK]", "root"),
             ]
-        elif self._screen_menu_state == "menu_edit":
+        elif S == "menu_draw2":
             items = [
-                ("  EDIT   ", None),
+                ("  DRAW 2", None),
                 ("", None),
-                (" ERASE   ", "erase"),
-                (" MOVE    ", "move"),
-                (" COPY    ", "copy"),
-                (" ROTATE  ", "rotate"),
-                (" UNDO    ", "undo"),
-                (" REDO    ", "redo"),
+                (" HATCH  ", None),
+                (" INSERT ", None),
+                (" POINT  ", None),
+                (" SOLID  ", None),
                 ("", None),
-                (" [<- BACK]", "root"),
+                (" _prev_ ", "menu_draw"),
+                (" [<-BACK]", "root"),
             ]
-        elif self._screen_menu_state == "menu_display":
+        elif S == "menu_edit":
             items = [
-                ("  DISPLAY", None),
+                ("  EDIT  ", None),
                 ("", None),
-                (" ZOOM E  ", "zoom_extents"),
-                (" REDRAW  ", "redraw"),
+                (" ERASE  ", "erase"),
+                (" MOVE   ", "move"),
+                (" COPY   ", "copy"),
+                (" ROTATE ", "rotate"),
+                (" MIRROR ", None),
+                (" TRIM   ", None),
+                (" EXTEND ", None),
                 ("", None),
-                (" [<- BACK]", "root"),
+                (" _next_ ", "menu_edit2"),
+                (" [<-BACK]", "root"),
             ]
-        elif self._screen_menu_state == "menu_layer":
+        elif S == "menu_edit2":
             items = [
-                ("  LAYER   ", None),
+                ("  EDIT 2", None),
                 ("", None),
-                (" SET CUR  ", "layer_set"),
-                (" NEW      ", "layer_new"),
-                (" DELETE   ", "layer_del"),
+                (" FILLET ", None),
+                (" CHAMFER", None),
+                (" OFFSET ", None),
+                (" SCALE  ", None),
+                (" ARRAY  ", None),
+                (" BREAK  ", None),
+                (" EXPLODE", None),
                 ("", None),
-                (" [<- BACK]", "root"),
+                (" _prev_ ", "menu_edit"),
+                (" [<-BACK]", "root"),
             ]
-        elif self._screen_menu_state == "menu_settings":
+        elif S == "menu_display":
             items = [
-                ("  SETTINGS", None),
+                (" DISPLAY", None),
                 ("", None),
-                (" SNAP  ON ", "snap_toggle"),
-                (" ORTHO OFF", "ortho_toggle"),
-                (" GRID  ON ", "grid_toggle"),
+                (" ZOOM E ", "zoom_extents"),
+                (" ZOOM W ", None),
+                (" ZOOM P ", None),
+                (" PAN    ", None),
+                (" REDRAW ", "redraw"),
+                (" REGEN  ", None),
                 ("", None),
-                (" [<- BACK]", "root"),
+                (" [<-BACK]", "root"),
+            ]
+        elif S == "menu_inquiry":
+            items = [
+                (" INQUIRY", None),
+                ("", None),
+                (" LIST   ", "list_entities"),
+                (" DIST   ", None),
+                (" AREA   ", None),
+                (" ID     ", None),
+                (" STATUS ", None),
+                ("", None),
+                (" [<-BACK]", "root"),
+            ]
+        elif S == "menu_layer":
+            items = [
+                ("  LAYER  ", None),
+                ("", None),
+                (" ?      ", None),
+                (" MAKE   ", None),
+                (" SET    ", "layer_set"),
+                (" NEW    ", "layer_new"),
+                (" ON     ", None),
+                (" OFF    ", None),
+                (" COLOR  ", None),
+                ("", None),
+                (" _next_ ", "menu_layer2"),
+                (" [<-BACK]", "root"),
+            ]
+        elif S == "menu_layer2":
+            items = [
+                ("  LAYER 2", None),
+                ("", None),
+                (" FREEZE ", None),
+                (" THAW   ", None),
+                (" LOCK   ", None),
+                (" UNLOCK ", None),
+                (" DELETE ", "layer_del"),
+                ("", None),
+                (" _prev_ ", "menu_layer"),
+                (" [<-BACK]", "root"),
+            ]
+        elif S == "menu_settings":
+            items = [
+                (" SETTINGS", None),
+                ("", None),
+                (" SNAP ON", "snap_toggle"),
+                (" GRID ON", "grid_toggle"),
+                (" ORTHO  ", "ortho_toggle"),
+                (" UNITS  ", None),
+                (" LIMITS ", None),
+                ("", None),
+                (" [<-BACK]", "root"),
+            ]
+        elif S == "menu_plot":
+            items = [
+                ("  PLOT   ", None),
+                ("", None),
+                (" PLOT   ", None),
+                (" DXF OUT", "dxf"),
+                ("", None),
+                (" [<-BACK]", "root"),
+            ]
+        elif S == "menu_utility":
+            items = [
+                (" UTILITY ", None),
+                ("", None),
+                (" UNDO   ", "undo"),
+                (" REDO   ", "redo"),
+                (" PURGE  ", None),
+                ("", None),
+                (" [<-BACK]", "root"),
             ]
         else:
             items = []
 
+        # Build UI items
         for label, action in items:
             if label == "":
                 item = QListWidgetItem("")
                 item.setFlags(Qt.ItemFlag.NoItemFlags)
                 self._screen_menu.addItem(item)
                 continue
-            item = QListWidgetItem(label)
-            if action:
-                item.setData(Qt.ItemDataRole.UserRole, action)
-                if label.startswith("[<-"):
-                    item.setForeground(QColor("#FFCC00"))  # yellow back
-                else:
-                    item.setForeground(QColor(CLR_MENU_TEXT))
-            else:
-                # Header — not clickable, green
+
+            display = label.strip()
+            item = QListWidgetItem(display)
+            is_nav = label.startswith("[<-") or label.startswith("_")
+            is_header = action is None and not is_nav
+
+            if is_header:
                 item.setFlags(Qt.ItemFlag.NoItemFlags)
                 item.setForeground(QColor(CLR_HEADER))
+            elif is_nav:
+                item.setData(Qt.ItemDataRole.UserRole, action)
+                item.setForeground(QColor("#FFCC00"))  # yellow nav
+            else:
+                item.setData(Qt.ItemDataRole.UserRole, action)
+                item.setForeground(QColor(CLR_MENU_TEXT))
+
             self._screen_menu.addItem(item)
 
     def _on_screen_menu_click(self, item: QListWidgetItem):
@@ -396,8 +493,9 @@ class MainWindow(QMainWindow):
         if not action:
             return
 
-        if action in ("menu_draw", "menu_edit", "menu_display", "menu_layer",
-                       "menu_settings", "root"):
+        if action in ("menu_draw", "menu_draw2", "menu_edit", "menu_edit2",
+                       "menu_display", "menu_layer", "menu_layer2", "menu_settings",
+                       "menu_inquiry", "menu_plot", "menu_utility", "root"):
             self._screen_menu_state = action
             self._refresh_screen_menu()
         elif action == "save":
@@ -443,6 +541,8 @@ class MainWindow(QMainWindow):
                 name, ok = QInputDialog.getItem(self, "Delete Layer", "Layer:", layers, 0, False)
                 if ok and name:
                     self._document.layer_manager.delete_layer(name)
+        elif action == "list_entities":
+            self._on_list_entities()
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
 
