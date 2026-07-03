@@ -1,0 +1,956 @@
+{
+  "version": 1,
+  "layers": {
+    "layers": [
+      {
+        "name": "0",
+        "color": "#FFFFFF",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      },
+      {
+        "name": "WALLS",
+        "color": "#FFFFFF",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      },
+      {
+        "name": "DOORS",
+        "color": "#FFCC00",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      },
+      {
+        "name": "WINDOWS",
+        "color": "#44AAFF",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      },
+      {
+        "name": "TEXT",
+        "color": "#88FF88",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      },
+      {
+        "name": "DIMS",
+        "color": "#888888",
+        "linetype": "CONTINUOUS",
+        "visible": true,
+        "locked": false,
+        "lineweight": 0.25
+      }
+    ],
+    "current": "WALLS"
+  },
+  "entities": [
+    {
+      "type": "Line",
+      "uuid": "c8a36ef2-aabe-4922-8a9c-748d8b7ad8f9",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        0.15
+      ],
+      "end": [
+        11.0,
+        0.15
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "025fe5e1-692c-4b95-89eb-51e04d072a9c",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        -0.15
+      ],
+      "end": [
+        11.0,
+        -0.15
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "eb7c4b63-af82-451e-9b1f-0c8349b1ee79",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        6.15
+      ],
+      "end": [
+        11.0,
+        6.15
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "89b7cf5a-70a1-476d-80f6-69ea4f6e7632",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        5.85
+      ],
+      "end": [
+        11.0,
+        5.85
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "0cb44112-2982-4d48-a659-5a64e92b6b09",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        -0.15,
+        0.0
+      ],
+      "end": [
+        -0.15,
+        6.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "5a66720e-271c-4940-b730-c5456ce4fb20",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.15,
+        0.0
+      ],
+      "end": [
+        0.15,
+        6.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "9cf5ea3b-7166-4a8b-8863-e89eef33a48e",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        10.85,
+        0.0
+      ],
+      "end": [
+        10.85,
+        6.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "5a0da0eb-5a9a-4153-b0af-586fd695c271",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        11.15,
+        0.0
+      ],
+      "end": [
+        11.15,
+        6.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "41a6e728-7a43-4f67-97cf-15cabb2537f4",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        3.5,
+        0.0
+      ],
+      "end": [
+        3.5,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "abcbe240-2ef7-4a84-9614-a0683b9e176b",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        5.5,
+        2.8
+      ],
+      "end": [
+        5.5,
+        6.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "d13d027e-bb66-42e5-9994-ab38cc2c4bae",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        8.5,
+        0.0
+      ],
+      "end": [
+        8.5,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "3dddf1a2-daa9-4cca-8c0e-b7ec8bd7736e",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        2.8
+      ],
+      "end": [
+        8.5,
+        2.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "4ff8eccb-5c5c-45d2-881c-89c0f5e08c77",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        4.8
+      ],
+      "end": [
+        11.0,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "232f42ae-6b90-4566-8139-03bc4424fbaf",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        8.5,
+        0.0
+      ],
+      "end": [
+        8.5,
+        2.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "3b850c35-7c14-48e8-a31a-4df125988550",
+      "layer_name": "WALLS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        8.5,
+        2.8
+      ],
+      "end": [
+        11.0,
+        2.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "f269a98a-7023-451f-85d5-3c7f5513f41d",
+      "layer_name": "DOORS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        1.5,
+        0.0
+      ],
+      "end": [
+        2.4,
+        0.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "846b1bf0-d20c-40dc-8c19-f57d91d1367d",
+      "layer_name": "DOORS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        3.0,
+        2.9
+      ],
+      "end": [
+        3.9,
+        2.9
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "eaa5014c-1efa-45b5-97a3-f04821520688",
+      "layer_name": "DOORS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        6.5,
+        0.0
+      ],
+      "end": [
+        7.4,
+        0.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "a269ae1a-8c97-4ca6-90ed-172a6dc15c80",
+      "layer_name": "DOORS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        5.8,
+        2.9
+      ],
+      "end": [
+        6.7,
+        2.9
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "5e5055e4-310c-4c5d-a75a-add4b0b4c41e",
+      "layer_name": "DOORS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        9.0,
+        0.0
+      ],
+      "end": [
+        9.9,
+        0.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "acb9b5a7-3c4c-4982-bf2c-cea689977e23",
+      "layer_name": "DOORS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        5.0,
+        4.8
+      ],
+      "end": [
+        5.9,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "5e0ddbd0-6d0c-4d2b-9c30-f3d0826b3a1f",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        0.5
+      ],
+      "end": [
+        0.0,
+        2.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "090db815-74ef-4a0c-aed8-ad069e46f596",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        4.0,
+        0.0
+      ],
+      "end": [
+        7.0,
+        0.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "c4002abd-ae3a-4c45-9154-1089f22833f8",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        11.0,
+        2.0
+      ],
+      "end": [
+        11.0,
+        4.0
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "277c42df-cc1f-4ac8-8523-e8c95fb9affa",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        5.8,
+        4.8
+      ],
+      "end": [
+        8.0,
+        4.8
+      ]
+    },
+    {
+      "type": "Text",
+      "uuid": "acfda575-2be1-462a-bd8b-8416538fc19f",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        1.75,
+        1.4
+      ],
+      "content": "BEDROOM 1",
+      "height": 0.28,
+      "rotation": 0.0
+    },
+    {
+      "type": "Text",
+      "uuid": "394f39ae-e4ac-4c8c-aee6-322c662b4a5d",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        4.5,
+        1.4
+      ],
+      "content": "BATH 1",
+      "height": 0.22,
+      "rotation": 0.0
+    },
+    {
+      "type": "Text",
+      "uuid": "db7682ae-b720-4f7a-9ffd-cb39ee83997b",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        7.0,
+        3.6
+      ],
+      "content": "KITCHEN",
+      "height": 0.25,
+      "rotation": 0.0
+    },
+    {
+      "type": "Text",
+      "uuid": "b98edc2b-575e-45c6-b41d-3e4f06ceb60e",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        9.75,
+        1.4
+      ],
+      "content": "BEDROOM 2",
+      "height": 0.25,
+      "rotation": 0.0
+    },
+    {
+      "type": "Text",
+      "uuid": "a8cccc57-8b7b-44cb-a91e-98fee2b22f30",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        9.75,
+        3.6
+      ],
+      "content": "BATH 2",
+      "height": 0.22,
+      "rotation": 0.0
+    },
+    {
+      "type": "Text",
+      "uuid": "02d025d8-3f88-480e-bb4b-c0245f38f95d",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        3.5,
+        0.6
+      ],
+      "content": "LIVING / DINING",
+      "height": 0.3,
+      "rotation": 0.0
+    },
+    {
+      "type": "Text",
+      "uuid": "62fbb5e7-53c7-46ec-a9ac-2d24d27c8f88",
+      "layer_name": "TEXT",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        5.5,
+        5.4
+      ],
+      "content": "TERRACE",
+      "height": 0.28,
+      "rotation": 0.0
+    },
+    {
+      "type": "Dimension",
+      "uuid": "f9da2bc8-68da-4a83-a5ea-6e49931cdc30",
+      "layer_name": "DIMS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "def_point1": [
+        0.0,
+        -0.8
+      ],
+      "def_point2": [
+        11.0,
+        -0.8
+      ],
+      "text_position": [
+        5.5,
+        -1.1
+      ]
+    },
+    {
+      "type": "Dimension",
+      "uuid": "01d7c698-db96-4cd1-b4d6-f05653b3de9c",
+      "layer_name": "DIMS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "def_point1": [
+        -0.8,
+        0.0
+      ],
+      "def_point2": [
+        -0.8,
+        6.0
+      ],
+      "text_position": [
+        -0.8,
+        -1.1
+      ]
+    },
+    {
+      "type": "Dimension",
+      "uuid": "4e99b41c-1e25-475e-b23e-adb9cb580644",
+      "layer_name": "DIMS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "def_point1": [
+        0.0,
+        5.1
+      ],
+      "def_point2": [
+        3.5,
+        5.1
+      ],
+      "text_position": [
+        1.75,
+        5.3999999999999995
+      ]
+    },
+    {
+      "type": "Dimension",
+      "uuid": "590cfa25-cc79-4396-9a91-b01ed080b215",
+      "layer_name": "DIMS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "def_point1": [
+        3.7,
+        5.1
+      ],
+      "def_point2": [
+        5.7,
+        5.1
+      ],
+      "text_position": [
+        4.7,
+        5.3999999999999995
+      ]
+    },
+    {
+      "type": "Dimension",
+      "uuid": "040fa756-63ec-4438-8710-53fdffd2277d",
+      "layer_name": "DIMS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "def_point1": [
+        5.7,
+        2.9499999999999997
+      ],
+      "def_point2": [
+        8.7,
+        2.9499999999999997
+      ],
+      "text_position": [
+        7.199999999999999,
+        3.25
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "10a7323f-202f-41a1-999e-29c554d39b24",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.0,
+        4.8
+      ],
+      "end": [
+        0.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "5edb2060-38a1-4938-a8b4-57710386b87f",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        0.5,
+        4.8
+      ],
+      "end": [
+        0.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "95d786af-a2b0-4f9b-a908-621b80d20a0b",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        1.0,
+        4.8
+      ],
+      "end": [
+        1.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "cbe06cd3-1887-4614-93a1-25134761a8c4",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        1.5,
+        4.8
+      ],
+      "end": [
+        1.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "79e5a740-8061-4277-8a22-e9c141c218ed",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        2.0,
+        4.8
+      ],
+      "end": [
+        2.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "7c30fce4-770f-43de-b44b-367e54579da5",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        2.5,
+        4.8
+      ],
+      "end": [
+        2.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "77394bc9-93c7-4fd0-9de6-14cf7d069b8c",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        3.0,
+        4.8
+      ],
+      "end": [
+        3.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "cacb712a-7501-4123-87b6-9b23bc2224dd",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        3.5,
+        4.8
+      ],
+      "end": [
+        3.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "b918a894-f2de-44da-a129-2fb3058e111f",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        4.0,
+        4.8
+      ],
+      "end": [
+        4.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "57e68d80-35aa-41d0-9f95-7523a39b0d63",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        4.5,
+        4.8
+      ],
+      "end": [
+        4.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "18cc51f2-8a8f-4298-a42d-7a9a7a3aeb61",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        5.0,
+        4.8
+      ],
+      "end": [
+        5.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "72c3fc7f-1161-42e1-b498-1c48d5af416e",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        5.5,
+        4.8
+      ],
+      "end": [
+        5.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "7029d6e9-23fc-4e6e-8b6b-592dfdc1efe3",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        6.0,
+        4.8
+      ],
+      "end": [
+        6.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "ab9be18e-d30d-4983-9d47-a89ca12874f7",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        6.5,
+        4.8
+      ],
+      "end": [
+        6.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "7fc85906-d8ca-48d7-bf87-2ad77f53e02f",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        7.0,
+        4.8
+      ],
+      "end": [
+        7.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "de287251-273e-47f6-bf09-40d6a5edac10",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        7.5,
+        4.8
+      ],
+      "end": [
+        7.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "2d6e31a2-35c1-41ae-9c7f-b2a0c7def7af",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        8.0,
+        4.8
+      ],
+      "end": [
+        8.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "fc62ab9e-e159-4aec-9d8e-28445a3a70a2",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        8.5,
+        4.8
+      ],
+      "end": [
+        8.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "fcb249fb-350a-4b77-b5d2-40a28376afee",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        9.0,
+        4.8
+      ],
+      "end": [
+        9.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "4e561e4a-86dc-4345-9de6-9a9c139ed718",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        9.5,
+        4.8
+      ],
+      "end": [
+        9.8,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "22614e97-6b48-4399-a9c0-6265a519b088",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        10.0,
+        4.8
+      ],
+      "end": [
+        10.3,
+        4.8
+      ]
+    },
+    {
+      "type": "Line",
+      "uuid": "8dfaf074-520a-4e74-8d17-2806537a8799",
+      "layer_name": "WINDOWS",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        10.5,
+        4.8
+      ],
+      "end": [
+        10.8,
+        4.8
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from src.model.entities.arc import Arc
 from src.model.entities.polyline import Polyline
 from src.model.entities.text import TextEntity
 from src.model.entities.dimension import Dimension
+from src.model.entities.point_entity import PointEntity
 
 ENTITY_CLASSES = {
     "Line": Line,
@@ -15,6 +16,7 @@ ENTITY_CLASSES = {
     "Polyline": Polyline,
     "Text": TextEntity,
     "Dimension": Dimension,
+    "Point": PointEntity,
 }
 
 

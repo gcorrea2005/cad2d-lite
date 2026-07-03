@@ -1121,6 +1121,7 @@ class MainWindow(QMainWindow):
         from src.view.graphics.entity_items import (
             GfxLineItem, GfxCircleItem, GfxArcItem,
             GfxPolylineItem, GfxTextItem, GfxDimensionItem,
+            GfxPointItem,
         )
         from src.model.entities.line import Line
         from src.model.entities.circle import Circle
@@ -1128,6 +1129,7 @@ class MainWindow(QMainWindow):
         from src.model.entities.polyline import Polyline
         from src.model.entities.text import TextEntity
         from src.model.entities.dimension import Dimension
+        from src.model.entities.point_entity import PointEntity
 
         for entity in self._document.entities:
             if isinstance(entity, Line):
@@ -1142,6 +1144,8 @@ class MainWindow(QMainWindow):
                 item = GfxTextItem(entity)
             elif isinstance(entity, Dimension):
                 item = GfxDimensionItem(entity)
+            elif isinstance(entity, PointEntity):
+                item = GfxPointItem(entity)
             else:
                 continue
             self._scene.addItem(item)

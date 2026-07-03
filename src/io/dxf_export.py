@@ -7,6 +7,7 @@ from src.model.entities.arc import Arc
 from src.model.entities.polyline import Polyline
 from src.model.entities.text import TextEntity
 from src.model.entities.dimension import Dimension
+from src.model.entities.point_entity import PointEntity
 import math
 
 
@@ -55,6 +56,11 @@ def export_dxf(document: Document, path: Path) -> None:
                 p1=(entity.def_point1.x, entity.def_point1.y),
                 p2=(entity.def_point2.x, entity.def_point2.y),
                 distance=entity.text_position.y - entity.def_point1.y,
+                dxfattribs={"layer": layer},
+            )
+        elif isinstance(entity, PointEntity):
+            msp.add_point(
+                (entity.position.x, entity.position.y),
                 dxfattribs={"layer": layer},
             )
 
