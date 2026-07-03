@@ -26,6 +26,9 @@ from src.controller.tools.move_tool import MoveTool
 from src.controller.tools.copy_tool import CopyTool
 from src.controller.tools.rotate_tool import RotateTool
 from src.controller.tools.delete_tool import DeleteTool
+from src.controller.tools.zoom_win_tool import ZoomWinTool
+from src.controller.tools.pan_tool import PanTool
+from src.controller.tools.dist_tool import DistTool
 from src.io.cad_file import save_document, load_document
 from src.io.dxf_export import export_dxf
 
@@ -166,8 +169,10 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("copy", CopyTool(v, d))
         self._tool_manager.register_tool("rotate", RotateTool(v, d))
         self._tool_manager.register_tool("delete", DeleteTool(v, d))
+        self._tool_manager.register_tool("zoomwin", ZoomWinTool(v, d))
+        self._tool_manager.register_tool("pan", PanTool(v, d))
+        self._tool_manager.register_tool("dist", DistTool(v, d, self._echo))
 
-        self._view.tool_manager = self._tool_manager
         # Add info toolbar below menus (ACAD 10 style)
         self._info_bar = QToolBar("Info")
         self._info_bar.setMovable(False)
@@ -338,10 +343,10 @@ class MainWindow(QMainWindow):
             items = [
                 ("  DRAW 2", None),
                 ("", None),
-                (" HATCH  ", None),
-                (" INSERT ", None),
-                (" POINT  ", None),
-                (" SOLID  ", None),
+                (" HATCH  ", "ni_HATCH"),
+                (" INSERT ", "ni_INSERT"),
+                (" POINT  ", "ni_POINT"),
+                (" SOLID  ", "ni_SOLID"),
                 ("", None),
                 (" _prev_ ", "menu_draw"),
                 (" [<-BACK]", "root"),
@@ -354,9 +359,9 @@ class MainWindow(QMainWindow):
                 (" MOVE   ", "move"),
                 (" COPY   ", "copy"),
                 (" ROTATE ", "rotate"),
-                (" MIRROR ", None),
-                (" TRIM   ", None),
-                (" EXTEND ", None),
+                (" MIRROR ", "ni_MIRROR"),
+                (" TRIM   ", "ni_TRIM"),
+                (" EXTEND ", "ni_EXTEND"),
                 ("", None),
                 (" _next_ ", "menu_edit2"),
                 (" [<-BACK]", "root"),
@@ -365,13 +370,13 @@ class MainWindow(QMainWindow):
             items = [
                 ("  EDIT 2", None),
                 ("", None),
-                (" FILLET ", None),
-                (" CHAMFER", None),
-                (" OFFSET ", None),
-                (" SCALE  ", None),
-                (" ARRAY  ", None),
-                (" BREAK  ", None),
-                (" EXPLODE", None),
+                (" FILLET ", "ni_FILLET"),
+                (" CHAMFER", "ni_CHAMFER"),
+                (" OFFSET ", "ni_OFFSET"),
+                (" SCALE  ", "ni_SCALE"),
+                (" ARRAY  ", "ni_ARRAY"),
+                (" BREAK  ", "ni_BREAK"),
+                (" EXPLODE", "ni_EXPLODE"),
                 ("", None),
                 (" _prev_ ", "menu_edit"),
                 (" [<-BACK]", "root"),
@@ -381,11 +386,11 @@ class MainWindow(QMainWindow):
                 (" DISPLAY", None),
                 ("", None),
                 (" ZOOM E ", "zoom_extents"),
-                (" ZOOM W ", None),
-                (" ZOOM P ", None),
-                (" PAN    ", None),
+                (" ZOOM W ", "zoom_window"),
+                (" ZOOM P ", "ni_ZOOM_P"),
+                (" PAN    ", "pan_cmd"),
                 (" REDRAW ", "redraw"),
-                (" REGEN  ", None),
+                (" REGEN  ", "regen"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -394,10 +399,10 @@ class MainWindow(QMainWindow):
                 (" INQUIRY", None),
                 ("", None),
                 (" LIST   ", "list_entities"),
-                (" DIST   ", None),
-                (" AREA   ", None),
-                (" ID     ", None),
-                (" STATUS ", None),
+                (" DIST   ", "dist"),
+                (" AREA   ", "ni_AREA"),
+                (" ID     ", "ni_ID"),
+                (" STATUS ", "ni_STATUS"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -405,13 +410,13 @@ class MainWindow(QMainWindow):
             items = [
                 ("  LAYER  ", None),
                 ("", None),
-                (" ?      ", None),
-                (" MAKE   ", None),
+                (" ?      ", "layer_query"),
+                (" MAKE   ", "layer_make"),
                 (" SET    ", "layer_set"),
                 (" NEW    ", "layer_new"),
-                (" ON     ", None),
-                (" OFF    ", None),
-                (" COLOR  ", None),
+                (" ON     ", "layer_on"),
+                (" OFF    ", "layer_off"),
+                (" COLOR  ", "layer_color"),
                 ("", None),
                 (" _next_ ", "menu_layer2"),
                 (" [<-BACK]", "root"),
@@ -420,10 +425,10 @@ class MainWindow(QMainWindow):
             items = [
                 ("  LAYER 2", None),
                 ("", None),
-                (" FREEZE ", None),
-                (" THAW   ", None),
-                (" LOCK   ", None),
-                (" UNLOCK ", None),
+                (" FREEZE ", "layer_freeze"),
+                (" THAW   ", "layer_thaw"),
+                (" LOCK   ", "layer_lock"),
+                (" UNLOCK ", "layer_unlock"),
                 (" DELETE ", "layer_del"),
                 ("", None),
                 (" _prev_ ", "menu_layer"),
@@ -436,8 +441,8 @@ class MainWindow(QMainWindow):
                 (" SNAP ON", "snap_toggle"),
                 (" GRID ON", "grid_toggle"),
                 (" ORTHO  ", "ortho_toggle"),
-                (" UNITS  ", None),
-                (" LIMITS ", None),
+                (" UNITS  ", "ni_UNITS"),
+                (" LIMITS ", "ni_LIMITS"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -445,7 +450,7 @@ class MainWindow(QMainWindow):
             items = [
                 ("  PLOT   ", None),
                 ("", None),
-                (" PLOT   ", None),
+                (" PLOT   ", "ni_PLOT"),
                 (" DXF OUT", "dxf"),
                 ("", None),
                 (" [<-BACK]", "root"),
@@ -456,7 +461,7 @@ class MainWindow(QMainWindow):
                 ("", None),
                 (" UNDO   ", "undo"),
                 (" REDO   ", "redo"),
-                (" PURGE  ", None),
+                (" PURGE  ", "ni_PURGE"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -543,6 +548,42 @@ class MainWindow(QMainWindow):
                     self._document.layer_manager.delete_layer(name)
         elif action == "list_entities":
             self._on_list_entities()
+        # ── Layer operations ──
+        elif action == "layer_on":
+            self._layer_op("ON", lambda l: setattr(l, 'visible', True))
+        elif action == "layer_off":
+            self._layer_op("OFF", lambda l: setattr(l, 'visible', False))
+        elif action == "layer_freeze":
+            self._layer_op("FREEZE", lambda l: setattr(l, 'locked', True))
+        elif action == "layer_thaw":
+            self._layer_op("THAW", lambda l: setattr(l, 'locked', False))
+        elif action == "layer_lock":
+            self._layer_op("LOCK", lambda l: setattr(l, 'locked', True))
+        elif action == "layer_unlock":
+            self._layer_op("UNLOCK", lambda l: setattr(l, 'locked', False))
+        elif action == "layer_color":
+            self._layer_color()
+        elif action == "layer_make":
+            self._layer_make()
+        elif action == "layer_query":
+            self._layer_query()
+        # ── Display ──
+        elif action == "zoom_window":
+            self._activate_tool("zoomwin")
+        elif action == "pan_cmd":
+            self._activate_tool("pan")
+        elif action == "regen":
+            self._rebuild_scene()
+            self._echo("Regenerating drawing.")
+            self._echo("Command:")
+        # ── Inquiry ──
+        elif action == "dist":
+            self._activate_tool("dist")
+        # ── Not implemented echo ──
+        elif action and action.startswith("ni_"):
+            cmd_name = action[3:].upper()
+            self._echo(f"Command: {cmd_name} (not implemented)")
+            self._echo("Command:")
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
 
@@ -741,6 +782,55 @@ class MainWindow(QMainWindow):
         for e in self._document.entities:
             d = e.to_dict()
             self._echo(f"  {d['type']:10s}  L:{e.layer_name}  uuid:{e.uuid[:8]}")
+        self._echo("Command:")
+
+    # ── Layer helpers ───────────────────────────────────────
+    def _layer_op(self, op_name: str, fn):
+        """Apply an operation to a selected layer."""
+        layers = list(self._document.layer_manager.layers.keys())
+        name, ok = QInputDialog.getItem(self, f"Layer {op_name}", "Layer:", layers, 0, False)
+        if ok and name:
+            layer = self._document.layer_manager.layers.get(name)
+            if layer:
+                fn(layer)
+                self._echo(f"Layer {name}: {op_name}")
+        self._echo("Command:")
+
+    def _layer_color(self):
+        layers = list(self._document.layer_manager.layers.keys())
+        name, ok = QInputDialog.getItem(self, "Layer Color", "Layer:", layers, 0, False)
+        if ok and name:
+            from PySide6.QtWidgets import QColorDialog
+            color = QColorDialog.getColor()
+            if color.isValid():
+                layer = self._document.layer_manager.layers.get(name)
+                if layer:
+                    layer.color = color.name()
+                    self._echo(f"Layer {name}: color={color.name()}")
+        self._echo("Command:")
+
+    def _layer_make(self):
+        """Make a new layer and set it current (like ACAD LAYER Make)."""
+        name, ok = QInputDialog.getText(self, "Make Layer", "New layer name:")
+        if ok and name.strip():
+            try:
+                lm = self._document.layer_manager
+                if name.strip() not in lm.layers:
+                    lm.add_layer(name.strip())
+                lm.set_current(name.strip())
+                self._echo(f"Made layer: {name.strip()} (current)")
+            except ValueError as e:
+                QMessageBox.warning(self, "Error", str(e))
+        self._echo("Command:")
+
+    def _layer_query(self):
+        """List all layers with properties."""
+        self._echo("--- LAYERS ---")
+        for name, layer in self._document.layer_manager.layers.items():
+            cur = ">" if name == self._document.layer_manager.current_layer_name else " "
+            vis = "ON" if layer.visible else "OFF"
+            lock = "LK" if layer.locked else "UL"
+            self._echo(f" {cur} {name:10s} {vis} {lock} {layer.color}")
         self._echo("Command:")
 
     # ── Layer dialog ───────────────────────────────────────
