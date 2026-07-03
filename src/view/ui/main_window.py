@@ -242,6 +242,19 @@ class MainWindow(QMainWindow):
         m.addAction("COPY", lambda: self._activate_tool("copy"), "Ctrl+Shift+C")
         m.addAction("ROTATE", lambda: self._activate_tool("rotate"), "Ctrl+R")
 
+        # Display
+        m = mb.addMenu("DISPLAY")
+        m.addAction("ZOOM EXTENTS", self._view.zoom_extents)
+        m.addAction("REDRAW", self._rebuild_scene)
+
+        # Inquiry
+        m = mb.addMenu("INQUIRY")
+        m.addAction("LIST ENTITIES", self._on_list_entities)
+
+        # Layer
+        m = mb.addMenu("LAYER")
+        m.addAction("LAYERS...", self._show_layer_dialog)
+
         # Settings
         m = mb.addMenu("SETTINGS")
         snap_act = QAction("SNAP  (F9)", self, checkable=True)
@@ -255,9 +268,6 @@ class MainWindow(QMainWindow):
         ortho_act.triggered.connect(self._toggle_ortho)
         m.addAction(ortho_act)
         self._ortho_action = ortho_act
-
-        m.addSeparator()
-        m.addAction("LAYERS", self._show_layer_dialog)
 
     # ── Screen Menu (right side) ───────────────────────────
     def _setup_screen_menu(self):
@@ -624,6 +634,14 @@ class MainWindow(QMainWindow):
             for uuid in list(self._document._entities.keys()):
                 self._document.remove_entity(uuid)
             self._rebuild_scene()
+
+    def _on_list_entities(self):
+        """List all entities in the command output (INQUIRY menu)."""
+        self._echo(f"--- {len(self._document.entities)} ENTITIES ---")
+        for e in self._document.entities:
+            d = e.to_dict()
+            self._echo(f"  {d['type']:10s}  L:{e.layer_name}  uuid:{e.uuid[:8]}")
+        self._echo("Command:")
 
     # ── Layer dialog ───────────────────────────────────────
     def _show_layer_dialog(self):
