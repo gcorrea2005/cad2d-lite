@@ -77,7 +77,22 @@ class CadView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def keyPressEvent(self, event):
-        # Forward key events to active tool
+        # Global hotkeys
+        if event.key() == Qt.Key.Key_F8:
+            # Ortho toggle
+            w = self.window()
+            if hasattr(w, '_toggle_ortho'):
+                w._toggle_ortho()
+                event.accept()
+                return
+        if event.key() == Qt.Key.Key_F9:
+            # Snap toggle
+            w = self.window()
+            if hasattr(w, '_toggle_snap'):
+                w._toggle_snap()
+                event.accept()
+                return
+        # Forward to active tool
         if self.tool_manager and self.tool_manager._active_tool:
             self.tool_manager._active_tool.key_press(event)
             event.accept()

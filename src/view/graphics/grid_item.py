@@ -14,7 +14,7 @@ class GridItem(QGraphicsItem):
         return self._rect
 
     def paint(self, painter: QPainter, option, widget=None):
-        pen = QPen(Qt.GlobalColor.darkGray)
+        pen = QPen(QColor("#1a3a4a"))  # dark cyan retro grid
         pen.setWidthF(0)
         painter.setPen(pen)
 
