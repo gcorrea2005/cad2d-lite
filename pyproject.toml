@@ -1,0 +1,16 @@
+[project]
+name = "cadlite"
+version = "0.1.0"
+description = "2D CAD Lite — desktop CAD application"
+requires-python = ">=3.11"
+dependencies = [
+    "PySide6>=6.5",
+    "ezdxf>=1.1",
+]
+
+[project.scripts]
+cadlite = "src.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
