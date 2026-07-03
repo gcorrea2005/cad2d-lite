@@ -717,10 +717,35 @@ class MainWindow(QMainWindow):
         self._echo(f"Command: {name_map.get(tool_name, tool_name.upper())}")
 
     def _process_command(self, text: str):
-        parts = text.upper().split()
+        parts = text.strip().split(None, 1)
         if not parts:
             return
-        cmd = parts[0]
+        cmd = parts[0].upper()
+        args = parts[1] if len(parts) > 1 else ""
+
+        # Commands that take coordinates — delegate to ScriptEngine
+        coord_commands = {
+            "LINE", "L", "CIRCLE", "C", "ARC", "A",
+            "RECTANG", "RECTANGLE", "REC", "R",
+            "PLINE", "POLYLINE", "PL", "P",
+            "TEXT", "T", "MTEXT", "POINT",
+            "DIM", "DIMENSION", "D",
+            "ERASE", "E", "LAYER", "ZOOM",
+            "UNDO", "U", "REDO", "SAVE", "SAVEAS", "DELAY",
+        }
+
+        if cmd in coord_commands and args:
+            # Execute directly via ScriptEngine
+            from src.io.script_engine import ScriptEngine
+            engine = ScriptEngine(
+                self._document, self._view,
+                self._echo, self._rebuild_scene)
+            engine._exec_line(text)
+            self._rebuild_scene()
+            self._echo("Command:")
+            return
+
+        # Tool switching (bare commands without coordinates)
         aliases = {
             "L": "line", "LINE": "line",
             "C": "circle", "CIRCLE": "circle",
@@ -738,6 +763,17 @@ class MainWindow(QMainWindow):
             "REDO": "redo",
             "SAVE": "save", "OPEN": "open",
             "Q": "quit", "QUIT": "quit",
+            "X": "explode", "EXPLODE": "explode",
+            "O": "offset", "OFFSET": "offset",
+            "B": "break", "BREAK": "break",
+            "H": "hatch", "HATCH": "hatch",
+            "SC": "scale", "SCALE": "scale",
+            "MI": "mirror", "MIRROR": "mirror",
+            "TR": "trim", "TRIM": "trim",
+            "EX": "extend", "EXTEND": "extend",
+            "F": "fillet", "FILLET": "fillet",
+            "CHA": "chamfer", "CHAMFER": "chamfer",
+            "AR": "array", "ARRAY": "array",
         }
         action = aliases.get(cmd)
         if not action:
