@@ -42,8 +42,8 @@ CLR_CMD_BG     = "#000018"
 CLR_CMD_TEXT   = "#FFFFFF"
 CLR_ACCENT     = "#FFCC00"   # yellow accent (snap, warnings)
 CLR_HEADER     = "#44AAFF"   # blue header text in screen menu
-CLR_INFO_BG    = "#000033"   # info bar background
-CLR_SCREEN_BG  = "#000044"   # screen menu background (the blue)
+CLR_SCREEN_BG  = "#0000AA"   # classic ACAD blue (VGA palette)
+CLR_INFO_BG    = "#000088"   # info bar darker blue
 
 
 class MainWindow(QMainWindow):
