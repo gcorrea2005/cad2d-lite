@@ -203,6 +203,8 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("point", PointTool(v, d, lm))
         self._tool_manager.register_tool("solid", SolidTool(v, d, lm))
 
+        self._view.tool_manager = self._tool_manager
+
         # Add info toolbar below menus (ACAD 10 style)
         self._info_bar = QToolBar("Info")
         self._info_bar.setMovable(False)
