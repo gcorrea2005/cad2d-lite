@@ -774,7 +774,6 @@ class MainWindow(QMainWindow):
         self._ortho_label = QLabel("")
 
         sb = QStatusBar()
-        sb.addWidget(self._coord_label, 1)
         sb.addWidget(self._layer_label)
         sb.addPermanentWidget(self._snap_label)
         sb.addPermanentWidget(self._ortho_label)
