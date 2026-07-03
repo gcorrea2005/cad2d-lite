@@ -251,6 +251,8 @@ class MainWindow(QMainWindow):
         m.addSeparator()
         m.addAction("DXF OUT", self._on_export_dxf)
         m.addSeparator()
+        m.addAction("SCRIPT", self._on_script)
+        m.addSeparator()
         m.addAction("QUIT", self.close, QKeySequence.StandardKey.Quit)
 
         # Edit
@@ -1103,6 +1105,17 @@ class MainWindow(QMainWindow):
         if path:
             export_dxf(self._document, Path(path))
             self._echo(f"DXF exported: {path}")
+
+    def _on_script(self):
+        """SCRIPT — run a .scr command file."""
+        path, _ = QFileDialog.getOpenFileName(self, "Run Script", "",
+                                               "Script Files (*.scr);;All Files (*)")
+        if path:
+            from src.io.script_engine import ScriptEngine
+            engine = ScriptEngine(
+                self._document, self._view,
+                self._echo, self._rebuild_scene)
+            engine.run(Path(path))
 
     def _on_undo(self):
         self._document.undo()
