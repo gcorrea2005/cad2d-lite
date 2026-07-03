@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QMenuBar, QStatusBar, QDockWidget,
+    QMainWindow, QMenuBar, QToolBar, QStatusBar, QDockWidget,
     QListWidget, QListWidgetItem, QPlainTextEdit,
     QFileDialog, QMessageBox, QInputDialog,
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -33,15 +33,15 @@ from src.io.dxf_export import export_dxf
 # ── AutoCAD 10 style color palette ──
 CLR_BG         = "#000000"   # black drawing area
 CLR_GRID       = "#1a3a4a"   # dark cyan grid
-CLR_CROSSHAIR  = "#00FF88"   # neon green crosshair
-CLR_TEXT       = "#00FFCC"   # cyan text
+CLR_TEXT       = "#FFFFFF"   # white text everywhere
 CLR_MENU_BG    = "#0a0a14"   # near-black menu bg
-CLR_MENU_TEXT  = "#88CCFF"   # light blue menu text
+CLR_MENU_TEXT  = "#FFFFFF"   # white menu text
 CLR_MENU_SEL   = "#003366"   # dark blue selection
 CLR_STATUS_BG  = "#0a0a14"
 CLR_CMD_BG     = "#050510"
-CLR_CMD_TEXT   = "#CCCCCC"
+CLR_CMD_TEXT   = "#FFFFFF"
 CLR_ACCENT     = "#FFCC00"   # yellow accent (snap, warnings)
+CLR_HEADER     = "#00FF88"   # green header text in screen menu
 
 
 class MainWindow(QMainWindow):
@@ -166,6 +166,32 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("delete", DeleteTool(v, d))
 
         self._view.tool_manager = self._tool_manager
+        # Add info toolbar below menus (ACAD 10 style)
+        self._info_bar = QToolBar("Info")
+        self._info_bar.setMovable(False)
+        self._info_bar.setStyleSheet(f"""
+            QToolBar {{
+                background-color: {CLR_MENU_BG};
+                border-bottom: 1px solid #1a1a2e;
+                spacing: 20px;
+                padding: 2px 8px;
+            }}
+            QLabel {{
+                color: {CLR_MENU_TEXT};
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+            }}
+        """)
+        self._info_layer = QLabel("LAYER: 0")
+        self._info_ortho = QLabel("")
+        self._info_coords = QLabel("0.0000, 0.0000")
+        self._info_bar.addWidget(self._info_layer)
+        self._info_bar.addSeparator()
+        self._info_bar.addWidget(self._info_ortho)
+        self._info_bar.addSeparator()
+        self._info_bar.addWidget(self._info_coords)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self._info_bar)
+
         self._tool_manager.activate_tool("select")
 
     def _activate_tool(self, name: str):
@@ -180,56 +206,56 @@ class MainWindow(QMainWindow):
         mb = self.menuBar()
 
         # File
-        m = mb.addMenu("&File")
-        m.addAction("&New", self._on_new, QKeySequence.StandardKey.New)
-        m.addAction("&Open...", self._on_open, QKeySequence.StandardKey.Open)
-        m.addAction("&Save", self._on_save, QKeySequence.StandardKey.Save)
-        m.addAction("Save &As...", self._on_save_as, "Ctrl+Shift+S")
+        m = mb.addMenu("FILE")
+        m.addAction("NEW", self._on_new, QKeySequence.StandardKey.New)
+        m.addAction("OPEN", self._on_open, QKeySequence.StandardKey.Open)
+        m.addAction("SAVE", self._on_save, QKeySequence.StandardKey.Save)
+        m.addAction("SAVE AS", self._on_save_as, "Ctrl+Shift+S")
         m.addSeparator()
-        m.addAction("Export &DXF...", self._on_export_dxf)
+        m.addAction("DXF OUT", self._on_export_dxf)
         m.addSeparator()
-        m.addAction("E&xit", self.close, QKeySequence.StandardKey.Quit)
+        m.addAction("QUIT", self.close, QKeySequence.StandardKey.Quit)
 
         # Edit
-        m = mb.addMenu("&Edit")
-        m.addAction("&Undo", self._on_undo, QKeySequence.StandardKey.Undo)
-        m.addAction("&Redo", self._on_redo, QKeySequence.StandardKey.Redo)
+        m = mb.addMenu("EDIT")
+        m.addAction("UNDO", self._on_undo, QKeySequence.StandardKey.Undo)
+        m.addAction("REDO", self._on_redo, QKeySequence.StandardKey.Redo)
         m.addSeparator()
-        m.addAction("&Erase Selected", self._on_erase)
-        m.addAction("Erase &All", self._on_erase_all)
+        m.addAction("ERASE", self._on_erase)
+        m.addAction("ERASE ALL", self._on_erase_all)
 
         # Draw
-        m = mb.addMenu("&Draw")
-        m.addAction("&Line", lambda: self._activate_tool("line"), "L")
-        m.addAction("&Circle", lambda: self._activate_tool("circle"), "C")
-        m.addAction("&Arc", lambda: self._activate_tool("arc"), "A")
-        m.addAction("&Polyline", lambda: self._activate_tool("polyline"), "P")
-        m.addAction("&Rectangle", lambda: self._activate_tool("rectangle"), "R")
-        m.addAction("&Text", lambda: self._activate_tool("text"), "T")
-        m.addAction("&Dimension", lambda: self._activate_tool("dim"), "D")
+        m = mb.addMenu("DRAW")
+        m.addAction("LINE", lambda: self._activate_tool("line"), "L")
+        m.addAction("CIRCLE", lambda: self._activate_tool("circle"), "C")
+        m.addAction("ARC", lambda: self._activate_tool("arc"), "A")
+        m.addAction("PLINE", lambda: self._activate_tool("polyline"), "P")
+        m.addAction("RECTANG", lambda: self._activate_tool("rectangle"), "R")
+        m.addAction("TEXT", lambda: self._activate_tool("text"), "T")
+        m.addAction("DIM", lambda: self._activate_tool("dim"), "D")
 
         # Modify
-        m = mb.addMenu("&Modify")
-        m.addAction("&Move", lambda: self._activate_tool("move"), "M")
-        m.addAction("&Copy", lambda: self._activate_tool("copy"), "Ctrl+Shift+C")
-        m.addAction("R&otate", lambda: self._activate_tool("rotate"), "Ctrl+R")
+        m = mb.addMenu("MODIFY")
+        m.addAction("MOVE", lambda: self._activate_tool("move"), "M")
+        m.addAction("COPY", lambda: self._activate_tool("copy"), "Ctrl+Shift+C")
+        m.addAction("ROTATE", lambda: self._activate_tool("rotate"), "Ctrl+R")
 
         # Settings
-        m = mb.addMenu("&Settings")
-        snap_act = QAction("&Snap (F9)", self, checkable=True)
+        m = mb.addMenu("SETTINGS")
+        snap_act = QAction("SNAP  (F9)", self, checkable=True)
         snap_act.setChecked(True)
         snap_act.triggered.connect(self._toggle_snap)
         m.addAction(snap_act)
         self._snap_action = snap_act
 
-        ortho_act = QAction("&Ortho (F8)", self, checkable=True)
+        ortho_act = QAction("ORTHO (F8)", self, checkable=True)
         ortho_act.setChecked(False)
         ortho_act.triggered.connect(self._toggle_ortho)
         m.addAction(ortho_act)
         self._ortho_action = ortho_act
 
         m.addSeparator()
-        m.addAction("&Layers...", self._show_layer_dialog)
+        m.addAction("LAYERS", self._show_layer_dialog)
 
     # ── Screen Menu (right side) ───────────────────────────
     def _setup_screen_menu(self):
@@ -279,13 +305,13 @@ class MainWindow(QMainWindow):
             items = [
                 ("  DRAW   ", None),
                 ("", None),
-                (" Line    ", "line"),
-                (" Circle  ", "circle"),
-                (" Arc     ", "arc"),
-                (" Pline   ", "polyline"),
-                (" Rectang ", "rectangle"),
-                (" Text    ", "text"),
-                (" Dim     ", "dim"),
+                (" LINE    ", "line"),
+                (" CIRCLE  ", "circle"),
+                (" ARC     ", "arc"),
+                (" PLINE   ", "polyline"),
+                (" RECTANG ", "rectangle"),
+                (" TEXT    ", "text"),
+                (" DIM     ", "dim"),
                 ("", None),
                 (" [<- BACK]", "root"),
             ]
@@ -293,12 +319,12 @@ class MainWindow(QMainWindow):
             items = [
                 ("  EDIT   ", None),
                 ("", None),
-                (" Erase   ", "erase"),
-                (" Move    ", "move"),
-                (" Copy    ", "copy"),
-                (" Rotate  ", "rotate"),
-                (" Undo    ", "undo"),
-                (" Redo    ", "redo"),
+                (" ERASE   ", "erase"),
+                (" MOVE    ", "move"),
+                (" COPY    ", "copy"),
+                (" ROTATE  ", "rotate"),
+                (" UNDO    ", "undo"),
+                (" REDO    ", "redo"),
                 ("", None),
                 (" [<- BACK]", "root"),
             ]
@@ -306,8 +332,8 @@ class MainWindow(QMainWindow):
             items = [
                 ("  DISPLAY", None),
                 ("", None),
-                (" Zoom E  ", "zoom_extents"),
-                (" Redraw  ", "redraw"),
+                (" ZOOM E  ", "zoom_extents"),
+                (" REDRAW  ", "redraw"),
                 ("", None),
                 (" [<- BACK]", "root"),
             ]
@@ -315,9 +341,9 @@ class MainWindow(QMainWindow):
             items = [
                 ("  LAYER   ", None),
                 ("", None),
-                (" Set cur  ", "layer_set"),
-                (" New      ", "layer_new"),
-                (" Delete   ", "layer_del"),
+                (" SET CUR  ", "layer_set"),
+                (" NEW      ", "layer_new"),
+                (" DELETE   ", "layer_del"),
                 ("", None),
                 (" [<- BACK]", "root"),
             ]
@@ -325,9 +351,9 @@ class MainWindow(QMainWindow):
             items = [
                 ("  SETTINGS", None),
                 ("", None),
-                (" Snap  ON ", "snap_toggle"),
-                (" Ortho OFF", "ortho_toggle"),
-                (" Grid  ON ", "grid_toggle"),
+                (" SNAP  ON ", "snap_toggle"),
+                (" ORTHO OFF", "ortho_toggle"),
+                (" GRID  ON ", "grid_toggle"),
                 ("", None),
                 (" [<- BACK]", "root"),
             ]
@@ -336,7 +362,6 @@ class MainWindow(QMainWindow):
 
         for label, action in items:
             if label == "":
-                # Spacer
                 item = QListWidgetItem("")
                 item.setFlags(Qt.ItemFlag.NoItemFlags)
                 self._screen_menu.addItem(item)
@@ -345,11 +370,13 @@ class MainWindow(QMainWindow):
             if action:
                 item.setData(Qt.ItemDataRole.UserRole, action)
                 if label.startswith("[<-"):
-                    item.setForeground(QColor("#FFCC00"))
+                    item.setForeground(QColor("#FFCC00"))  # yellow back
+                else:
+                    item.setForeground(QColor(CLR_MENU_TEXT))
             else:
-                # Header — not clickable
+                # Header — not clickable, green
                 item.setFlags(Qt.ItemFlag.NoItemFlags)
-                item.setForeground(QColor("#00FFCC"))
+                item.setForeground(QColor(CLR_HEADER))
             self._screen_menu.addItem(item)
 
     def _on_screen_menu_click(self, item: QListWidgetItem):
@@ -551,14 +578,10 @@ class MainWindow(QMainWindow):
         self.setStatusBar(sb)
 
     def _update_coord_status(self, scene_pos: QPointF):
-        tool_name = ""
-        if self._tool_manager._active_tool:
-            tn = type(self._tool_manager._active_tool).__name__
-            tool_name = tn.replace("Tool", "")
-        self._coord_label.setText(
-            f"  {scene_pos.x():.4f}, {scene_pos.y():.4f}  [{tool_name}]")
-        self._layer_label.setText(
-            f"L:{self._document.layer_manager.current_layer_name}")
+        self._info_coords.setText(f"{scene_pos.x():.4f}, {scene_pos.y():.4f}")
+        self._info_layer.setText(f"LAYER: {self._document.layer_manager.current_layer_name}")
+        self._info_ortho.setText("ORTHO" if self._ortho_active else "")
+        self._layer_label.setText(f"L:{self._document.layer_manager.current_layer_name}")
 
     def _toggle_snap(self):
         self._snap_active = not self._snap_active
