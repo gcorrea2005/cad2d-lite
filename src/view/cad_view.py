@@ -84,22 +84,54 @@ class CadView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def keyPressEvent(self, event):
+        w = self.window()
+
         # Global hotkeys
         if event.key() == Qt.Key.Key_F8:
-            # Ortho toggle
-            w = self.window()
             if hasattr(w, '_toggle_ortho'):
                 w._toggle_ortho()
                 event.accept()
                 return
         if event.key() == Qt.Key.Key_F9:
-            # Snap toggle
-            w = self.window()
             if hasattr(w, '_toggle_snap'):
                 w._toggle_snap()
                 event.accept()
                 return
-        # Forward to active tool
+
+        # Tool-switching shortcuts (like AutoCAD)
+        key_map = {
+            Qt.Key.Key_Escape: "select",
+            Qt.Key.Key_L: "line",
+            Qt.Key.Key_C: "circle",
+            Qt.Key.Key_A: "arc",
+            Qt.Key.Key_P: "polyline",
+            Qt.Key.Key_R: "rectangle",
+            Qt.Key.Key_T: "text",
+            Qt.Key.Key_D: "dim",
+            Qt.Key.Key_M: "move",
+            Qt.Key.Key_O: "offset",
+            Qt.Key.Key_X: "explode",
+        }
+        if (event.key() in key_map and
+            not (event.modifiers() & Qt.KeyboardModifier.ControlModifier)):
+            if hasattr(w, '_activate_tool'):
+                w._activate_tool(key_map[event.key()])
+                event.accept()
+                return
+
+        # Ctrl+Z / Ctrl+Y for undo/redo
+        if event.key() == Qt.Key.Key_Z and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            if hasattr(w, '_on_undo'):
+                w._on_undo()
+                event.accept()
+                return
+        if event.key() == Qt.Key.Key_Y and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            if hasattr(w, '_on_redo'):
+                w._on_redo()
+                event.accept()
+                return
+
+        # Forward to active tool (for tool-specific keys like Enter, Delete, etc.)
         if self.tool_manager and self.tool_manager._active_tool:
             self.tool_manager._active_tool.key_press(event)
             event.accept()
