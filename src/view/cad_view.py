@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsView
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QWheelEvent, QMouseEvent
 
 
@@ -22,7 +22,13 @@ class CadView(QGraphicsView):
 
         self.setMouseTracking(True)
 
+        # Zoom history stack
+        self._zoom_stack: list[QRectF] = []
+        self._zoom_index: int = -1
+        self._saving_zoom = True
+
     def wheelEvent(self, event: QWheelEvent):
+        self._save_viewport()
         delta = event.angleDelta().y()
         if delta > 0:
             self.scale(self._zoom_factor, self._zoom_factor)
@@ -66,6 +72,7 @@ class CadView(QGraphicsView):
         if event.button() == Qt.MouseButton.MiddleButton:
             self._panning = False
             self.setCursor(Qt.CursorShape.ArrowCursor)
+            self._save_viewport()  # save after pan
             event.accept()
             return
         # Forward release to tool
@@ -100,8 +107,39 @@ class CadView(QGraphicsView):
         super().keyPressEvent(event)
 
     def zoom_extents(self):
+        self._save_viewport()
         self.fitInView(self.scene().itemsBoundingRect(),
                        Qt.AspectRatioMode.KeepAspectRatio)
 
     def zoom_window(self, rect):
+        self._save_viewport()
         self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
+
+    def _save_viewport(self):
+        """Push current viewport onto zoom history stack."""
+        if not self._saving_zoom:
+            return
+        vr = self.viewport()
+        if vr is None:
+            return
+        current = QRectF(
+            self.mapToScene(vr.rect()).boundingRect()
+        )
+        # Truncate forward history if we're not at the end
+        self._zoom_stack = self._zoom_stack[:self._zoom_index + 1]
+        self._zoom_stack.append(current)
+        self._zoom_index = len(self._zoom_stack) - 1
+        # Cap at 50 entries
+        if len(self._zoom_stack) > 50:
+            self._zoom_stack = self._zoom_stack[-50:]
+            self._zoom_index = len(self._zoom_stack) - 1
+
+    def zoom_previous(self):
+        """Restore previous zoom level."""
+        if self._zoom_index <= 0:
+            return
+        self._zoom_index -= 1
+        rect = self._zoom_stack[self._zoom_index]
+        self._saving_zoom = False
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
+        self._saving_zoom = True

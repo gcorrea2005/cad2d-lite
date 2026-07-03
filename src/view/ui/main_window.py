@@ -29,6 +29,8 @@ from src.controller.tools.delete_tool import DeleteTool
 from src.controller.tools.zoom_win_tool import ZoomWinTool
 from src.controller.tools.pan_tool import PanTool
 from src.controller.tools.dist_tool import DistTool
+from src.controller.tools.id_tool import IdTool
+from src.controller.tools.area_tool import AreaTool
 from src.io.cad_file import save_document, load_document
 from src.io.dxf_export import export_dxf
 
@@ -172,6 +174,8 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("zoomwin", ZoomWinTool(v, d))
         self._tool_manager.register_tool("pan", PanTool(v, d))
         self._tool_manager.register_tool("dist", DistTool(v, d, self._echo))
+        self._tool_manager.register_tool("id", IdTool(v, d, self._echo))
+        self._tool_manager.register_tool("area", AreaTool(v, d, self._echo))
 
         # Add info toolbar below menus (ACAD 10 style)
         self._info_bar = QToolBar("Info")
@@ -387,7 +391,7 @@ class MainWindow(QMainWindow):
                 ("", None),
                 (" ZOOM E ", "zoom_extents"),
                 (" ZOOM W ", "zoom_window"),
-                (" ZOOM P ", "ni_ZOOM_P"),
+                (" ZOOM P ", "zoom_previous"),
                 (" PAN    ", "pan_cmd"),
                 (" REDRAW ", "redraw"),
                 (" REGEN  ", "regen"),
@@ -400,9 +404,9 @@ class MainWindow(QMainWindow):
                 ("", None),
                 (" LIST   ", "list_entities"),
                 (" DIST   ", "dist"),
-                (" AREA   ", "ni_AREA"),
-                (" ID     ", "ni_ID"),
-                (" STATUS ", "ni_STATUS"),
+                (" AREA   ", "area"),
+                (" ID     ", "id_cmd"),
+                (" STATUS ", "status_cmd"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -519,6 +523,8 @@ class MainWindow(QMainWindow):
             self._on_redo()
         elif action == "zoom_extents":
             self._view.zoom_extents()
+        elif action == "zoom_previous":
+            self._view.zoom_previous()
         elif action == "redraw":
             self._rebuild_scene()
         elif action == "snap_toggle":
@@ -579,6 +585,12 @@ class MainWindow(QMainWindow):
         # ── Inquiry ──
         elif action == "dist":
             self._activate_tool("dist")
+        elif action == "id_cmd":
+            self._on_id()
+        elif action == "status_cmd":
+            self._on_status()
+        elif action == "area":
+            self._activate_tool("area")
         # ── Not implemented echo ──
         elif action and action.startswith("ni_"):
             cmd_name = action[3:].upper()
@@ -831,6 +843,29 @@ class MainWindow(QMainWindow):
             vis = "ON" if layer.visible else "OFF"
             lock = "LK" if layer.locked else "UL"
             self._echo(f" {cur} {name:10s} {vis} {lock} {layer.color}")
+        self._echo("Command:")
+
+    def _on_id(self):
+        """ID command — activate a point-pick to identify entity under cursor."""
+        self._activate_tool("id")
+
+    def _on_status(self):
+        """STATUS — show drawing statistics."""
+        doc = self._document
+        ents = doc.entities
+        types = {}
+        for e in ents:
+            t = e.to_dict()["type"]
+            types[t] = types.get(t, 0) + 1
+        self._echo("--- DRAWING STATUS ---")
+        self._echo(f"Entities: {len(ents)}")
+        for t, n in sorted(types.items()):
+            self._echo(f"  {t:12s}: {n}")
+        self._echo(f"Layers: {len(doc.layer_manager.layers)}")
+        self._echo(f"Current: {doc.layer_manager.current_layer_name}")
+        self._echo(f"Snap: {'ON' if self._snap_active else 'OFF'}")
+        self._echo(f"Ortho: {'ON' if self._ortho_active else 'OFF'}")
+        self._echo(f"Grid: {'ON' if self._grid.isVisible() else 'OFF'}")
         self._echo("Command:")
 
     # ── Layer dialog ───────────────────────────────────────
