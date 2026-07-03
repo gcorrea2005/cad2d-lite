@@ -32,16 +32,18 @@ from src.io.dxf_export import export_dxf
 
 # ── AutoCAD 10 style color palette ──
 CLR_BG         = "#000000"   # black drawing area
-CLR_GRID       = "#1a3a4a"   # dark cyan grid
+CLR_GRID       = "#0a1a2a"   # dark blue grid
 CLR_TEXT       = "#FFFFFF"   # white text everywhere
-CLR_MENU_BG    = "#0a0a14"   # near-black menu bg
+CLR_MENU_BG    = "#000022"   # dark navy menu bg
 CLR_MENU_TEXT  = "#FFFFFF"   # white menu text
-CLR_MENU_SEL   = "#003366"   # dark blue selection
-CLR_STATUS_BG  = "#0a0a14"
-CLR_CMD_BG     = "#050510"
+CLR_MENU_SEL   = "#003388"   # blue selection
+CLR_STATUS_BG  = "#000022"
+CLR_CMD_BG     = "#000018"
 CLR_CMD_TEXT   = "#FFFFFF"
 CLR_ACCENT     = "#FFCC00"   # yellow accent (snap, warnings)
-CLR_HEADER     = "#00FF88"   # green header text in screen menu
+CLR_HEADER     = "#44AAFF"   # blue header text in screen menu
+CLR_INFO_BG    = "#000033"   # info bar background
+CLR_SCREEN_BG  = "#000044"   # screen menu background (the blue)
 
 
 class MainWindow(QMainWindow):
@@ -87,7 +89,7 @@ class MainWindow(QMainWindow):
                 background-color: {CLR_MENU_SEL};
             }}
             QListWidget {{
-                background-color: {CLR_MENU_BG};
+                background-color: {CLR_SCREEN_BG};
                 color: {CLR_MENU_TEXT};
                 border: none;
                 font-family: 'Courier New', monospace;
@@ -100,7 +102,7 @@ class MainWindow(QMainWindow):
                 background-color: {CLR_MENU_SEL};
             }}
             QListWidget::item:hover {{
-                background-color: #112244;
+                background-color: #002266;
             }}
             QPlainTextEdit {{
                 background-color: {CLR_CMD_BG};
@@ -171,8 +173,8 @@ class MainWindow(QMainWindow):
         self._info_bar.setMovable(False)
         self._info_bar.setStyleSheet(f"""
             QToolBar {{
-                background-color: {CLR_MENU_BG};
-                border-bottom: 1px solid #1a1a2e;
+                background-color: {CLR_INFO_BG};
+                border-bottom: 1px solid #000055;
                 spacing: 20px;
                 padding: 2px 8px;
             }}
