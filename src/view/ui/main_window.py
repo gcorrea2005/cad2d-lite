@@ -23,6 +23,8 @@ from src.controller.tools.text_tool import TextTool
 from src.controller.tools.dim_linear_tool import DimLinearTool
 from src.controller.tools.dim_radius_tool import DimRadiusTool
 from src.controller.tools.select_tool import SelectTool
+from src.controller.tools.stretch_tool import StretchTool
+from src.controller.tools.ellipse_tool import EllipseTool
 from src.controller.tools.move_tool import MoveTool
 from src.controller.tools.copy_tool import CopyTool
 from src.controller.tools.rotate_tool import RotateTool
@@ -173,6 +175,8 @@ class MainWindow(QMainWindow):
         self._tool_manager = ToolManager(v, d)
 
         self._tool_manager.register_tool("select", SelectTool(v, d))
+        self._tool_manager.register_tool("stretch", StretchTool(v, d, lm))
+        self._tool_manager.register_tool("ellipse", EllipseTool(v, d, lm))
         self._tool_manager.register_tool("line", LineTool(v, d, lm))
         self._tool_manager.register_tool("circle", CircleTool(v, d, lm))
         self._tool_manager.register_tool("arc", ArcTool(v, d, lm))
@@ -386,6 +390,7 @@ class MainWindow(QMainWindow):
                 (" TEXT   ", "text"),
                 (" DIM    ", "dim"),
                 (" POINT  ", "point"),
+                (" ELLIPSE", "ellipse"),
                 (" HATCH  ", "hatch"),
                 (" SOLID  ", "solid"),
                 ("", None),
@@ -408,6 +413,7 @@ class MainWindow(QMainWindow):
                 (" BREAK  ", "break"),
                 (" EXPLODE", "explode"),
                 (" ARRAY  ", "array"),
+                (" STRETCH", "stretch"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -1878,6 +1884,8 @@ class MainWindow(QMainWindow):
                 item = GfxTextItem(entity)
             elif isinstance(entity, Dimension):
                 item = GfxDimensionItem(entity)
+            elif isinstance(entity, Ellipse):
+                item = GfxEllipseItem(entity)
             elif isinstance(entity, PointEntity):
                 item = GfxPointItem(entity)
             elif isinstance(entity, BlockInstance):

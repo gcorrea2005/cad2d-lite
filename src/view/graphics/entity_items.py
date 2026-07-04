@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QGraphicsItem
-from PySide6.QtCore import QRectF, QPointF, Qt
+from PySide6.QtCore import Qt, QPointF, QRectF, QLineF
+from PySide6.QtGui import QPainter
 from PySide6.QtGui import QPen, QColor, QPainter
 from src.model.entities.line import Line
 from src.model.entities.circle import Circle
@@ -373,6 +374,37 @@ class GfxDimensionItem(QGraphicsItem):
                 tw = fm.horizontalAdvance(text)
                 painter.drawText(QPointF(-4, tw / 2), text)
                 painter.restore()
+
+
+class GfxEllipseItem(QGraphicsItem):
+    def __init__(self, entity):
+        super().__init__()
+        self.entity = entity
+        self.setZValue(0)
+
+    def boundingRect(self) -> QRectF:
+        bmin, bmax = self.entity.bounding_box()
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        return r.adjusted(-2, -2, 2, 2)
+
+    def paint(self, painter: QPainter, option, widget=None):
+        import math
+        e = self.entity
+        pen = _entity_pen(e)
+        painter.setPen(pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+        cx, cy = e.center.x, e.center.y
+        r_maj = e.major_radius
+        r_min = e.minor_radius
+        ang = math.degrees(e.angle)
+
+        painter.save()
+        painter.translate(QPointF(cx, cy))
+        painter.rotate(ang)
+        rect = QRectF(-r_maj, -r_min, r_maj * 2, r_min * 2)
+        painter.drawEllipse(rect)
+        painter.restore()
 
 
 class GfxPointItem(QGraphicsItem):

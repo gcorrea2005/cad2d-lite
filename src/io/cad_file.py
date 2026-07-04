@@ -7,8 +7,9 @@ from src.model.entities.arc import Arc
 from src.model.entities.polyline import Polyline
 from src.model.entities.text import TextEntity
 from src.model.entities.dimension import Dimension
-from src.model.entities.block import BlockInstance
 from src.model.entities.point_entity import PointEntity
+from src.model.entities.block import BlockInstance
+from src.model.entities.ellipse import Ellipse
 
 ENTITY_CLASSES = {
     "Line": Line,
@@ -18,6 +19,8 @@ ENTITY_CLASSES = {
     "Text": TextEntity,
     "Dimension": Dimension,
     "Point": PointEntity,
+    "BlockInstance": BlockInstance,
+    "Ellipse": Ellipse,
 }
 
 
