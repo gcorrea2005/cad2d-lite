@@ -267,9 +267,9 @@ class GfxDimensionItem(QGraphicsItem):
                 painter.rotate(math.degrees(ang))
             painter.drawText(QPointF(-15, 4), text)
             painter.restore()
-        elif e.dim_type == "radius":
-            # Radius dimension: leader from center to circle edge
-            center, edge = p1, p2  # p1=center, p2=point on circle
+        elif e.dim_type == "radius" or e.dim_type == "diameter":
+            # Radius/diameter: leader from center to circle edge
+            center, edge = p1, p2
             painter.drawLine(
                 QPointF(center.x, center.y),
                 QPointF(edge.x, edge.y),
@@ -278,7 +278,8 @@ class GfxDimensionItem(QGraphicsItem):
             font = painter.font()
             font.setPixelSize(12)
             painter.setFont(font)
-            text = f"R {dist:.2f}"
+            prefix = "⌀ " if e.dim_type == "diameter" else "R "
+            text = f"{prefix}{dist:.2f}"
             mid_x = (center.x + edge.x) / 2
             mid_y = (center.y + edge.y) / 2
             painter.drawText(QPointF(mid_x + 4, mid_y - 2), text)

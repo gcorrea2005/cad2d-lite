@@ -789,6 +789,8 @@ class MainWindow(QMainWindow):
             "D": "dim", "DIM": "dim",
             "DIMALIGNED": "dim_aligned",
             "DIMRADIUS": "dim_radius",
+            "DIMDIAMETER": "dim_diameter",
+            "DIMANGULAR": "dim_angular",
             "M": "move", "MOVE": "move",
             "CO": "copy", "COPY": "copy",
             "RO": "rotate", "ROTATE": "rotate",
@@ -822,6 +824,9 @@ class MainWindow(QMainWindow):
             "ORTHO": "ortho_toggle",
             "GRID": "grid_toggle_cmd",
             "DXFIN": "dxfin_cmd",
+            "PLOT": "plot_cmd",
+            "PRINT": "plot_cmd",
+            "HATCH": "hatch",
             "LINETYPE": "linetype_cmd",
             "LTYPE": "linetype_cmd",
             "TEMPLATE": "layer_template",
@@ -894,6 +899,9 @@ class MainWindow(QMainWindow):
         elif action == "dxfin_cmd":
             self._cmd_dxfin()
             return
+        elif action == "plot_cmd":
+            self._cmd_plot(args)
+            return
         elif action == "linetype_cmd":
             self._cmd_linetype(args)
             return
@@ -903,6 +911,14 @@ class MainWindow(QMainWindow):
             return
         elif action == "dim_radius":
             self._tool_manager._dim_type = "radius"
+            self._activate_tool("dimradius")
+            return
+        elif action == "dim_diameter":
+            self._tool_manager._dim_type = "diameter"
+            self._activate_tool("dimradius")
+            return
+        elif action == "dim_angular":
+            self._tool_manager._dim_type = "angular"
             self._activate_tool("dimradius")
             return
         elif action == "layer_template":
@@ -1153,6 +1169,95 @@ class MainWindow(QMainWindow):
             self._view.zoom_extents()
         except Exception as e:
             self._echo(f"DXFIN error: {e}")
+        self._echo("Command:")
+
+    def _cmd_plot(self, args: str):
+        """PLOT command: export viewport to PDF."""
+        from PySide6.QtWidgets import QFileDialog, QInputDialog
+        from PySide6.QtPrintSupport import QPrinter, QPageSize
+        from PySide6.QtGui import QPainter, QColor
+        from PySide6.QtCore import QRectF, Qt
+        from pathlib import Path
+
+        # Paper sizes in mm (A-series)
+        paper_sizes = {
+            "A4": (210, 297), "A3": (297, 420), "A2": (420, 594),
+            "A1": (594, 841), "A0": (841, 1189),
+        }
+        scales = ["Fit to paper", "1:1", "1:10", "1:20", "1:50", "1:100", "1:200", "1:500"]
+
+        # Choose scale
+        scale_str, ok = QInputDialog.getItem(
+            self, "Plot Scale", "Scale:", scales, 4, False)
+        if not ok:
+            self._echo("PLOT cancelled.")
+            self._echo("Command:")
+            return
+
+        # Choose paper
+        paper_names = list(paper_sizes.keys())
+        paper_str, ok = QInputDialog.getItem(
+            self, "Paper Size", "Paper:", paper_names, 0, False)
+        if not ok:
+            self._echo("PLOT cancelled.")
+            self._echo("Command:")
+            return
+
+        # Choose output file
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save PDF", str(Path.home() / "Desktop" / "drawing.pdf"),
+            "PDF Files (*.pdf)")
+        if not path:
+            self._echo("PLOT cancelled.")
+            self._echo("Command:")
+            return
+
+        try:
+            pw_mm, ph_mm = paper_sizes[paper_str]
+            pw = int(pw_mm * 2.8346)
+            ph = int(ph_mm * 2.8346)
+
+            # Get current viewport scene rect
+            vr = self._view.viewport().rect()
+            scene_rect = self._view.mapToScene(vr).boundingRect()
+
+            # Calculate scale
+            if scale_str == "Fit to paper":
+                sw, sh = scene_rect.width(), scene_rect.height()
+                scale = min(pw / sw, ph / sh) if sw > 0 and sh > 0 else 1
+            else:
+                ratio = float(scale_str.split(":")[1])
+                scale = pw / (scene_rect.width() * ratio) if scene_rect.width() > 0 else 1
+
+            printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+            printer.setOutputFormat(QPrinter.OutputFormat.PdfFormat)
+            printer.setOutputFileName(path)
+            printer.setPageSize(QPrinter.PageSize.A4)
+
+            painter = QPainter()
+            if not painter.begin(printer):
+                self._echo("PLOT error: Cannot start printer")
+                self._echo("Command:")
+                return
+
+            # White background
+            painter.fillRect(printer.pageRect(QPrinter.Unit.DevicePixel),
+                           QColor("#FFFFFF"))
+
+            # Render scene centered
+            painter.save()
+            painter.translate(pw / 2, ph / 2)
+            painter.scale(scale, -scale)
+            painter.translate(-scene_rect.center().x(), -scene_rect.center().y())
+            self._scene.render(painter, QRectF(scene_rect), QRectF(scene_rect))
+            painter.restore()
+            painter.end()
+
+            self._echo(f"PLOT: {Path(path).name} ({paper_str}, {scale_str})")
+            import subprocess
+            subprocess.run(["open", path])
+        except Exception as e:
+            self._echo(f"PLOT error: {e}")
         self._echo("Command:")
 
     # ── Coord Status Update ───────────────────────────────

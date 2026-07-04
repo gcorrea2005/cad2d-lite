@@ -1,3 +1,4 @@
+"""Hatch tool — fill closed polylines with ACAD patterns."""
 from src.controller.tools.base_tool import BaseTool
 from src.model.entities.base import Point
 from src.model.entities.line import Line
@@ -5,26 +6,27 @@ from src.model.entities.polyline import Polyline
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QInputDialog
+from src.model.hatch_patterns import get_pattern, PATTERNS
 import math
 
 
 class HatchTool(BaseTool):
-    """Basic hatch: fill closed polyline area with parallel lines."""
+    """Fill closed polylines with predefined ACAD hatch patterns."""
+
     def cursor(self):
         return QCursor(Qt.CursorShape.PointingHandCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        # Ask for spacing and angle
-        spacing, ok = QInputDialog.getDouble(
-            self.view, "Hatch", "Line spacing:", 1.0, 0.1, 100, 2)
-        if not ok:
-            return
-        angle_deg, ok = QInputDialog.getDouble(
-            self.view, "Hatch", "Angle (degrees):", 45.0, 0, 360, 1)
+        pattern_names = list(PATTERNS.keys())
+        pattern_name, ok = QInputDialog.getItem(
+            self.view, "Hatch Pattern", "Pattern:",
+            pattern_names, 0, False)
         if not ok:
             return
 
-        angle = math.radians(angle_deg)
+        pattern = get_pattern(pattern_name)
+        if not pattern:
+            return
 
         items = self.view.scene().items(scene_pos)
         for item in items:
@@ -32,62 +34,54 @@ class HatchTool(BaseTool):
                 continue
             ent = item.entity
             if isinstance(ent, Polyline) and ent.is_closed:
-                self._hatch_polyline(ent, spacing, angle)
+                self._hatch_polyline(ent, pattern)
                 break
 
-    def _hatch_polyline(self, pl: Polyline, spacing: float, angle: float):
-        """Fill closed polyline with parallel hatch lines."""
+    def _hatch_polyline(self, pl: Polyline, pattern: dict):
+        """Fill closed polyline with hatch pattern lines."""
+        if not pattern["lines"]:
+            return  # SOLID handled by SolidTool
+
         bmin, bmax = pl.bounding_box()
-        margin = spacing * 2
-        x0 = bmin.x - margin
-        y0 = bmin.y - margin
-        x1 = bmax.x + margin
-        y1 = bmax.y + margin
+        diag = math.hypot(bmax.x - bmin.x, bmax.y - bmin.y)
+        margin = 20
+        x0, y0 = bmin.x - margin, bmin.y - margin
 
-        # Direction perpendicular to hatch lines
-        nx = math.cos(angle + math.pi / 2)
-        ny = math.sin(angle + math.pi / 2)
-        # Hatch line direction
-        dx_line = math.cos(angle)
-        dy_line = math.sin(angle)
+        for angle_deg, spacing, offset in pattern["lines"]:
+            angle = math.radians(angle_deg)
+            dx_line = math.cos(angle)
+            dy_line = math.sin(angle)
+            nx = -math.sin(angle)
+            ny = math.cos(angle)
 
-        # Extent along normal direction
-        diag = math.hypot(x1 - x0, y1 - y0)
+            t = offset
+            while t < diag * 2:
+                rx = x0 + t * nx
+                ry = y0 + t * ny
 
-        # Generate hatch lines
-        t = 0.0
-        while t < diag * 2:
-            # Reference point for this hatch line
-            rx = x0 + t * nx
-            ry = y0 + t * ny
+                hl_start = Point(rx - diag * dx_line, ry - diag * dy_line)
+                hl_end = Point(rx + diag * dx_line, ry + diag * dy_line)
 
-            # Create a long line through the bbox
-            hl_start = Point(rx - diag * dx_line, ry - diag * dy_line)
-            hl_end = Point(rx + diag * dx_line, ry + diag * dy_line)
+                intersections = []
+                for a, b in pl.segments():
+                    inter = _seg_intersection(hl_start, hl_end, a, b)
+                    if inter:
+                        intersections.append(inter)
 
-            # Find intersections with polyline edges
-            intersections = []
-            for a, b in pl.segments():
-                inter = _seg_intersection(hl_start, hl_end, a, b)
-                if inter:
-                    intersections.append(inter)
+                intersections.sort(key=lambda p: p.x * dx_line + p.y * dy_line)
 
-            # Sort intersections along hatch line direction
-            intersections.sort(key=lambda p: p.x * dx_line + p.y * dy_line)
+                for i in range(0, len(intersections) - 1, 2):
+                    if i + 1 < len(intersections):
+                        seg = Line(intersections[i], intersections[i + 1],
+                                   layer_name=pl.layer_name,
+                                   color=pl.color,
+                                   linetype=pl.linetype)
+                        self.document.add_entity(seg)
 
-            # Draw segments between pairs
-            for i in range(0, len(intersections) - 1, 2):
-                if i + 1 < len(intersections):
-                    seg = Line(intersections[i], intersections[i + 1],
-                               layer_name=pl.layer_name,
-                               color="#444466")  # dim blue hatch
-                    self.document.add_entity(seg)
-
-            t += spacing
+                t += spacing
 
 
 def _seg_intersection(a1: Point, a2: Point, b1: Point, b2: Point) -> Point | None:
-    """Intersection of two line segments. Returns None if no intersection."""
     dx1 = a2.x - a1.x
     dy1 = a2.y - a1.y
     dx2 = b2.x - b1.x

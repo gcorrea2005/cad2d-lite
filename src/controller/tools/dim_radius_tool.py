@@ -24,7 +24,14 @@ class DimRadiusTool(BaseTool):
         elif self._edge is None:
             self._edge = pt
         else:
-            dim = Dimension(self._center, self._edge, pt, dim_type="radius",
+            # Read dim_type from tool_manager flag
+            dim_type = "radius"
+            tm = self.view.tool_manager
+            if hasattr(tm, '_dim_type') and tm._dim_type:
+                dim_type = tm._dim_type
+                tm._dim_type = None  # reset
+
+            dim = Dimension(self._center, self._edge, pt, dim_type=dim_type,
                             layer_name=self._current_layer, color=self._current_color)
             self.document.add_entity(dim)
             gfx = GfxDimensionItem(dim)
