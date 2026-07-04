@@ -66,8 +66,40 @@ def _import_entity(entity, document) -> bool:
         return True
 
     elif dxftype == "LWPOLYLINE":
-        pts = entity.get_points('xy')
-        vertices = [Point(x, y) for x, y in pts]
+        # Handle vertices, possibly with bulge (arc segments)
+        pts_data = entity.get_points('xyb') if hasattr(entity, 'get_points') else entity.get_points('xy')
+        if not pts_data:
+            return False
+
+        # Convert to vertices, splitting arc segments
+        vertices = []
+        for i, pt_data in enumerate(pts_data):
+            x, y = pt_data[0], pt_data[1]
+            bulge = pt_data[2] if len(pt_data) > 2 else 0.0
+            if abs(bulge) > 0.0001 and i > 0 and vertices:
+                # Bulge = tan(angle/4), angle = sweep of arc
+                # Generate arc points between previous vertex and this one
+                prev = vertices[-1]
+                chord_len = math.hypot(x - prev.x, y - prev.y)
+                angle = 4 * math.atan(bulge)  # total sweep angle
+                radius = chord_len / (2 * abs(math.sin(angle / 2))) if abs(math.sin(angle / 2)) > 0.001 else chord_len
+                # Approximate arc with line segments
+                mid_x = (prev.x + x) / 2
+                mid_y = (prev.y + y) / 2
+                chord_ang = math.atan2(y - prev.y, x - prev.x)
+                center_x = mid_x - radius * math.sin(angle / 2) * math.cos(chord_ang)
+                center_y = mid_y - radius * math.sin(angle / 2) * math.sin(chord_ang)
+                # Generate arc points
+                start_ang = math.atan2(prev.y - center_y, prev.x - center_x)
+                steps = max(4, int(abs(angle) / 0.3))
+                for j in range(1, steps + 1):
+                    a = start_ang + angle * j / steps
+                    vertices.append(Point(center_x + radius * math.cos(a),
+                                          center_y + radius * math.sin(a)))
+                vertices.append(Point(x, y))
+            else:
+                vertices.append(Point(x, y))
+
         if len(vertices) >= 2:
             closed = entity.closed
             document.add_entity(Polyline(vertices, closed=closed,

@@ -17,6 +17,71 @@ class HatchTool(BaseTool):
         return QCursor(Qt.CursorShape.PointingHandCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
+        pt = self._snap(scene_pos)
+        click_pt = Point(pt.x, pt.y)
+
+        # 1. Try direct click on a closed Polyline
+        items = self.view.scene().items(scene_pos)
+        for item in items:
+            if not hasattr(item, 'entity'):
+                continue
+            ent = item.entity
+            if isinstance(ent, Polyline) and ent.is_closed:
+                self._do_hatch(ent)
+                return
+
+        # 2. Boundary detection: find nearest enclosing closed polyline
+        boundary = self._find_boundary(click_pt)
+        if boundary:
+            self._do_hatch(boundary)
+        else:
+            # Echo feedback
+            if hasattr(self.view, 'window') and hasattr(self.view.window(), '_echo'):
+                pass  # handled by _do_hatch below
+            # If still nothing found, the dialog in _do_hatch won't appear
+            # since we already know there's no boundary
+
+    def _find_boundary(self, pt: Point) -> Polyline | None:
+        """Find the nearest closed polyline that contains the given point."""
+        candidates = []
+        for ent in self.document.entities:
+            if isinstance(ent, Polyline) and ent.is_closed:
+                if self._point_in_polygon(pt, ent.vertices):
+                    area = abs(self._polygon_area(ent.vertices))
+                    candidates.append((area, ent))
+
+        if not candidates:
+            return None
+        # Return the smallest enclosing polyline (innermost boundary)
+        candidates.sort()
+        return candidates[0][1]
+
+    def _point_in_polygon(self, pt: Point, vertices: list[Point]) -> bool:
+        """Ray casting: is point inside polygon?"""
+        x, y = pt.x, pt.y
+        inside = False
+        n = len(vertices)
+        j = n - 1
+        for i in range(n):
+            xi, yi = vertices[i].x, vertices[i].y
+            xj, yj = vertices[j].x, vertices[j].y
+            if ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / (yj - yi) + xi):
+                inside = not inside
+            j = i
+        return inside
+
+    def _polygon_area(self, vertices: list[Point]) -> float:
+        """Signed polygon area (shoelace formula)."""
+        area = 0.0
+        n = len(vertices)
+        for i in range(n):
+            j = (i + 1) % n
+            area += vertices[i].x * vertices[j].y
+            area -= vertices[j].x * vertices[i].y
+        return area / 2.0
+
+    def _do_hatch(self, boundary: Polyline):
+        """Ask for pattern and hatch the boundary."""
         pattern_names = list(PATTERNS.keys())
         pattern_name, ok = QInputDialog.getItem(
             self.view, "Hatch Pattern", "Pattern:",
@@ -28,19 +93,12 @@ class HatchTool(BaseTool):
         if not pattern:
             return
 
-        items = self.view.scene().items(scene_pos)
-        for item in items:
-            if not hasattr(item, 'entity'):
-                continue
-            ent = item.entity
-            if isinstance(ent, Polyline) and ent.is_closed:
-                self._hatch_polyline(ent, pattern)
-                break
+        self._hatch_polyline(boundary, pattern)
 
     def _hatch_polyline(self, pl: Polyline, pattern: dict):
         """Fill closed polyline with hatch pattern lines."""
         if not pattern["lines"]:
-            return  # SOLID handled by SolidTool
+            return
 
         bmin, bmax = pl.bounding_box()
         diag = math.hypot(bmax.x - bmin.x, bmax.y - bmin.y)
