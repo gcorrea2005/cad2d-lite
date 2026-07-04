@@ -1,5 +1,5 @@
 <!--
-  DogCAD 2D Lite — DOCUMENTACIÓN SALVAJE v2.0
+  DogCAD 2D Lite — DOCUMENTACIÓN SALVAJE v3.0
   Más demencia, más locura. Giovanni Correa, 2026.
   Konami → Matrix | DOOM → Infierno | ` → Terminal | ACAD → CRT Flash
   Hecho en Bogotá 🇨🇴 con Python y puro vicio.
@@ -9,7 +9,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DogCAD 2D Lite — DOCUMENTACIÓN SALVAJE v2.0 💀🔥</title>
+<title>DogCAD 2D Lite — DOCUMENTACIÓN SALVAJE v3.0 💀🔥</title>
 <style>
   /* ─── RESET ─── */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -440,10 +440,10 @@
 <!-- HERO -->
 <section class="hero">
   <h1>DogCAD 2D Lite</h1>
-  <p class="sub">DOCUMENTACIÓN SIN CENSURA v2.0 🔥</p>
+  <p class="sub">DOCUMENTACIÓN SIN CENSURA v3.0 🔥</p>
   <p class="tagline">
     Un CAD 2D de escritorio hecho con <span style="color:var(--accent)">Python + PySide6 + ezdxf</span>.
-    Interfaz retro AutoCAD 10, alma moderna. 30 herramientas, 60 tests, 0 excusas.
+    Interfaz retro AutoCAD 10, alma moderna. 30 herramientas, 99 tests, SETVAR engine, ACI 256 colores, 11 OSNAP, linetypes, PLOT PDF, DXF IN, 0 excusas.
     Porque no necesitas AutoCAD para trazar una línea en 2026.
   </p>
   <div class="typewriter" id="typewriter">
@@ -504,7 +504,7 @@
   <table>
     <tr><th>Módulo</th><th>Líneas</th><th>Rol</th></tr>
     <tr><td>src/view/ui/main_window.py</td><td>1,154</td><td>💀 Ventana principal (el monstruo)</td></tr>
-    <tr><td>src/controller/tools/ (32 archivos)</td><td>~2,100</td><td>🔧 Las 30 herramientas</td></tr>
+    <tr><td>src/controller/tools/ (34 archivos)</td><td>~2,500</td><td>🔧 Las 30 herramientas + DIMRADIUS</td></tr>
     <tr><td>src/model/entities/</td><td>~600</td><td>📐 Las 7 entidades geométricas</td></tr>
     <tr><td>tests/</td><td>489</td><td>✅ Batería de pruebas</td></tr>
     <tr><td>src/io/</td><td>~200</td><td>💾 Save/Load/DXF</td></tr>
@@ -722,7 +722,7 @@
 <section id="historia">
   <h2>📜 HISTORIA DEL PROYECTO</h2>
   <p style="color:#aabbcc;margin-bottom:1.5rem">
-    Todo empezó como un "¿y si hacemos un CAD?" y terminó con 4,877 líneas y 30 herramientas.
+    Todo empezó como un "¿y si hacemos un CAD?" y terminó con 7,800 líneas, 30 herramientas, SETVAR engine, 99 tests, y un pug de icono.
     Así se cuenta la historia.
   </p>
   <div class="timeline">
@@ -745,7 +745,7 @@
       <div class="date">FASE C</div>
       <h4>UTILITY — Lo que faltaba</h4>
       <p>EXPLODE (polilínea → líneas), BREAK (partir línea en 2), ARRAY (grid rectangular),
-      HATCH (relleno con líneas paralelas), PURGE (limpiar capas vacías).
+      HATCH (ANSI31-38 patrones ACAD), bloques (BLOCK/INSERT).
       Zoom stack 50 niveles con ZOOM Previous.</p>
     </div>
     <div class="tl-item">
@@ -773,7 +773,7 @@
   </p>
 
   <div class="impression">
-    <p class="quote">"4,877 líneas de Python y ni una sola suscripción mensual a Autodesk. Esto es el sueño húmedo de cualquier ingeniero civil tercermundista."</p>
+    <p class="quote">"7,200 líneas de Python y ni una sola suscripción mensual a Autodesk. Esto es el sueño húmedo de cualquier ingeniero civil tercermundista."</p>
     <p class="author">— Ing. Giovanni Correa, creador y usuario #1</p>
   </div>
 
@@ -783,7 +783,7 @@
   </div>
 
   <div class="impression">
-    <p class="quote">"60 tests que pasan en 1.48 segundos. En mi anterior trabajo, solo compilar la UI tomaba más que eso."</p>
+    "99 tests que pasan en 1.5 segundos. En mi anterior trabajo, solo compilar la UI tomaba más que eso."
     <p class="author">— Desarrollador C++ arrepentido</p>
   </div>
 
@@ -831,7 +831,7 @@ cad-2d-lite/
 │   └── io/
 │       ├── cad_file.py            <span class="comment"># .cadlite JSON save/load</span>
 │       └── dxf_export.py          <span class="comment"># DXF R2010 export via ezdxf</span>
-├── tests/                         <span class="comment"># 60 tests, 100% passing</span>
+├── tests/                         <span class="comment"># 99 tests, 100% passing</span>
 ├── scripts/
 │   └── generate_apto.py           <span class="comment"># Generación programática de planos</span>
 ├── docs/
@@ -846,13 +846,16 @@ cad-2d-lite/
     <tr><th>Página Raíz</th><th>Submenús</th></tr>
     <tr><td>DISPLAY</td><td>ZOOM Window, ZOOM Previous, ZOOM Extents, PAN, REDRAW, REGEN</td></tr>
     <tr><td>DRAW (p1)</td><td>LINE, CIRCLE, ARC, POLYLINE, RECTANGLE, TEXT, DIMENSION</td></tr>
-    <tr><td>DRAW (p2)</td><td>POINT, SOLID, HATCH, INSERT (pendiente)</td></tr>
+    <tr><td>DRAW (p2)</td><td>POINT, SOLID, HATCH (ANSI31-38), DONUT, ELLIPSE</td></tr>
     <tr><td>EDIT (p1)</td><td>MOVE, COPY, ROTATE, DELETE, MIRROR, SCALE</td></tr>
     <tr><td>EDIT (p2)</td><td>OFFSET, TRIM, EXTEND, FILLET, CHAMFER, EXPLODE, BREAK, ARRAY</td></tr>
     <tr><td>INQUIRY</td><td>DIST, ID, AREA, LIST, STATUS</td></tr>
     <tr><td>LAYER</td><td>Make, Set, ON, OFF, Color, Query, PURGE</td></tr>
-    <tr><td>SETTINGS</td><td>UNITS, LIMITS, SNAP, ORTHO, GRID</td></tr>
-    <tr><td>PLOT</td><td>PLOT (QPrintDialog)</td></tr>
+    <tr><td>SETTINGS</td><td>UNITS, LIMITS, SNAP, ORTHO, GRID ✅</td></tr>
+    <tr><td>PLOT</td><td>PLOT PDF ✅ (A4-A0, escalas)</td></tr>
+    <tr><td>DXF IN</td><td>DXF IN ✅ (LINE, CIRCLE, ARC, PLINE, TEXT, DIMS)</td></tr>
+    <tr><td>LINETYPE</td><td>LINETYPE ✅ (15 tipos: DASHED, CENTER, HIDDEN...)</td></tr>
+    <tr><td>DIMENSION</td><td>DIMALIGNED ✅, DIMRADIUS ✅, DIMDIAMETER ✅</td></tr>
     <tr><td>UTILITY</td><td>UNDO, REDO, SAVE</td></tr>
   </table>
 
@@ -893,7 +896,7 @@ cad-2d-lite/
 <footer>
   DogCAD 2D Lite — Hecho con ❤️ (y Python) en Bogotá, Colombia 🇨🇴<br>
   Por Giovanni Correa. 2025-2026. No se aceptan devoluciones.<br>
-  <span style="color:var(--blue)">▐▓▒░ 4,877 LÍNEAS DE PURO VICIO ░▒▓▌</span>
+  <span style="color:var(--blue)">▐▓▒░ 7,200 LÍNEAS DE PURO VICIO ░▒▓▌</span>
 </footer>
 
 </div> <!-- wrap -->
@@ -1174,10 +1177,10 @@ const toolsData = {
   PLINE: { title:'POLYLINE', desc:'Polilínea de N vértices. Click derecho o Enter para finalizar. ≥2 vértices mínimo.', file:'polyline_tool.py' },
   RECTANGLE: { title:'RECTANGLE', desc:'Rectángulo por 2 esquinas opuestas. Crea 4 líneas individuales.', file:'rectangle_tool.py' },
   TEXT: { title:'TEXT', desc:'Texto con altura configurable. QInputDialog para el contenido.', file:'text_tool.py' },
-  DIMENSION: { title:'DIMENSION', desc:'Cota lineal: click 2 puntos + offset. Líneas de extensión + texto de distancia.', file:'dim_linear_tool.py' },
-  POINT: { title:'POINT', desc:'Marcador de posición (cruz X de 2×2 unidades). Snap-enabled.', file:'point_tool.py' },
+  DIMENSION: { title:'DIMENSION', desc:'Cotas: DIMLINEAR, DIMALIGNED, DIMRADIUS (R), DIMDIAMETER (⌀). 3 clicks.', file:'dim_linear_tool.py' },
+  POINT: { title:'POINT', desc:'Punto con PDMODE/PDSIZE. Estilos: dot, X, cross, circle, square. SETVAR controla.', file:'point_tool.py' },
   SOLID: { title:'SOLID', desc:'Polígono relleno con color. N clicks + Enter/right-click. QColorDialog para elegir color.', file:'solid_tool.py' },
-  HATCH: { title:'HATCH', desc:'Relleno con líneas paralelas (espaciado + ángulo). Intersección segmento a segmento.', file:'hatch_tool.py' },
+  HATCH: { title:'HATCH', desc:'Patrones ACAD: ANSI31 ladrillo, ANSI32 acero, ANSI35 concreto, etc. Clip al polígono.', file:'hatch_tool.py' },
 
   MOVE: { title:'MOVE', desc:'Seleccionar entidades + punto base + destino. Undo mediante ModifyEntityCommand.', file:'move_tool.py' },
   COPY: { title:'COPY', desc:'Copia selección: punto base + destino. Las copias heredan capa y propiedades.', file:'copy_tool.py' },
@@ -1198,7 +1201,7 @@ const toolsData = {
   ID: { title:'ID', desc:'Identificar: click en entidad → tipo, capa, UUID, coordenadas. O click en vacío → coordenadas.', file:'id_tool.py' },
   AREA: { title:'AREA', desc:'Área poligonal: N clicks + Enter. Fórmula de Shoelace para área + perímetro.', file:'area_tool.py' },
 
-  LIMITS: { title:'LIMITS', desc:'Definir límites del dibujo (lower-left / upper-right). Ajusta scene rect + rebuild grid.', file:'main_window.py' },
+  LIMITS: { title:'LIMITS', desc:'Límites del dibujo. Nuevos comandos: PLOT (PDF A4-A0), DXFIN (importar DXF), LINETYPE (15 tipos).', file:'main_window.py' },
   PLOT: { title:'PLOT', desc:'Imprimir: QPrintDialog → renderiza CadView a impresora/PDF vía QPainter.', file:'main_window.py' },
   ZOOMWIN: { title:'ZOOM WINDOW', desc:'Zoom ventana: arrastrar rectángulo para encuadrar. Push al zoom stack (50 niveles).', file:'zoom_win_tool.py' },
   PAN: { title:'PAN', desc:'Arrastrar vista con click izquierdo. Guarda viewport previo en zoom stack.', file:'pan_tool.py' },
@@ -1500,14 +1503,14 @@ function toast(msg) {
       '',
       'Stack: Python 3.12 + PySide6 6.11 + ezdxf',
       'Entidades: Line, Circle, Arc, Polyline, Text, Dimension, Point',
-      'Herramientas: 30 | Tests: 60 | Líneas: 4,877',
+      'Herramientas: 30 | Tests: 60 | Líneas: 7,200',
       'UI: Retro AutoCAD 10 (screen menu azul, info bar, command line)',
       'Autor: Ing. Giovanni Correa — Bogotá, Colombia 🇨🇴',
       ''
     ].join('\n'),
     STATS: () => [
       'ESTADÍSTICAS VIVAS:',
-      '  Líneas de código ..... 4,877',
+      '  Líneas de código ..... 7,200',
       '  Herramientas ......... 30',
       '  Tests ................ 60 (100% passing)',
       '  Tipos de entidad ..... 7',
@@ -1683,12 +1686,12 @@ document.head.appendChild(shakeStyle);
 // ═══════════════════════════════════════════════════
 //  CONSOLE EASTER EGG
 // ═══════════════════════════════════════════════════
-console.log('%c DogCAD 2D Lite %c v2.0 "Más Demencia Edition" %c 🔥💀',
+console.log('%c DogCAD 2D Lite %c v3.0 "Pug Edition" %c 🔥💀',
   'color:#0000AA;font-size:22px;font-weight:bold;',
   'color:#FFCC00;font-size:14px;',
   'color:#FF4400;font-size:16px;'
 );
-console.log('%c 30 tools | 60 tests | 4,877 lines | 0 Autodesk dependencies', 'color:#44AAFF;');
+console.log('%c 30 tools | 99 tests | 7,800 lines | SETVAR | ACI 256 | 11 OSNAP | LINETYPE | PLOT | DXF IN | 0 Autodesk dependencies', 'color:#44AAFF;');
 console.log('%c Konami → Matrix | DOOM → Infierno | ` → Terminal | ACAD → CRT Flash', 'color:#00FF88;');
 console.log('%c Hecho con ❤️ en Bogotá, Colombia 🇨🇴 — por Giovanni Correa', 'color:#CC44FF;');
 console.log('%c Ya que estás en la consola: probá escribir DOOM en la página 😈', 'color:#FF8800;font-size:12px;');
