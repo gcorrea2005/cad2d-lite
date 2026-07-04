@@ -358,13 +358,14 @@ class MainWindow(QMainWindow):
 
         if S == "root":
             items = [
-                ("AutoCAD", None),
+                ("DogCAD 2D", None),
                 ("* * * *", None), ("", None),
                 ("DRAW    ", "menu_draw"),
                 ("EDIT    ", "menu_edit"),
                 ("DISPLAY ", "menu_display"),
                 ("INQUIRY ", "menu_inquiry"),
                 ("LAYER   ", "menu_layer"),
+                ("DIM     ", "menu_dimension"),
                 ("SETTINGS", "menu_settings"),
                 ("UTILITY ", "menu_utility"),
                 ("", None),
@@ -384,9 +385,6 @@ class MainWindow(QMainWindow):
                 (" RECTANG", "rectangle"),
                 (" TEXT   ", "text"),
                 (" DIM    ", "dim"),
-                (" DIM-ALI", "dim_aligned"),
-                (" DIM-RAD", "dim_radius"),
-                (" DIM-DIA", "dim_diameter"),
                 (" POINT  ", "point"),
                 (" HATCH  ", "hatch"),
                 (" SOLID  ", "solid"),
@@ -455,6 +453,21 @@ class MainWindow(QMainWindow):
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
+        elif S == "menu_dimension":
+            items = [
+                (" DIM    ", None), ("", None),
+                (" LINEAR ", "dim"),
+                (" ALIGNED", "dim_aligned"),
+                (" RADIUS ", "dim_radius"),
+                (" DIAMETR", "dim_diameter"),
+                (" ANGULAR", "dim_angular"),
+                ("", None),
+                (" SETVAR ", "ni_setvardim"),
+                ("  DIMSCALE", "ni_dimscale"),
+                ("  DIMTXT  ", "ni_dimtxt"),
+                ("", None),
+                (" [<-BACK]", "root"),
+            ]
         elif S == "menu_settings":
             items = [
                 (" SETTINGS", None), ("", None),
@@ -513,7 +526,7 @@ class MainWindow(QMainWindow):
             return
 
         if action in ("menu_draw", "menu_edit", "menu_display",
-                       "menu_layer", "menu_settings",
+                       "menu_layer", "menu_dimension", "menu_settings",
                        "menu_inquiry", "menu_utility", "root"):
             self._screen_menu_state = action
             self._refresh_screen_menu()
@@ -624,6 +637,18 @@ class MainWindow(QMainWindow):
         elif action == "insert_cmd":
             self._activate_tool("insert")
         # ── Not implemented echo ──
+        elif action == "dim_aligned":
+            self._tool_manager._aligned_dim = True
+            self._activate_tool("dim")
+        elif action == "dim_radius":
+            self._tool_manager._dim_type = "radius"
+            self._activate_tool("dimradius")
+        elif action == "dim_diameter":
+            self._tool_manager._dim_type = "diameter"
+            self._activate_tool("dimradius")
+        elif action == "dim_angular":
+            self._tool_manager._dim_type = "angular"
+            self._activate_tool("dimradius")
         elif action and action.startswith("ni_"):
             cmd_name = action[3:].upper()
             self._echo(f"Command: {cmd_name} (not implemented)")
@@ -838,6 +863,7 @@ class MainWindow(QMainWindow):
             "LINETYPE": "linetype_cmd",
             "LTYPE": "linetype_cmd",
             "TEMPLATE": "layer_template",
+            "UNITS": "units_cmd",
         }
         action = aliases.get(cmd)
         if not action:
@@ -932,6 +958,9 @@ class MainWindow(QMainWindow):
         elif action == "layer_template":
             self._cmd_layer_template()
             self._echo("Command:")
+            return
+        elif action == "units_cmd":
+            self._cmd_units(args)
             return
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
@@ -1093,6 +1122,35 @@ class MainWindow(QMainWindow):
             self._echo("Opening documentation in Safari...")
         else:
             self._echo("Documentation not found.")
+        self._echo("Command:")
+
+    def _cmd_units(self, args: str):
+        """UNITS command: show/set drawing units."""
+        from src.model.units import set_units, format_distance, DECIMAL, METRIC_M, METRIC_CM, METRIC_MM, ARCHITECTURAL
+        sv = self._document.sysvars
+        
+        if not args:
+            lunits = int(sv["LUNITS"])
+            luprec = int(sv["LUPREC"])
+            names = {2: "Decimal", 3: "Engineering", 4: "Architectural", 5: "Metric (m)", 6: "Metric (cm)", 7: "Metric (mm)"}
+            self._echo(f"Units: {names.get(lunits, str(lunits))}, {luprec} decimals")
+            self._echo(f"Options: 2=Decimal 3=Engineering 4=Architectural 5=Metric(m) 6=Metric(cm) 7=Metric(mm)")
+        else:
+            parts = args.upper().split()
+            try:
+                lunits = int(parts[0])
+                luprec = int(parts[1]) if len(parts) > 1 else 2
+                msg = set_units(sv, lunits, luprec)
+                self._echo(f"Units: {msg}")
+            except ValueError:
+                # Named: "METRIC M", "METRIC CM"
+                mapping = {"M": METRIC_M, "CM": METRIC_CM, "MM": METRIC_MM, "ARCH": ARCHITECTURAL, "DEC": DECIMAL}
+                key = parts[0] if parts else ""
+                if key in mapping:
+                    msg = set_units(sv, mapping[key])
+                    self._echo(f"Units: {msg}")
+                else:
+                    self._echo(f"Unknown units: {args}")
         self._echo("Command:")
 
     def _cmd_linetype(self, args: str):
@@ -1271,7 +1329,13 @@ class MainWindow(QMainWindow):
     # ── Coord Status Update ───────────────────────────────
     def _update_coord_status(self, scene_pos: QPointF):
         x, y = scene_pos.x(), scene_pos.y()
-        self._sb_coords.setText(f"X={x:10.4f}  Y={y:10.4f}")
+        from src.model.units import format_distance
+        try:
+            fx = format_distance(x, self._document.sysvars).replace(" m", "").replace(" cm", "").replace(" mm", "")
+            fy = format_distance(y, self._document.sysvars).replace(" m", "").replace(" cm", "").replace(" mm", "")
+            self._sb_coords.setText(f"X={fx:>10}  Y={fy:>10}")
+        except Exception:
+            self._sb_coords.setText(f"X={x:10.4f}  Y={y:10.4f}")
         self._sb_layer.setText(f"LAYER:{self._document.layer_manager.current_layer_name}")
         self._sb_ortho.setText("ORTHO" if self._ortho_active else "")
         # Color from CECOLOR

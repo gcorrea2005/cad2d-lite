@@ -191,9 +191,6 @@ class GfxDimensionItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
-        # Counter-flip to compensate view's Y-up transform
-        from PySide6.QtGui import QTransform
-        self.setTransform(QTransform.fromScale(1, -1))
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
@@ -269,10 +266,11 @@ class GfxDimensionItem(QGraphicsItem):
                 painter.rotate(math.degrees(ang) + 180)
             else:
                 painter.rotate(math.degrees(ang))
-            # Center text: measure width
+            # Counter-flip for text readability
+            painter.scale(1, -1)
             fm = painter.fontMetrics()
             tw = fm.horizontalAdvance(text)
-            painter.drawText(QPointF(-tw / 2, -6), text)
+            painter.drawText(QPointF(-tw / 2, 6), text)
             painter.restore()
 
         elif e.dim_type == "radius" or e.dim_type == "diameter":
@@ -291,7 +289,11 @@ class GfxDimensionItem(QGraphicsItem):
             painter.setFont(font)
             prefix = "⌀ " if e.dim_type == "diameter" else "R "
             text = f"{prefix}{dist:.2f}"
-            painter.drawText(QPointF(tp.x, tp.y - 4), text)
+            painter.save()
+            painter.translate(QPointF(tp.x, tp.y))
+            painter.scale(1, -1)
+            painter.drawText(QPointF(0, -4), text)
+            painter.restore()
 
         elif e.dim_type == "angular":
             # p1=vertex, p2=point on arc, tp=text position
@@ -344,7 +346,11 @@ class GfxDimensionItem(QGraphicsItem):
                 text = f"{dist:.2f}"
                 fm = painter.fontMetrics()
                 tw = fm.horizontalAdvance(text)
-                painter.drawText(QPointF(mid_x - tw / 2, dim_y + 4), text)
+                painter.save()
+                painter.translate(QPointF(mid_x - tw / 2, dim_y))
+                painter.scale(1, -1)
+                painter.drawText(QPointF(0, 4), text)
+                painter.restore()
             else:
                 # Vertical
                 dim_x = tp.x
@@ -360,11 +366,12 @@ class GfxDimensionItem(QGraphicsItem):
                 painter.setFont(font)
                 text = f"{dist:.2f}"
                 painter.save()
-                painter.translate(QPointF(dim_x + 4, mid_y))
+                painter.translate(QPointF(dim_x, mid_y))
+                painter.scale(1, -1)
                 painter.rotate(-90)
                 fm = painter.fontMetrics()
                 tw = fm.horizontalAdvance(text)
-                painter.drawText(QPointF(tw / 2, 3), text)
+                painter.drawText(QPointF(-4, tw / 2), text)
                 painter.restore()
 
 

@@ -23,8 +23,12 @@ class DistTool(BaseTool):
             dist = self._p1.distance_to(pt)
             dx = pt.x - self._p1.x
             dy = pt.y - self._p1.y
-            self._echo(f"Distance = {dist:.4f}  "
-                       f"Delta X = {dx:.4f}  Delta Y = {dy:.4f}")
+            from src.model.units import format_distance
+            fd = format_distance(dist, self.document.sysvars)
+            fdx = format_distance(abs(dx), self.document.sysvars)
+            fdy = format_distance(abs(dy), self.document.sysvars)
+            self._echo(f"Distance = {fd},  "
+                       f"Delta X = {fdx},  Delta Y = {fdy}")
             self._echo("Command:")
             self._p1 = None
 
