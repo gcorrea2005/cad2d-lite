@@ -236,6 +236,14 @@ class MainWindow(QMainWindow):
     def _activate_tool(self, name: str):
         """Activate tool and echo command to command line."""
         if name in self._tool_manager._tools:
+            # If switching away from a modify tool, rebuild scene
+            old_tool = self._tool_manager._active_tool
+            if old_tool and type(old_tool).__name__ in (
+                "MoveTool", "CopyTool", "RotateTool", "MirrorTool",
+                "ScaleTool", "TrimTool", "ExtendTool", "FilletTool",
+                "ChamferTool", "BreakTool", "ExplodeTool",
+            ):
+                self._rebuild_scene()
             self._tool_manager.activate_tool(name)
             self._echo_command(name)
             self._update_screen_menu_highlight(name)
@@ -267,19 +275,19 @@ class MainWindow(QMainWindow):
 
         # Draw
         m = mb.addMenu("DRAW")
-        m.addAction("LINE", lambda: self._activate_tool("line"), "L")
-        m.addAction("CIRCLE", lambda: self._activate_tool("circle"), "C")
-        m.addAction("ARC", lambda: self._activate_tool("arc"), "A")
-        m.addAction("PLINE", lambda: self._activate_tool("polyline"), "P")
-        m.addAction("RECTANG", lambda: self._activate_tool("rectangle"), "R")
-        m.addAction("TEXT", lambda: self._activate_tool("text"), "T")
-        m.addAction("DIM", lambda: self._activate_tool("dim"), "D")
+        m.addAction("LINE", lambda: self._activate_tool("line"))
+        m.addAction("CIRCLE", lambda: self._activate_tool("circle"))
+        m.addAction("ARC", lambda: self._activate_tool("arc"))
+        m.addAction("PLINE", lambda: self._activate_tool("polyline"))
+        m.addAction("RECTANG", lambda: self._activate_tool("rectangle"))
+        m.addAction("TEXT", lambda: self._activate_tool("text"))
+        m.addAction("DIM", lambda: self._activate_tool("dim"))
 
         # Modify
         m = mb.addMenu("MODIFY")
         m.addAction("MOVE", lambda: self._activate_tool("move"), "M")
-        m.addAction("COPY", lambda: self._activate_tool("copy"), "Ctrl+Shift+C")
-        m.addAction("ROTATE", lambda: self._activate_tool("rotate"), "Ctrl+R")
+        m.addAction("COPY", lambda: self._activate_tool("copy"))
+        m.addAction("ROTATE", lambda: self._activate_tool("rotate"))
 
         # Display
         m = mb.addMenu("DISPLAY")
