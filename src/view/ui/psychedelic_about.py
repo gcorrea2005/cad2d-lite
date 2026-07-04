@@ -19,7 +19,7 @@ class PsychedelicAbout(QDialog):
 
         self._hue = 0.0
         self._particles: list[tuple[float, float, float, float]] = []
-        for _ in range(80):
+        for _ in range(120):
             self._particles.append((
                 random.uniform(0, 500),
                 random.uniform(0, 350),
@@ -54,7 +54,7 @@ class PsychedelicAbout(QDialog):
         self._close_btn.clicked.connect(self.accept)
 
     def _tick(self):
-        self._hue = (self._hue + 1.5) % 360
+        self._hue = (self._hue + 2.5) % 360  # faster rainbow
         # Update matrix rain
         for i, (x, y, _) in enumerate(self._matrix_cols):
             new_y = y + random.uniform(2, 8)
@@ -105,15 +105,16 @@ class PsychedelicAbout(QDialog):
         painter.setFont(font2)
 
         lines = [
-            ("Hecho en Bogotá 🇨🇴 con Python y puro vicio", 90),
-            ("Giovanni Correa © 2026", 115),
-            ("30 herramientas · 60 tests · Y+ up", 140),
-            ("Stack: PySide6 + ezdxf + pytest", 165),
-            ("", 185),
-            ("DEDICADO A LA MEMORIA DE:", 210),
-            ("AutoCAD R10 (1988) — DOS, EGA/VGA", 235),
-            ("y a todos los que dibujaron con grid", 260),
-            ("y se quedaron sin RAM.", 280),
+            ("Hecho en Zipaquirá, Cundinamarca 🇨🇴", 90),
+            ("con Python, vicio y pan de sagú", 108),
+            ("Giovanni Correa © 2026", 130),
+            ("30 herramientas · 60 tests · Y+ up", 155),
+            ("Stack: PySide6 + ezdxf + pytest", 178),
+            ("", 198),
+            ("DEDICADO A LA MEMORIA DE:", 220),
+            ("AutoCAD R10 (1988) — DOS, EGA/VGA", 242),
+            ("y a todos los que dibujaron con grid", 264),
+            ("y se quedaron sin RAM.", 282),
         ]
         for text, y in lines:
             h = (title_hue + y * 0.5) % 360
