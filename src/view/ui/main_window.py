@@ -1173,7 +1173,7 @@ class MainWindow(QMainWindow):
             luprec = int(sv["LUPREC"])
             names = {2: "Decimal", 3: "Engineering", 4: "Architectural", 5: "Metric (m)", 6: "Metric (cm)", 7: "Metric (mm)"}
             self._echo(f"Units: {names.get(lunits, str(lunits))}, {luprec} decimals")
-            self._echo(f"Options: 2=Decimal 3=Engineering 4=Architectural 5=Metric(m) 6=Metric(cm) 7=Metric(mm)")
+            self._echo(f"2=Decimal 3=Engineering 4=Architectural(ft-in) 5=Metric(m) 6=Metric(cm) 7=Metric(mm)")
         else:
             parts = args.upper().split()
             try:
@@ -1399,8 +1399,8 @@ class MainWindow(QMainWindow):
         ]
         count = 0
         for name, aci, ltype in template:
-            if name not in lm.layers:
-                lm.add_layer(name, color=aci)
+            for name, color, ltype in layers:
+                        lm.add_layer(name, color, ltype)
                 if ltype != "CONTINUOUS":
                     pass  # layer doesn't store linetype yet
                 count += 1

@@ -10,10 +10,10 @@ class LayerManager:
     def current_layer_name(self) -> str:
         return self._current
 
-    def add_layer(self, name: str, color: str = "7") -> Layer:
+    def add_layer(self, name: str, color: str = "7", linetype: str = "CONTINUOUS") -> Layer:
         if name in self.layers:
             raise ValueError(f"Layer '{name}' already exists")
-        layer = Layer(name=name, color=color)
+        layer = Layer(name=name, color=color, linetype=linetype)
         self.layers[name] = layer
         return layer
 
