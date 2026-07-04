@@ -263,6 +263,8 @@ class MainWindow(QMainWindow):
         m.addSeparator()
         m.addAction("SCRIPT", self._on_script)
         m.addSeparator()
+        m.addAction("ACERCA DE", self._on_about)
+        m.addSeparator()
         m.addAction("QUIT", self.close, QKeySequence.StandardKey.Quit)
 
         # Edit
@@ -1116,6 +1118,12 @@ class MainWindow(QMainWindow):
                 self._document, self._view,
                 self._echo, self._rebuild_scene)
             engine.run(Path(path))
+
+    def _on_about(self):
+        """ACERCA DE — psychedelic about dialog."""
+        from src.view.ui.psychedelic_about import PsychedelicAbout
+        dlg = PsychedelicAbout(self)
+        dlg.exec()
 
     def _on_undo(self):
         self._document.undo()
