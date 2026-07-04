@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
                 color: {CLR_CMD_TEXT};
                 border: 1px solid #1a1a2e;
                 font-family: 'Courier New', monospace;
-                font-size: 13px;
+                font-size: 14px;
             }}
             QStatusBar {{
                 background-color: {CLR_STATUS_BG};
@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
             QLabel {{
                 color: {CLR_MENU_TEXT};
                 font-family: 'Courier New', monospace;
-                font-size: 13px;
+                font-size: 14px;
             }}
         """)
         self._info_layer = QLabel("LAYER: 0")
@@ -626,7 +626,7 @@ class MainWindow(QMainWindow):
         self._cmd_output = QPlainTextEdit()
         self._cmd_output.setReadOnly(True)
         self._cmd_output.setMaximumBlockCount(500)
-        self._cmd_output.setFixedHeight(60)
+        self._cmd_output.setFixedHeight(80)
         self._cmd_output.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self._cmd_input = QPlainTextEdit()
