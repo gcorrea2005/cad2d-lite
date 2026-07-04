@@ -19,7 +19,13 @@ class GfxLineItem(QGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
-        return QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        # Ensure minimum size for hit detection
+        if r.width() < 1:
+            r.adjust(-0.5, 0, 0.5, 0)
+        if r.height() < 1:
+            r.adjust(0, -0.5, 0, 0.5)
+        return r
 
     def paint(self, painter: QPainter, option, widget=None):
         color = QColor(self.entity.color)
@@ -40,7 +46,13 @@ class GfxCircleItem(QGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
-        return QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        # Ensure minimum size for hit detection
+        if r.width() < 1:
+            r.adjust(-0.5, 0, 0.5, 0)
+        if r.height() < 1:
+            r.adjust(0, -0.5, 0, 0.5)
+        return r
 
     def paint(self, painter: QPainter, option, widget=None):
         color = QColor(self.entity.color)
@@ -60,7 +72,13 @@ class GfxArcItem(QGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
-        return QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        # Ensure minimum size for hit detection
+        if r.width() < 1:
+            r.adjust(-0.5, 0, 0.5, 0)
+        if r.height() < 1:
+            r.adjust(0, -0.5, 0, 0.5)
+        return r
 
     def paint(self, painter: QPainter, option, widget=None):
         color = QColor(self.entity.color)
@@ -86,7 +104,13 @@ class GfxPolylineItem(QGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
-        return QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        # Ensure minimum size for hit detection
+        if r.width() < 1:
+            r.adjust(-0.5, 0, 0.5, 0)
+        if r.height() < 1:
+            r.adjust(0, -0.5, 0, 0.5)
+        return r
 
     def paint(self, painter: QPainter, option, widget=None):
         color = QColor(self.entity.color)
@@ -116,7 +140,13 @@ class GfxTextItem(QGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
-        return QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        # Ensure minimum size for hit detection
+        if r.width() < 1:
+            r.adjust(-0.5, 0, 0.5, 0)
+        if r.height() < 1:
+            r.adjust(0, -0.5, 0, 0.5)
+        return r
 
     def paint(self, painter: QPainter, option, widget=None):
         color = QColor(self.entity.color)
@@ -142,7 +172,13 @@ class GfxDimensionItem(QGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
-        return QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        r = QRectF(QPointF(bmin.x, bmin.y), QPointF(bmax.x, bmax.y))
+        # Ensure minimum size for hit detection
+        if r.width() < 1:
+            r.adjust(-0.5, 0, 0.5, 0)
+        if r.height() < 1:
+            r.adjust(0, -0.5, 0, 0.5)
+        return r
 
     def paint(self, painter: QPainter, option, widget=None):
         e = self.entity
