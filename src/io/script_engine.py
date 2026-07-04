@@ -45,12 +45,58 @@ class ScriptEngine:
         self._line = 0
 
     def _parse_point(self, s: str) -> Point | None:
-        """Parse 'x,y' or 'x, y' into Point."""
+        """Parse 'x,y', '@x,y', or '@dist<angle' into Point."""
         s = s.strip()
+        if not s:
+            return None
+
+        # Relative polar: @dist<angle
+        if s.startswith('@') and '<' in s:
+            m = re.match(r'@([\d.]+)\s*<\s*(-?[\d.]+)', s)
+            if m:
+                dist = float(m.group(1))
+                angle_deg = float(m.group(2))
+                angle_rad = math.radians(angle_deg)
+                last = self._get_lastpoint()
+                return Point(
+                    last.x + dist * math.cos(angle_rad),
+                    last.y + dist * math.sin(angle_rad),
+                )
+
+        # Relative cartesian: @x,y
+        if s.startswith('@'):
+            s = s[1:]  # strip @
+            m = re.match(r'(-?[\d.]+)\s*,\s*(-?[\d.]+)', s)
+            if m:
+                dx = float(m.group(1))
+                dy = float(m.group(2))
+                last = self._get_lastpoint()
+                return Point(last.x + dx, last.y + dy)
+            return None
+
+        # Absolute: x,y
         m = re.match(r'(-?[\d.]+)\s*,\s*(-?[\d.]+)', s)
         if m:
             return Point(float(m.group(1)), float(m.group(2)))
         return None
+
+    def _get_lastpoint(self) -> Point:
+        """Get LASTPOINT from sysvars."""
+        try:
+            raw = self.doc.sysvars["LASTPOINT"]
+            if isinstance(raw, str):
+                parts = raw.split(',')
+                return Point(float(parts[0]), float(parts[1]))
+            return Point(0, 0)
+        except Exception:
+            return Point(0, 0)
+
+    def _set_lastpoint(self, pt: Point):
+        """Update LASTPOINT in sysvars."""
+        try:
+            self.doc.sysvars["LASTPOINT"] = f"{pt.x},{pt.y}"
+        except Exception:
+            pass
 
     def run(self, filepath: Path):
         """Execute a .scr file."""
@@ -93,6 +139,7 @@ class ScriptEngine:
                 p2 = self._parse_point(pts[1])
                 if p1 and p2:
                     self.doc.add_entity(Line(p1, p2, layer_name=self.layer))
+                    self._set_lastpoint(p2)
 
         elif cmd == "CIRCLE":
             pts = args.split()
@@ -101,6 +148,7 @@ class ScriptEngine:
                 r = float(pts[1])
                 if c:
                     self.doc.add_entity(Circle(c, r, layer_name=self.layer))
+                    self._set_lastpoint(c)
 
         elif cmd == "ARC":
             # ARC cx,cy radius start_deg end_deg
@@ -124,6 +172,7 @@ class ScriptEngine:
                         Point(p2.x, p2.y), Point(p1.x, p2.y),
                     ], closed=True, layer_name=self.layer)
                     self.doc.add_entity(pl)
+                    self._set_lastpoint(p2)
 
         elif cmd == "PLINE" or cmd == "POLYLINE":
             pts_str = args.split()
@@ -139,6 +188,7 @@ class ScriptEngine:
             if len(vertices) >= 2:
                 self.doc.add_entity(Polyline(vertices, closed=closed,
                                              layer_name=self.layer))
+                self._set_lastpoint(vertices[-1])
 
         elif cmd == "TEXT" or cmd == "MTEXT":
             # TEXT x,y content (content can have spaces)
@@ -147,11 +197,13 @@ class ScriptEngine:
                 pt = Point(float(m.group(1)), float(m.group(2)))
                 content = m.group(3).strip().strip('"').strip("'")
                 self.doc.add_entity(TextEntity(pt, content, layer_name=self.layer))
+                self._set_lastpoint(pt)
 
         elif cmd == "POINT":
             pt = self._parse_point(args)
             if pt:
                 self.doc.add_entity(PointEntity(pt, layer_name=self.layer))
+                self._set_lastpoint(pt)
 
         elif cmd == "DIM" or cmd == "DIMENSION":
             pts = args.split()
@@ -193,8 +245,8 @@ class ScriptEngine:
         elif cmd == "ZOOM":
             sub = args.strip().upper()
             if sub == "E" or sub == "EXTENTS":
-                # Will be done by rebuild
-                pass
+                if self.view:
+                    self.view.zoom_extents()
             elif sub.startswith("W"):
                 pts = args.split()[1:] if len(args.split()) > 1 else []
                 if len(pts) >= 2:

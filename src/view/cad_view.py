@@ -89,6 +89,9 @@ class CadView(QGraphicsView):
         self._zoom_index: int = -1
         self._saving_zoom = True
 
+        # Save initial viewport as zoom baseline (deferred until viewport is ready)
+        self._needs_initial_save = True
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._crosshair_overlay.setGeometry(self.viewport().rect())
@@ -158,6 +161,11 @@ class CadView(QGraphicsView):
         if event.key() == Qt.Key.Key_F2:
             if hasattr(w, '_toggle_text_screen'):
                 w._toggle_text_screen()
+                event.accept()
+                return
+        if event.key() == Qt.Key.Key_F7:
+            if hasattr(w, '_grid'):
+                w._grid.setVisible(not w._grid.isVisible())
                 event.accept()
                 return
         if event.key() == Qt.Key.Key_F8:
@@ -270,11 +278,12 @@ class CadView(QGraphicsView):
         if not self._saving_zoom:
             return
         vr = self.viewport()
-        if vr is None:
+        if vr is None or vr.width() == 0 or vr.height() == 0:
             return
         current = QRectF(
             self.mapToScene(vr.rect()).boundingRect()
         )
+        self._needs_initial_save = False
         # Truncate forward history if we're not at the end
         self._zoom_stack = self._zoom_stack[:self._zoom_index + 1]
         self._zoom_stack.append(current)
@@ -286,6 +295,8 @@ class CadView(QGraphicsView):
 
     def zoom_previous(self):
         """Restore previous zoom level."""
+        if self._needs_initial_save:
+            self._save_viewport()
         if self._zoom_index <= 0:
             return
         self._zoom_index -= 1

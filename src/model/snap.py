@@ -43,6 +43,7 @@ class SnapEngine:
         SnapType.PERPENDICULAR: 7,
         SnapType.TANGENT: 8,
         SnapType.NEAREST: 9,
+        SnapType.GRID: 10,  # lowest priority: always overridden by geometry snaps
     }
 
     def __init__(self, snap_distance: float = 10.0):
@@ -128,6 +129,14 @@ class SnapEngine:
                     if d <= self.snap_distance:
                         candidates.append(SnapResult(pt, SnapType.NEAREST, ent))
                         if quick: break
+
+        # Grid snap (always check, independent of entities)
+        if SnapType.GRID in active_snaps:
+            grid_pt = self._grid_snap(cursor)
+            if grid_pt:
+                d = cursor.distance_to(grid_pt)
+                if d <= self.snap_distance:
+                    candidates.append(SnapResult(grid_pt, SnapType.GRID, None))
 
         if not candidates:
             return None
@@ -364,3 +373,15 @@ class SnapEngine:
             return a
         t = max(0, min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / length_sq))
         return Point(a.x + t * dx, a.y + t * dy)
+
+    def _grid_snap(self, cursor: Point) -> Point | None:
+        """Snap cursor to nearest grid point using SNAPUNIT."""
+        try:
+            sx = sy = 1.0
+            if hasattr(self, '_snap_unit'):
+                sx, sy = self._snap_unit
+            gx = round(cursor.x / sx) * sx
+            gy = round(cursor.y / sy) * sy
+            return Point(gx, gy)
+        except Exception:
+            return None

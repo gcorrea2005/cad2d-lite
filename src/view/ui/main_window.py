@@ -21,6 +21,7 @@ from src.controller.tools.polyline_tool import PolylineTool
 from src.controller.tools.rectangle_tool import RectangleTool
 from src.controller.tools.text_tool import TextTool
 from src.controller.tools.dim_linear_tool import DimLinearTool
+from src.controller.tools.dim_radius_tool import DimRadiusTool
 from src.controller.tools.select_tool import SelectTool
 from src.controller.tools.move_tool import MoveTool
 from src.controller.tools.copy_tool import CopyTool
@@ -201,6 +202,7 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("hatch", HatchTool(v, d))
         self._tool_manager.register_tool("point", PointTool(v, d, lm))
         self._tool_manager.register_tool("solid", SolidTool(v, d, lm))
+        self._tool_manager.register_tool("dimradius", DimRadiusTool(v, d, lm))
 
         self._view.tool_manager = self._tool_manager
 
@@ -523,10 +525,16 @@ class MainWindow(QMainWindow):
             self._on_redo()
         elif action == "zoom_extents":
             self._view.zoom_extents()
+            self._echo("ZOOM Extents")
+            self._echo("Command:")
         elif action == "zoom_previous":
             self._view.zoom_previous()
+            self._echo("ZOOM Previous")
+            self._echo("Command:")
         elif action == "redraw":
             self._rebuild_scene()
+            self._echo("REDRAW")
+            self._echo("Command:")
         elif action == "snap_toggle":
             self._toggle_snap()
         elif action == "ortho_toggle":
@@ -576,8 +584,12 @@ class MainWindow(QMainWindow):
         # ── Display ──
         elif action == "zoom_window":
             self._activate_tool("zoomwin")
+            self._echo("ZOOM Window — drag rectangle to zoom")
+            self._echo("Command:")
         elif action == "pan_cmd":
             self._activate_tool("pan")
+            self._echo("PAN — drag to pan")
+            self._echo("Command:")
         elif action == "regen":
             self._rebuild_scene()
             self._echo("Regenerating drawing.")
@@ -750,7 +762,7 @@ class MainWindow(QMainWindow):
             "RECTANG", "RECTANGLE", "REC", "R",
             "PLINE", "POLYLINE", "PL", "P",
             "TEXT", "T", "MTEXT", "POINT",
-            "DIM", "DIMENSION", "D",
+            "DIM", "DIMENSION", "D", "DIMALIGNED", "DIMLIN",
             "ERASE", "E", "LAYER", "ZOOM",
             "UNDO", "U", "REDO", "SAVE", "SAVEAS", "DELAY",
         }
@@ -775,6 +787,8 @@ class MainWindow(QMainWindow):
             "R": "rectangle", "REC": "rectangle", "RECTANG": "rectangle",
             "T": "text", "TEXT": "text",
             "D": "dim", "DIM": "dim",
+            "DIMALIGNED": "dim_aligned",
+            "DIMRADIUS": "dim_radius",
             "M": "move", "MOVE": "move",
             "CO": "copy", "COPY": "copy",
             "RO": "rotate", "ROTATE": "rotate",
@@ -806,6 +820,11 @@ class MainWindow(QMainWindow):
             "HELP": "help",
             "SNAP": "snap_toggle",
             "ORTHO": "ortho_toggle",
+            "GRID": "grid_toggle_cmd",
+            "DXFIN": "dxfin_cmd",
+            "LINETYPE": "linetype_cmd",
+            "LTYPE": "linetype_cmd",
+            "TEMPLATE": "layer_template",
         }
         action = aliases.get(cmd)
         if not action:
@@ -865,6 +884,29 @@ class MainWindow(QMainWindow):
         elif action == "ortho_toggle":
             self._toggle_ortho()
             self._echo(f"Ortho {'ON' if self._ortho_active else 'OFF'}")
+            self._echo("Command:")
+            return
+        elif action == "grid_toggle_cmd":
+            self._grid.setVisible(not self._grid.isVisible())
+            self._echo(f"Grid {'ON' if self._grid.isVisible() else 'OFF'}")
+            self._echo("Command:")
+            return
+        elif action == "dxfin_cmd":
+            self._cmd_dxfin()
+            return
+        elif action == "linetype_cmd":
+            self._cmd_linetype(args)
+            return
+        elif action == "dim_aligned":
+            self._tool_manager._aligned_dim = True
+            self._activate_tool("dim")
+            return
+        elif action == "dim_radius":
+            self._tool_manager._dim_type = "radius"
+            self._activate_tool("dimradius")
+            return
+        elif action == "layer_template":
+            self._cmd_layer_template()
             self._echo("Command:")
             return
         elif action in self._tool_manager._tools:
@@ -1027,6 +1069,90 @@ class MainWindow(QMainWindow):
             self._echo("Opening documentation in Safari...")
         else:
             self._echo("Documentation not found.")
+        self._echo("Command:")
+
+    def _cmd_linetype(self, args: str):
+        """LINETYPE command: list or set current entity linetype."""
+        from src.model.linetype_defs import list_linetypes, get_linetype
+        sv = self._document.sysvars
+        if not args:
+            lt = sv["CELTYPE"]
+            ltdef = get_linetype(lt)
+            self._echo(f"Current linetype: {lt} ({ltdef.description})")
+            self._echo(f"LTSCALE = {sv['LTSCALE']}")
+            self._echo("Use LINETYPE ? to list all")
+            self._echo("Command:")
+            return
+        if args.strip() == "?":
+            self._echo("Available linetypes:")
+            for name in list_linetypes():
+                ltdef = get_linetype(name)
+                marker = ">" if name == sv["CELTYPE"] else " "
+                self._echo(f"  {marker} {name:<14} {ltdef.description}")
+            self._echo("Command:")
+            return
+        # Set linetype
+        name = args.strip().upper()
+        try:
+            ltdef = get_linetype(name)
+            sv["CELTYPE"] = name
+            self._echo(f"LINETYPE set to {name} ({ltdef.description})")
+            self._echo("Command:")
+        except Exception:
+            self._echo(f"Unknown linetype: {name}")
+            self._echo("Command:")
+
+    def _cmd_layer_template(self):
+        """Create standard architectural layer template."""
+        from src.model.aci import aci_to_hex
+        lm = self._document.layer_manager
+        sv = self._document.sysvars
+        template = [
+            ("0",          "7",    "CONTINUOUS"),   # default
+            ("MUROS",      "4",    "CONTINUOUS"),   # cyan
+            ("PUERTAS",    "2",    "CONTINUOUS"),   # yellow
+            ("VENTANAS",   "3",    "CONTINUOUS"),   # green
+            ("COTAS",      "1",    "CONTINUOUS"),   # red
+            ("TEXTO",      "7",    "CONTINUOUS"),   # white
+            ("EJES",       "1",    "CENTER"),       # red, center linetype
+            ("MOBILIARIO", "8",    "CONTINUOUS"),   # dark gray
+            ("ELECTRICO",  "5",    "CONTINUOUS"),   # blue
+            ("SANITARIO",  "6",    "CONTINUOUS"),   # magenta
+            ("CUBIERTA",   "2",    "DASHED"),       # yellow dashed
+            ("OCULTO",     "8",    "HIDDEN"),       # gray hidden
+        ]
+        count = 0
+        for name, aci, ltype in template:
+            if name not in lm.layers:
+                lm.add_layer(name, color=aci)
+                if ltype != "CONTINUOUS":
+                    pass  # layer doesn't store linetype yet
+                count += 1
+                self._echo(f"  Created layer: {name} (ACI {aci})")
+        self._echo(f"Template loaded: {count} layers")
+        sv["CLAYER"] = "0"
+        lm.set_current("0")
+
+    def _cmd_dxfin(self):
+        """DXFIN command: import DXF file via file dialog."""
+        from PySide6.QtWidgets import QFileDialog
+        from pathlib import Path
+        from src.io.dxf_import import import_dxf
+
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Import DXF", "", "DXF Files (*.dxf);;All Files (*)")
+        if not path:
+            self._echo("DXFIN cancelled.")
+            self._echo("Command:")
+            return
+
+        try:
+            count = import_dxf(Path(path), self._document)
+            self._echo(f"DXFIN: {count} entities imported from {Path(path).name}")
+            self._rebuild_scene()
+            self._view.zoom_extents()
+        except Exception as e:
+            self._echo(f"DXFIN error: {e}")
         self._echo("Command:")
 
     # ── Coord Status Update ───────────────────────────────

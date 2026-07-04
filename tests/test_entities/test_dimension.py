@@ -10,7 +10,8 @@ def test_dimension_creation():
 
 def test_dimension_measured_distance():
     d = Dimension(def_point1=Point(0, 0), def_point2=Point(3, 4),
-                  text_position=Point(1.5, 6))
+                  text_position=Point(1.5, 6),
+                  dim_type="aligned")
     assert d.measured_distance() == 5.0
 
 def test_dimension_serialization():

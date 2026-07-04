@@ -8,7 +8,9 @@ from src.model.entities.polyline import Polyline
 from src.model.entities.text import TextEntity
 from src.model.entities.dimension import Dimension
 from src.model.entities.point_entity import PointEntity
+from src.model.entities.base import Point
 from src.model.aci import aci_to_rgb
+from src.model.linetype_defs import get_qt_dash_pattern
 
 
 def _entity_color(entity) -> QColor:
@@ -21,6 +23,16 @@ def _entity_color(entity) -> QColor:
         r, g, b = aci_to_rgb(int(c))
         return QColor(r, g, b)
     return QColor(c)
+
+
+def _entity_pen(entity, ltscale: float = 1.0) -> QPen:
+    """Create QPen with entity color + linetype dash pattern."""
+    pen = QPen(_entity_color(entity))
+    pen.setWidthF(0)  # cosmetic pen (1px regardless of zoom)
+    dash = get_qt_dash_pattern(entity.linetype, ltscale)
+    if dash:
+        pen.setDashPattern(dash)
+    return pen
 
 
 import math
@@ -43,9 +55,7 @@ class GfxLineItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = _entity_color(self.entity)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        pen = _entity_pen(self.entity)
         painter.setPen(pen)
         painter.drawLine(
             QPointF(self.entity.start.x, self.entity.start.y),
@@ -70,9 +80,7 @@ class GfxCircleItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = _entity_color(self.entity)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        pen = _entity_pen(self.entity)
         painter.setPen(pen)
         r = self.entity.radius
         c = self.entity.center
@@ -96,9 +104,7 @@ class GfxArcItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = _entity_color(self.entity)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        pen = _entity_pen(self.entity)
         painter.setPen(pen)
         e = self.entity
         # QPainter.drawArc uses 1/16 degree units, and spans counter-clockwise
@@ -128,9 +134,7 @@ class GfxPolylineItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = _entity_color(self.entity)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        pen = _entity_pen(self.entity)
         painter.setPen(pen)
         verts = self.entity.vertices
         for i in range(len(verts) - 1):
@@ -165,9 +169,7 @@ class GfxTextItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = _entity_color(self.entity)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        pen = _entity_pen(self.entity)
         painter.setPen(pen)
         font = painter.font()
         # Use pixel size for consistent readability
@@ -199,34 +201,107 @@ class GfxDimensionItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
+        import math
         e = self.entity
-        color = QColor(e.color)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        pen = _entity_pen(e)
         painter.setPen(pen)
 
-        # Extension lines
-        painter.drawLine(
-            QPointF(e.def_point1.x, e.def_point1.y),
-            QPointF(e.def_point1.x, e.text_position.y),
-        )
-        painter.drawLine(
-            QPointF(e.def_point2.x, e.def_point2.y),
-            QPointF(e.def_point2.x, e.text_position.y),
-        )
-        # Dimension line
-        painter.drawLine(
-            QPointF(e.def_point1.x, e.text_position.y),
-            QPointF(e.def_point2.x, e.text_position.y),
-        )
-        # Text
+        p1, p2 = e.def_point1, e.def_point2
+        tp = e.text_position  # text position (offset perpendicular to dim line)
         dist = e.measured_distance()
-        font = painter.font()
-        font.setPixelSize(10)
-        painter.setFont(font)
-        text = f"{dist:.2f}"
-        mid_x = (e.def_point1.x + e.def_point2.x) / 2
-        painter.drawText(QPointF(mid_x - 10, e.text_position.y - 2), text)
+
+        if e.dim_type == "aligned":
+            # Angle of the line connecting the two points
+            ang = math.atan2(p2.y - p1.y, p2.x - p1.x)
+            cos_a, sin_a = math.cos(ang), math.sin(ang)
+
+            # Perpendicular direction (offset)
+            perp_x, perp_y = -sin_a, cos_a
+
+            # Compute offset from text_position to the line p1→p2
+            # Project tp onto the perpendicular direction
+            mid = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+            dx_tp = tp.x - mid.x
+            dy_tp = tp.y - mid.y
+            # Sign of the offset (which side of the line)
+            ext_len = dx_tp * perp_x + dy_tp * perp_y
+            if abs(ext_len) < 2:
+                ext_len = 10  # minimum offset
+
+            # Extension line 1: from p1 perpendicular to dim line
+            ext1_end = Point(
+                p1.x + perp_x * ext_len,
+                p1.y + perp_y * ext_len,
+            )
+            painter.drawLine(
+                QPointF(p1.x, p1.y),
+                QPointF(ext1_end.x, ext1_end.y),
+            )
+            # Extension line 2
+            ext2_end = Point(
+                p2.x + perp_x * ext_len,
+                p2.y + perp_y * ext_len,
+            )
+            painter.drawLine(
+                QPointF(p2.x, p2.y),
+                QPointF(ext2_end.x, ext2_end.y),
+            )
+            # Dimension line: parallel to p1→p2, offset by perp
+            painter.drawLine(
+                QPointF(ext1_end.x, ext1_end.y),
+                QPointF(ext2_end.x, ext2_end.y),
+            )
+            # Text at midpoint of dimension line
+            mid_x = (ext1_end.x + ext2_end.x) / 2
+            mid_y = (ext1_end.y + ext2_end.y) / 2
+            font = painter.font()
+            font.setPixelSize(12)
+            painter.setFont(font)
+            text = f"{dist:.2f}"
+            # Rotate text to match angle
+            painter.save()
+            painter.translate(QPointF(mid_x, mid_y))
+            if cos_a < 0:
+                painter.rotate(math.degrees(ang) + 180)
+            else:
+                painter.rotate(math.degrees(ang))
+            painter.drawText(QPointF(-15, 4), text)
+            painter.restore()
+        elif e.dim_type == "radius":
+            # Radius dimension: leader from center to circle edge
+            center, edge = p1, p2  # p1=center, p2=point on circle
+            painter.drawLine(
+                QPointF(center.x, center.y),
+                QPointF(edge.x, edge.y),
+            )
+            dist = e.measured_distance()
+            font = painter.font()
+            font.setPixelSize(12)
+            painter.setFont(font)
+            text = f"R {dist:.2f}"
+            mid_x = (center.x + edge.x) / 2
+            mid_y = (center.y + edge.y) / 2
+            painter.drawText(QPointF(mid_x + 4, mid_y - 2), text)
+        else:
+            # Linear (H/V) — existing behavior
+            painter.drawLine(
+                QPointF(p1.x, p1.y),
+                QPointF(p1.x, tp.y),
+            )
+            painter.drawLine(
+                QPointF(p2.x, p2.y),
+                QPointF(p2.x, tp.y),
+            )
+            painter.drawLine(
+                QPointF(p1.x, tp.y),
+                QPointF(p2.x, tp.y),
+            )
+            font = painter.font()
+            font.setPixelSize(12)
+            painter.setFont(font)
+            text = f"{dist:.2f}"
+            mid_x = (p1.x + p2.x) / 2
+            painter.drawText(QPointF(mid_x - 10, tp.y - 2), text)
 
 
 class GfxPointItem(QGraphicsItem):
@@ -257,11 +332,9 @@ class GfxPointItem(QGraphicsItem):
         )
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = _entity_color(self.entity)
-        pen = QPen(color, 1)
+        pen = _entity_pen(self.entity)
         painter.setPen(pen)
         painter.setBrush(Qt.BrushStyle.NoBrush)
-
         p = self.entity.position
         x, y = p.x, p.y
         size = self._point_size()

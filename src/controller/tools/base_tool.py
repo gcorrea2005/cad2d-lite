@@ -74,8 +74,25 @@ class BaseTool:
         # Update snap distance based on current zoom
         self._snap_engine.snap_distance = self._pixel_to_scene_distance()
 
+        # Read SNAPUNIT from sysvars for grid snap
+        try:
+            raw = self.document.sysvars["SNAPUNIT"]
+            if isinstance(raw, str):
+                parts = raw.split(',')
+                self._snap_engine._snap_unit = (float(parts[0]), float(parts[1]))
+        except Exception:
+            self._snap_engine._snap_unit = (1.0, 1.0)
+
+        # Dynamically include GRID snap if SNAPMODE is ON
+        active = set(self._active_snaps)
+        try:
+            if int(self.document.sysvars["SNAPMODE"]):
+                active.add(SnapType.GRID)
+        except Exception:
+            pass
+
         result = self._snap_engine.find_snap(
-            cursor, self.document.entities, self._active_snaps
+            cursor, self.document.entities, active
         )
         if result:
             self._last_snap = result

@@ -24,7 +24,12 @@ class DimLinearTool(BaseTool):
         elif self._p2 is None:
             self._p2 = pt
         else:
-            dim = Dimension(self._p1, self._p2, pt,
+            # Check if aligned mode was requested
+            dim_type = "linear"
+            if hasattr(self.view.tool_manager, '_aligned_dim'):
+                dim_type = "aligned" if self.view.tool_manager._aligned_dim else "linear"
+                self.view.tool_manager._aligned_dim = False  # reset
+            dim = Dimension(self._p1, self._p2, pt, dim_type=dim_type,
                             layer_name=self._current_layer, color=self._current_color)
             self.document.add_entity(dim)
             gfx = GfxDimensionItem(dim)
