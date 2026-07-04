@@ -34,12 +34,10 @@ class FilletTool(BaseTool):
 
     def mouse_press(self, event, scene_pos: QPointF):
         if not self._radius_set:
-            r, ok = QInputDialog.getDouble(
-                self.view, "Fillet", "Fillet radius:",
-                1.0, 0.001, 10000, 4)
-            if not ok:
-                return
-            self._radius = r
+            try:
+                self._radius = float(self.document.sysvars["FILLETRAD"])
+            except Exception:
+                self._radius = 1.0
             self._radius_set = True
 
         items = self.view.scene().items(scene_pos)
@@ -56,10 +54,29 @@ class FilletTool(BaseTool):
                 break
 
     def _do_fillet(self, l1: Line, l2: Line):
-        """Round corner between l1 and l2 with an arc."""
+        """Round corner between l1 and l2 with an arc, or clean corner if radius=0."""
         inter = _line_intersection(l1.start, l1.end, l2.start, l2.end)
         if inter is None:
-            return  # parallel lines
+            return
+
+        # ── FILLET 0: clean corner (extend/trim to intersection) ──
+        if self._radius < 0.001:
+            old1 = l1.to_dict()
+            old2 = l2.to_dict()
+            if l1.start.distance_to(inter) < l1.end.distance_to(inter):
+                l1.start = inter
+            else:
+                l1.end = inter
+            if l2.start.distance_to(inter) < l2.end.distance_to(inter):
+                l2.start = inter
+            else:
+                l2.end = inter
+            cmd1 = ModifyEntityCommand(self.document, l1, old1, l1.to_dict())
+            cmd2 = ModifyEntityCommand(self.document, l2, old2, l2.to_dict())
+            self.document.execute(cmd1)
+            self.document.execute(cmd2)
+            self._rebuild_gfx(l1, l2)
+            return
 
         # Unit direction vectors
         d1x = l1.end.x - l1.start.x
@@ -135,6 +152,15 @@ class FilletTool(BaseTool):
         arc = Arc(center, self._radius, start_angle, end_angle,
                   layer_name=l1.layer_name, color=l1.color)
         self.document.add_entity(arc)
+
+    def _rebuild_gfx(self, l1, l2):
+        """Rebuild graphics for modified lines."""
+        from src.view.graphics.entity_items import GfxLineItem
+        for item in list(self.view.scene().items()):
+            if hasattr(item, 'entity') and (item.entity is l1 or item.entity is l2):
+                self.view.scene().removeItem(item)
+        self.view.scene().addItem(GfxLineItem(l1))
+        self.view.scene().addItem(GfxLineItem(l2))
 
     def deactivate(self):
         self._line1 = None

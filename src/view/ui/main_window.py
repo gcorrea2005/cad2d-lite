@@ -395,11 +395,7 @@ class MainWindow(QMainWindow):
                 (" TEXT   ", "text"),
                 (" DIM    ", "dim"),
                 (" POINT  ", "point"),
-                "ELLIPSE": "ellipse",
-                            "DIMBASELINE": "dimbase",
-                            "DIMBASE": "dimbase",
-                            "DONUT": "donut",
-            "CHPROP": "chprop_cmd",
+                (" ELLIPSE", "ellipse"),
                 (" HATCH  ", "hatch"),
                 (" SOLID  ", "solid"),
                 (" DONUT  ", "donut"),
@@ -505,7 +501,8 @@ class MainWindow(QMainWindow):
                 (" REDO   ", "redo"),
                 (" PURGE  ", "purge"),
                 (" PLOT   ", "plot"),
-                (" DXFIN  ", "ni_dxfin"),
+                (" DXF OUT", "ni_dxfout"),
+                (" DXFIN  ", "dxfin_cmd"),
                 (" SCRIPT ", "script_cmd"),
                 (" TEMPLATE","ni_template"),
                 ("", None),
@@ -666,6 +663,8 @@ class MainWindow(QMainWindow):
         elif action == "dim_angular":
             self._tool_manager._dim_type = "angular"
             self._activate_tool("dimradius")
+        elif action == "ni_dxfout":
+            self._cmd_dxfout()
         elif action and action.startswith("ni_"):
             cmd_name = action[3:].upper()
             self._echo(f"Command: {cmd_name} (not implemented)")
@@ -998,6 +997,9 @@ class MainWindow(QMainWindow):
             return
         elif action == "chprop_cmd":
             self._cmd_chprop(args)
+            return
+        elif action == "chamfer_cmd":
+            self._activate_tool("chamfer")
             return
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
