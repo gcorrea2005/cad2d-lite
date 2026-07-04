@@ -15,6 +15,9 @@ class CadView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setBackgroundBrush(Qt.GlobalColor.black)
 
+        # CAD convention: Y positive = UP
+        self.scale(1, -1)
+
         self._zoom_factor = 1.15
         self._panning = False
         self._last_pan_point = QPointF()
