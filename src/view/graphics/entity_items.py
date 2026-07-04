@@ -135,6 +135,9 @@ class GfxTextItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
+        # Counter-flip to compensate view's Y-up transform
+        from PySide6.QtGui import QTransform
+        self.setTransform(QTransform.fromScale(1, -1))
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
@@ -166,6 +169,9 @@ class GfxDimensionItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
+        # Counter-flip to compensate view's Y-up transform
+        from PySide6.QtGui import QTransform
+        self.setTransform(QTransform.fromScale(1, -1))
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()

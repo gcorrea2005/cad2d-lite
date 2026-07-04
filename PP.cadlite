@@ -4302,6 +4302,77 @@
         ]
       ],
       "closed": true
+    },
+    {
+      "type": "Text",
+      "uuid": "22871309-50e7-44db-95f7-0a91350d49c8",
+      "layer_name": "0",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "position": [
+        111.0,
+        96.0
+      ],
+      "content": "holitas",
+      "height": 2.5,
+      "rotation": 0.0
+    },
+    {
+      "type": "Line",
+      "uuid": "44fa7bb8-e929-4b33-9bf1-cb133039c142",
+      "layer_name": "0",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "start": [
+        109.50299999999993,
+        -234.21474999999987
+      ],
+      "end": [
+        361.9682499999998,
+        -7.604374999999996
+      ]
+    },
+    {
+      "type": "Polyline",
+      "uuid": "0f7946a3-ec52-4f0b-89bb-a36b6d01de5d",
+      "layer_name": "0",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "vertices": [
+        [
+          357.40562499999976,
+          -247.90262499999986
+        ],
+        [
+          200.75549999999987,
+          -77.56462499999995
+        ],
+        [
+          31.93837499999998,
+          -261.59049999999985
+        ],
+        [
+          229.65212499999987,
+          -348.28037499999976
+        ],
+        [
+          348.28037499999976,
+          -249.42349999999985
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "type": "Circle",
+      "uuid": "838025fb-84c9-4071-aac4-cf7881089fa2",
+      "layer_name": "0",
+      "color": "#FFFFFF",
+      "linetype": "CONTINUOUS",
+      "center": [
+        170.3379999999999,
+        -240.29824999999985
+      ],
+      "radius": 86.51626805152016
     }
   ]
 }
