@@ -39,7 +39,8 @@ class ArcTool(BaseTool):
                 end_angle += 2 * math.pi
 
             arc = Arc(self._center, radius, start_angle, end_angle,
-                      layer_name=self._current_layer, color=self._current_color)
+                                   layer_name=self._current_layer, color=self._current_color,
+                                   linetype=self._current_linetype)
             self.document.add_entity(arc)
             gfx = GfxArcItem(arc)
             self.view.scene().addItem(gfx)

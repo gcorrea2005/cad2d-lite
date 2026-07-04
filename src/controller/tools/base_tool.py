@@ -33,12 +33,27 @@ class BaseTool:
         self._snap_pixels = 20
 
     @property
-    def _current_color(self) -> str:
-        """Read CECOLOR from sysvars, resolving BYLAYER to layer color."""
+    def _current_layer(self) -> str:
+        """Read CLAYER from sysvars."""
         try:
-            cec = self.document.sysvars["CECOLOR"]
+            return self.document.sysvars["CLAYER"]
         except Exception:
-            return "7"
+            return "0"
+
+    @property
+    def _current_linetype(self) -> str:
+        """Read CELTYPE from sysvars, resolving BYLAYER to layer linetype."""
+        try:
+            celt = self.document.sysvars["CELTYPE"]
+        except Exception:
+            return "CONTINUOUS"
+        if isinstance(celt, str) and celt.upper() == "BYLAYER":
+            try:
+                lm = self.document.layer_manager
+                return lm.layers[lm.current_layer_name].linetype
+            except Exception:
+                return "CONTINUOUS"
+        return celt
         if isinstance(cec, str) and cec.upper() == "BYLAYER":
             # Resolve to current layer's color
             try:

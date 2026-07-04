@@ -212,7 +212,9 @@ class GfxDimensionItem(QGraphicsItem):
         p1, p2 = e.def_point1, e.def_point2
         tp = e.text_position
         dist = e.measured_distance()
-        arrow_size = 6  # DIMASZ equivalent
+        # Read DIM vars for sizing (defaults: DIMSCALE=1, DIMTXT=2.5, DIMASZ=2.5)
+        arrow_size = 6
+        text_size = 11
 
         # ── Helper: draw arrowhead ──
         def draw_arrow(tip_x: float, tip_y: float, ang: float):
@@ -258,7 +260,7 @@ class GfxDimensionItem(QGraphicsItem):
             mid_x = (ext1_end.x + ext2_end.x) / 2
             mid_y = (ext1_end.y + ext2_end.y) / 2
             font = painter.font()
-            font.setPixelSize(11)
+            font.setPixelSize(text_size)
             painter.setFont(font)
             text = f"{dist:.2f}"
             painter.save()
@@ -286,7 +288,7 @@ class GfxDimensionItem(QGraphicsItem):
 
             # Text at text_position offset
             font = painter.font()
-            font.setPixelSize(11)
+            font.setPixelSize(text_size)
             painter.setFont(font)
             prefix = "⌀ " if e.dim_type == "diameter" else "R "
             text = f"{prefix}{dist:.2f}"
@@ -320,7 +322,7 @@ class GfxDimensionItem(QGraphicsItem):
             painter.drawArc(arc_rect, int(start_deg * 16), int(span * 16))
             # Text
             font = painter.font()
-            font.setPixelSize(11)
+            font.setPixelSize(text_size)
             painter.setFont(font)
             angle_deg = abs(span)
             text = f"{angle_deg:.1f}°"
@@ -342,7 +344,7 @@ class GfxDimensionItem(QGraphicsItem):
                 draw_arrow(right, dim_y, 0)
                 mid_x = (p1.x + p2.x) / 2
                 font = painter.font()
-                font.setPixelSize(11)
+                font.setPixelSize(text_size)
                 painter.setFont(font)
                 text = f"{dist:.2f}"
                 fm = painter.fontMetrics()
@@ -363,7 +365,7 @@ class GfxDimensionItem(QGraphicsItem):
                 draw_arrow(dim_x, top, math.pi / 2)
                 mid_y = (p1.y + p2.y) / 2
                 font = painter.font()
-                font.setPixelSize(11)
+                font.setPixelSize(text_size)
                 painter.setFont(font)
                 text = f"{dist:.2f}"
                 painter.save()

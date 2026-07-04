@@ -23,7 +23,8 @@ class LineTool(BaseTool):
         else:
             line = Line(self._first_point, pt,
                         layer_name=self._current_layer,
-                        color=self._current_color)
+                        color=self._current_color,
+                        linetype=self._current_linetype)
             self.document.add_entity(line)
             gfx = GfxLineItem(line)
             self.view.scene().addItem(gfx)

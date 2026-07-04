@@ -30,7 +30,8 @@ class DimLinearTool(BaseTool):
                 dim_type = "aligned" if self.view.tool_manager._aligned_dim else "linear"
                 self.view.tool_manager._aligned_dim = False  # reset
             dim = Dimension(self._p1, self._p2, pt, dim_type=dim_type,
-                            layer_name=self._current_layer, color=self._current_color)
+                                    layer_name=self._current_layer, color=self._current_color,
+                                    linetype=self._current_linetype)
             self.document.add_entity(dim)
             gfx = GfxDimensionItem(dim)
             self.view.scene().addItem(gfx)
