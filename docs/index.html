@@ -14,30 +14,42 @@
   /* ─── RESET ─── */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root {
-    --blue:     #0000AA;
-    --navy:     #000022;
-    --dark:     #000018;
     --black:    #000000;
     --white:    #FFFFFF;
-    --accent:   #FFCC00;
-    --header:   #44AAFF;
-    --green:    #00FF88;
-    --pink:     #FF44CC;
-    --orange:   #FF8844;
-    --magenta:  #CC44FF;
-    --cyan:     #00FFFF;
-    --grid:     #0a1a2a;
-    --info:     #000088;
-    --red:      #FF3333;
+    --bg-light: #f5f5f7;
+    --text:     #1d1d1f;
+    --text-secondary: rgba(0,0,0,0.8);
+    --text-tertiary: rgba(0,0,0,0.48);
+    --accent:   #0071e3;
+    --link:     #0066cc;
+    --link-dark:#2997ff;
+    --card-bg:  #ffffff;
+    --card-dark:#272729;
+    --nav-bg:   rgba(0,0,0,0.8);
+    --shadow:   3px 5px 30px 0px rgba(0,0,0,0.22);
+    --blue:     #0071e3;
+    --navy:     #1d1d1f;
+    --dark:     #000000;
+    --header:   #1d1d1f;
+    --green:    #0071e3;
+    --pink:     #0071e3;
+    --orange:   #1d1d1f;
+    --magenta:  #1d1d1f;
+    --cyan:     #0071e3;
+    --grid:     #e8e8ed;
+    --info:     #f5f5f7;
+    --red:      #0071e3;
   }
   html { scroll-behavior: smooth; font-size: 16px; }
   body {
-    font-family: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
-    background: var(--black);
-    color: var(--white);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--white);
+    color: var(--text);
     overflow-x: hidden;
-    line-height: 1.6;
-    cursor: crosshair;
+    line-height: 1.47;
+    cursor: default;
+    letter-spacing: -0.022em;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* ─── CRT POWER-ON FLASH ─── */
@@ -91,40 +103,38 @@
   /* ─── NAV ─── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: var(--navy);
-    border-bottom: 2px solid var(--blue);
+    background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 2rem; height: 52px;
-    font-size: 0.8rem; letter-spacing: 2px;
+    padding: 0 2rem; height: 48px;
+    font-size: 0.75rem;
   }
-  nav a { color: var(--header); text-decoration: none; transition: .2s; padding: 0.3rem 0.6rem; }
-  nav a:hover { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
-  nav .brand { font-weight: bold; font-size: 1.1rem; color: var(--white); letter-spacing: 3px; }
+  nav a { color: rgba(255,255,255,0.8); text-decoration: none; transition: .2s; padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+  nav a:hover { color: var(--white); }
+  nav .brand { font-weight: 600; font-size: 1rem; color: var(--white); }
   .sections-nav { display: flex; gap: 0.3rem; flex-wrap: wrap; }
   #konami-hint { color: var(--accent); font-size: 0.6rem; animation: blink 2s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
   /* ─── MAIN CONTAINER ─── */
   .wrap {
-    position: relative; z-index: 10; max-width: 1200px; margin: 0 auto;
-    padding: 80px 2rem 4rem;
+    position: relative; z-index: 10; max-width: 980px; margin: 0 auto;
+    padding: 0;
   }
 
   /* ─── HERO ─── */
   .hero {
-    text-align: left; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;
+    text-align: center; min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--black);
   }
   .hero h1 {
-    font-size: clamp(2rem, 6vw, 5rem); color: var(--blue);
-    text-shadow: 3px 3px 0 var(--accent), 6px 6px 0 rgba(0,0,170,0.3);
-    letter-spacing: 2px; animation: glitch 3s infinite;
+    font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 600; color: var(--white);
+    letter-spacing: -0.017em; line-height: 1.07;
   }
   .hero .sub {
-    font-size: 1.4rem; color: var(--accent); margin-top: 0.5rem;
+    font-size: 1.3rem; font-weight: 400; color: var(--white); margin-top: 0.5rem; letter-spacing: 0;
   }
   .hero .tagline {
-    font-size: 0.9rem; color: var(--header); margin-top: 1rem;
-    max-width: 650px;
+    font-size: 1.1rem; font-weight: 400; color: rgba(255,255,255,0.7); margin-top: 1rem;
+    max-width: 650px; line-height: 1.4;
   }
   @keyframes glitch {
     0%,90%,100%{transform:none}
@@ -135,12 +145,13 @@
 
   /* ─── TYPEWRITER ─── */
   .typewriter {
-    background: var(--dark); border: 1px solid var(--blue);
-    padding: 1.5rem; margin-top: 2rem; border-radius: 4px;
-    font-size: 0.85rem; color: var(--green); min-height: 120px;
+    background: var(--black); border: none;
+    padding: 1.5rem; margin-top: 2rem; border-radius: 12px;
+    font-size: 0.85rem; color: #64ffda; min-height: 80px;
     position: relative; overflow: hidden;
+    font-family: 'SF Mono', ui-monospace, monospace; max-width: 600px;
   }
-  .typewriter .prompt { color: var(--accent); }
+  .typewriter .prompt { color: var(--white); }
   .typewriter .cursor {
     display: inline-block; width: 10px; height: 18px; background: var(--green);
     animation: cursorBlink 0.6s infinite; vertical-align: text-bottom;
@@ -148,19 +159,18 @@
   @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
 
   /* ─── SECTIONS ─── */
-  section { margin: 4rem 0; padding: 2rem; position: relative; }
-  section::before {
-    content: ''; position: absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, transparent, var(--blue), transparent);
-  }
+  section { margin: 0; padding: 5rem 2rem; position: relative; }
+  section:nth-of-type(odd) { background: var(--white); }
+  section:nth-of-type(even) { background: var(--bg-light); }
   h2 {
-    font-size: 1.8rem; color: var(--accent); margin-bottom: 1.5rem;
-    letter-spacing: 3px; text-transform: uppercase;
-    border-left: 4px solid var(--blue); padding-left: 1rem;
+    font-size: 2.5rem; font-weight: 600; color: var(--text); margin-bottom: 1.5rem;
+    letter-spacing: -0.012em; line-height: 1.1;
+    max-width: 980px; margin-left: auto; margin-right: auto;
   }
   h3 {
-    color: var(--header); margin: 1.5rem 0 0.8rem; font-size: 1.2rem;
-    letter-spacing: 1px;
+    font-weight: 600; color: var(--text); margin: 2rem 0 0.8rem; font-size: 1.3rem;
+    letter-spacing: -0.01em;
+    max-width: 980px; margin-left: auto; margin-right: auto;
   }
 
   /* ─── RANDOM GLITCH ─── */
@@ -209,20 +219,19 @@
     gap: 1rem; margin-bottom: 2rem;
   }
   .stat-card {
-    background: var(--navy); border: 1px solid var(--blue);
-    padding: 1.5rem; text-align: center; border-radius: 4px;
-    transition: all 0.3s; position: relative; overflow: hidden;
+    background: var(--card-bg); border: none;
+    padding: 2rem 1.5rem; text-align: center; border-radius: 12px;
+    transition: all 0.3s; position: relative;
   }
   .stat-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(255,204,0,0.2);
-    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
   }
   .stat-card .num {
-    font-size: 2.5rem; font-weight: bold; color: var(--accent);
-    font-family: 'Courier New', monospace;
+    font-size: 2.5rem; font-weight: 600; color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif; letter-spacing: -0.02em;
   }
-  .stat-card .label { color: var(--header); font-size: 0.8rem; letter-spacing: 1px; margin-top: 0.3rem; }
+  .stat-card .label { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.3rem; letter-spacing: 0; }
 
   /* ─── ARCHITECTURE DIAGRAM ─── */
   .arch-diagram {
@@ -230,13 +239,13 @@
     gap: 1rem; margin: 2rem 0;
   }
   .arch-box {
-    background: var(--navy); border: 2px solid var(--blue);
-    padding: 1.5rem; border-radius: 4px; text-align: center;
+    background: var(--card-bg); border: none;
+    padding: 1.5rem; border-radius: 12px; text-align: center;
     transition: all 0.3s;
   }
   .arch-box:hover {
-    border-color: var(--accent); background: var(--dark);
-    box-shadow: 0 0 25px rgba(0,0,170,0.4);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
   }
   .arch-box .icon { font-size: 2rem; margin-bottom: 0.5rem; }
   .arch-box h4 { color: var(--header); margin-bottom: 0.5rem; letter-spacing: 1px; }
@@ -250,17 +259,15 @@
     gap: 0.6rem; margin: 1.5rem 0;
   }
   .tool-chip {
-    background: var(--navy); border: 1px solid var(--blue);
-    padding: 0.7rem 0.5rem; text-align: center; border-radius: 4px;
+    background: var(--card-bg); border: none;
+    padding: 0.7rem 0.8rem; text-align: center; border-radius: 8px;
     font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
-    color: var(--header); letter-spacing: 1px;
+    color: var(--text);
   }
   .tool-chip:hover {
-    border-color: var(--accent); color: var(--accent);
-    background: var(--dark); transform: scale(1.05);
-    box-shadow: 0 0 12px rgba(255,204,0,0.2);
+    background: var(--bg-light); transform: scale(1.02);
   }
-  .tool-chip.active { border-color: var(--green); color: var(--green); }
+  .tool-chip.active { background: var(--accent); color: var(--white); }
 
   /* ─── TOOL DETAIL PANEL ─── */
   .tool-detail {
@@ -276,9 +283,11 @@
 
   /* ─── CODE BLOCK ─── */
   .code-block {
-    background: var(--dark); border: 1px solid var(--blue);
-    padding: 1rem; border-radius: 4px; overflow-x: auto;
-    font-size: 0.8rem; color: var(--green); position: relative;
+    background: var(--black); border: none;
+    padding: 1.5rem; border-radius: 12px; overflow-x: auto;
+    font-size: 0.85rem; color: #64ffda; position: relative;
+    font-family: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    max-width: 980px; margin: 1.5rem auto;
   }
   .code-block .comment { color: #667799; }
   .code-block .keyword { color: var(--accent); }
@@ -304,13 +313,11 @@
 
   /* ─── QUOTES ─── */
   .impression {
-    background: var(--navy); border-left: 4px solid var(--accent);
-    padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 4px 4px 0;
-    position: relative; transform: rotate(-0.5deg);
+    background: var(--bg-light); padding: 2rem;
+    margin: 1.5rem auto; border-radius: 12px; max-width: 980px;
     transition: all 0.3s;
   }
-  .impression:nth-child(even) { transform: rotate(0.5deg); }
-  .impression:hover { transform: rotate(0) scale(1.02); border-color: var(--green); }
+  .impression:hover { box-shadow: var(--shadow); }
   .impression .quote { font-style: italic; color: var(--white); font-size: 1rem; }
   .impression .author { color: var(--accent); margin-top: 0.5rem; font-size: 0.8rem; }
 
@@ -319,13 +326,13 @@
     width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem;
   }
   th {
-    background: var(--blue); color: var(--white); padding: 0.7rem;
-    text-align: left; letter-spacing: 1px;
+    background: var(--bg-light); color: var(--text); padding: 0.7rem 1rem;
+    text-align: left; font-weight: 600; font-size: 0.85rem;
   }
   td {
-    padding: 0.5rem 0.7rem; border-bottom: 1px solid rgba(0,0,170,0.3);
+    padding: 0.5rem 1rem; border-bottom: 1px solid #e8e8ed;
   }
-  tr:hover td { background: rgba(0,0,170,0.2); }
+  tr:hover td { background: var(--bg-light); }
 
   /* ─── TOAST ─── */
   .toast {
@@ -385,8 +392,8 @@
 
   /* ─── FOOTER ─── */
   footer {
-    text-align: center; padding: 3rem; color: var(--header); font-size: 0.75rem;
-    border-top: 1px solid var(--blue); margin-top: 4rem; letter-spacing: 1px;
+    text-align: center; padding: 3rem; color: var(--text-tertiary); font-size: 0.75rem;
+    background: var(--bg-light); letter-spacing: 0;
   }
 </style>
 </head>
@@ -437,7 +444,6 @@
 <!-- WRAPPER -->
 <div class="wrap">
 
-<!-- HERO -->
 <section class="hero">
   <h1>DogCAD 2D Lite</h1>
   <p class="sub">DOCUMENTACION SIN CENSURA v3.0 🔥🐾</p>
