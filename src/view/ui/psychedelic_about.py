@@ -1,5 +1,5 @@
 """
-Psychedelic About dialog for CAD 2D Lite.
+Psychedelic About dialog for DogCAD 2D Lite.
 Rainbow cycling, matrix rain, CRT flicker, trippy vibes.
 """
 from PySide6.QtWidgets import QDialog, QLabel, QVBoxLayout, QPushButton
@@ -12,7 +12,7 @@ import random
 class PsychedelicAbout(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("ACERCA DE — CAD 2D Lite")
+        self.setWindowTitle("ACERCA DE — DogCAD 2D Lite")
         self.setFixedSize(500, 350)
         self.setStyleSheet("background-color: #000010;")
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
@@ -92,7 +92,7 @@ class PsychedelicAbout(QDialog):
 
         # ── Psychedelic title ──
         title_hue = self._hue
-        title = "CAD 2D Lite"
+        title = "DogCAD 2D Lite"
         font = QFont("Courier New", 28, QFont.Weight.Bold)
         painter.setFont(font)
         for i, ch in enumerate(title):

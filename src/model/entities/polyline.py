@@ -42,6 +42,6 @@ class Polyline(CadEntity):
             closed=data.get("closed", False),
             uuid=data.get("uuid"),
             layer_name=data.get("layer_name", "0"),
-            color=data.get("color", "#FFFFFF"),
+            color=data.get("color", "7"),
             linetype=data.get("linetype", "CONTINUOUS"),
         )

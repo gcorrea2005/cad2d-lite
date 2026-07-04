@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Layer:
     name: str
-    color: str = "#FFFFFF"
+    color: str = "7"
     linetype: str = "CONTINUOUS"
     visible: bool = True
     locked: bool = False

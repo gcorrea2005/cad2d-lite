@@ -22,7 +22,8 @@ class LineTool(BaseTool):
             self._first_point = pt
         else:
             line = Line(self._first_point, pt,
-                        layer_name=self.layer_manager.current_layer_name)
+                        layer_name=self._current_layer,
+                        color=self._current_color)
             self.document.add_entity(line)
             gfx = GfxLineItem(line)
             self.view.scene().addItem(gfx)

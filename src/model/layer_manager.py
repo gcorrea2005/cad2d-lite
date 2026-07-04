@@ -3,14 +3,14 @@ from src.model.layer import Layer
 
 class LayerManager:
     def __init__(self):
-        self.layers: dict[str, Layer] = {"0": Layer(name="0", color="#FFFFFF")}
+        self.layers: dict[str, Layer] = {"0": Layer(name="0", color="7")}
         self._current = "0"
 
     @property
     def current_layer_name(self) -> str:
         return self._current
 
-    def add_layer(self, name: str, color: str = "#FFFFFF") -> Layer:
+    def add_layer(self, name: str, color: str = "7") -> Layer:
         if name in self.layers:
             raise ValueError(f"Layer '{name}' already exists")
         layer = Layer(name=name, color=color)

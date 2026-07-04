@@ -18,6 +18,7 @@ class PointTool(BaseTool):
     def mouse_press(self, event, scene_pos: QPointF):
         pt = self._snap(scene_pos)
         entity = PointEntity(pt, layer_name=self.layer_manager.current_layer_name)
+        entity._document = self.document  # for PDMODE/PDSIZE access
         self.document.add_entity(entity)
         gfx = GfxPointItem(entity)
         self.view.scene().addItem(gfx)

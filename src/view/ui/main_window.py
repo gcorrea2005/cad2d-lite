@@ -67,7 +67,7 @@ CLR_INFO_BG    = "#000088"   # info bar darker blue
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CAD 2D Lite")
+        self.setWindowTitle("DogCAD 2D Lite")
         self.resize(1280, 800)
 
         self._document = Document()
@@ -78,7 +78,6 @@ class MainWindow(QMainWindow):
         self._setup_menus()
         self._setup_screen_menu()
         self._setup_command_line()
-        self._setup_statusbar()
         self._apply_theme()
 
         # Focus the view so keyboard shortcuts work immediately
@@ -205,31 +204,39 @@ class MainWindow(QMainWindow):
 
         self._view.tool_manager = self._tool_manager
 
-        # Add info toolbar below menus (ACAD 10 style)
-        self._info_bar = QToolBar("Info")
-        self._info_bar.setMovable(False)
-        self._info_bar.setStyleSheet(f"""
-            QToolBar {{
+        # ── Status Bar (ACAD 10 style with picante ASCII) ──
+        self._sb_layer = QLabel("LAYER:0")
+        self._sb_color = QLabel("COLOR:White")
+        self._sb_ltype = QLabel("LINETYPE:Continuous")
+        self._sb_coords = QLabel("X=     0.0000  Y=     0.0000")
+        self._sb_file = QLabel("NEW")
+        self._sb_ortho = QLabel("")
+        self._sb_snap = QLabel("")
+
+        sb = QStatusBar()
+        sb.setStyleSheet(f"""
+            QStatusBar {{
                 background-color: {CLR_INFO_BG};
-                border-bottom: 1px solid #000055;
-                spacing: 20px;
-                padding: 2px 8px;
+                border-top: 2px solid #000055;
+                font-family: 'Courier New', monospace;
+                font-size: 13px;
+                color: {CLR_MENU_TEXT};
             }}
             QLabel {{
                 color: {CLR_MENU_TEXT};
                 font-family: 'Courier New', monospace;
-                font-size: 14px;
+                font-size: 13px;
+                padding: 0 6px;
             }}
         """)
-        self._info_layer = QLabel("LAYER: 0")
-        self._info_ortho = QLabel("")
-        self._info_coords = QLabel("0.0000, 0.0000")
-        self._info_bar.addWidget(self._info_layer)
-        self._info_bar.addSeparator()
-        self._info_bar.addWidget(self._info_ortho)
-        self._info_bar.addSeparator()
-        self._info_bar.addWidget(self._info_coords)
-        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self._info_bar)
+        sb.addWidget(self._sb_layer)
+        sb.addWidget(self._sb_color)
+        sb.addWidget(self._sb_ltype)
+        sb.addWidget(self._sb_coords)
+        sb.addPermanentWidget(self._sb_file)
+        sb.addPermanentWidget(self._sb_snap)
+        sb.addPermanentWidget(self._sb_ortho)
+        self.setStatusBar(sb)
 
         self._tool_manager.activate_tool("select")
 
@@ -635,6 +642,17 @@ class MainWindow(QMainWindow):
         self._cmd_input.setPlaceholderText("Command:")
         self._cmd_input.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._cmd_input.setTabChangesFocus(False)
+        self._cmd_input.setCursorWidth(3)  # thick blinking cursor
+        self._cmd_input.setStyleSheet("""
+            QPlainTextEdit {
+                background-color: #000000;
+                color: #00FF00;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                border: none;
+                padding: 2px 6px;
+            }
+        """)
 
         # Capture Enter
         self._cmd_input.installEventFilter(self)
@@ -649,20 +667,58 @@ class MainWindow(QMainWindow):
         dock.setWidget(container)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
 
-        self._echo("CAD 2D Lite — Type a command or use screen menu")
+        # Command history
+        self._cmd_history: list[str] = []
+        self._cmd_history_index: int = -1
+        self._cmd_history_draft: str = ""  # saved text before navigating history
+
+        self._echo("DogCAD 2D Lite — Type a command or use screen menu")
         self._echo("Command:")
 
     def eventFilter(self, obj, event):
-        """Capture Enter in command input."""
+        """Capture Enter, Up/Down arrows in command input."""
         from PySide6.QtCore import QEvent
         if obj == self._cmd_input and event.type() == QEvent.Type.KeyPress:
-            if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+            key = event.key()
+
+            if key == Qt.Key.Key_Return or key == Qt.Key.Key_Enter:
                 text = self._cmd_input.toPlainText().strip()
                 self._cmd_input.clear()
                 if text:
+                    self._cmd_history.append(text)
+                    self._cmd_history_index = len(self._cmd_history)
                     self._process_command(text)
                 return True
+
+            if key == Qt.Key.Key_Up:
+                # Save current draft if first time navigating
+                if self._cmd_history_index == len(self._cmd_history):
+                    self._cmd_history_draft = self._cmd_input.toPlainText()
+                if self._cmd_history_index > 0:
+                    self._cmd_history_index -= 1
+                    self._cmd_input.setPlainText(self._cmd_history[self._cmd_history_index])
+                    self._move_cursor_to_end()
+                return True
+
+            if key == Qt.Key.Key_Down:
+                if self._cmd_history_index < len(self._cmd_history) - 1:
+                    self._cmd_history_index += 1
+                    self._cmd_input.setPlainText(self._cmd_history[self._cmd_history_index])
+                    self._move_cursor_to_end()
+                elif self._cmd_history_index == len(self._cmd_history) - 1:
+                    # Back to the draft the user was typing
+                    self._cmd_history_index = len(self._cmd_history)
+                    self._cmd_input.setPlainText(self._cmd_history_draft)
+                    self._move_cursor_to_end()
+                return True
+
         return super().eventFilter(obj, event)
+
+    def _move_cursor_to_end(self):
+        """Move text cursor to the end of the command input."""
+        cursor = self._cmd_input.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self._cmd_input.setTextCursor(cursor)
 
     def _echo(self, text: str):
         self._cmd_output.appendPlainText(text)
@@ -739,6 +795,17 @@ class MainWindow(QMainWindow):
             "F": "fillet", "FILLET": "fillet",
             "CHA": "chamfer", "CHAMFER": "chamfer",
             "AR": "array", "ARRAY": "array",
+            "CLAYER": "clayer",
+            "SETVAR": "setvar",
+            "TEXTSCR": "textscr",
+            "GRAPHSCR": "graphscr",
+            "LAYER": "layer_list",
+            "COLOR": "color_cmd",
+            "COLOUR": "color_cmd",
+            "ABOUT": "about",
+            "HELP": "help",
+            "SNAP": "snap_toggle",
+            "ORTHO": "ortho_toggle",
         }
         action = aliases.get(cmd)
         if not action:
@@ -763,35 +830,236 @@ class MainWindow(QMainWindow):
             self._echo("Command:")
         elif action == "quit":
             self.close()
+        elif action == "clayer":
+            self._cmd_clayer(args)
+            return
+        elif action == "setvar":
+            self._cmd_setvar(args)
+            return
+        elif action == "textscr":
+            self._text_screen_on()
+            self._echo("Command:")
+            return
+        elif action == "graphscr":
+            self._text_screen_off()
+            self._echo("Command:")
+            return
+        elif action == "layer_list":
+            self._cmd_layer_list()
+            return
+        elif action == "color_cmd":
+            self._cmd_color(args)
+            return
+        elif action == "about":
+            self._on_about()
+            self._echo("Command:")
+            return
+        elif action == "help":
+            self._cmd_help()
+            return
+        elif action == "snap_toggle":
+            self._toggle_snap()
+            self._echo(f"Snap {'ON' if self._snap_active else 'OFF'}")
+            self._echo("Command:")
+            return
+        elif action == "ortho_toggle":
+            self._toggle_ortho()
+            self._echo(f"Ortho {'ON' if self._ortho_active else 'OFF'}")
+            self._echo("Command:")
+            return
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
         else:
             self._echo(f"Unknown command: {cmd}")
             self._echo("Command:")
 
-    # ── Status Bar ─────────────────────────────────────────
-    def _setup_statusbar(self):
-        self._coord_label = QLabel("  0.0000, 0.0000")
-        self._layer_label = QLabel("L:0")
-        self._snap_label = QLabel("SNAP")
-        self._ortho_label = QLabel("")
+    # ── SETVAR / CLAYER commands ──────────────────────────
+    def _cmd_clayer(self, args: str):
+        """CLAYER command: show or set current layer."""
+        sv = self._document.sysvars
+        if not args:
+            val, _ = sv.setvar("CLAYER")
+            self._echo(f"Current layer: {val}")
+            self._echo("Command:")
+            return
+        try:
+            layer_name = args.strip()
+            sv["CLAYER"] = layer_name
+            # Sync with LayerManager
+            lm = self._document.layer_manager
+            if layer_name not in lm.layers:
+                lm.add_layer(layer_name)
+            lm.set_current(layer_name)
+            self._echo(f"CLAYER set to {layer_name}")
+            self._echo("Command:")
+        except (KeyError, ValueError, TypeError) as e:
+            self._echo(f"Invalid layer name: {args}")
 
-        sb = QStatusBar()
-        sb.addWidget(self._layer_label)
-        sb.addPermanentWidget(self._snap_label)
-        sb.addPermanentWidget(self._ortho_label)
-        self.setStatusBar(sb)
+    def _cmd_setvar(self, args: str):
+        """SETVAR command: list/query/set system variables."""
+        sv = self._document.sysvars
+        parts = args.strip().split(None, 1)
+        if not parts:
+            self._echo("SETVAR: Variable name or ?:")
+            return
 
+        name = parts[0].upper()
+        if name == "?":
+            pattern = parts[1].strip() if len(parts) > 1 else "*"
+            for vname, val, ro in sv.list_vars(pattern):
+                tag = " (read only)" if ro else ""
+                if isinstance(val, float):
+                    self._echo(f"{vname:<12} {val:.4f}{tag}")
+                else:
+                    self._echo(f"{vname:<12} {val}{tag}")
+            self._echo("Command:")
+            return
+
+        if len(parts) == 1:
+            # Show value
+            try:
+                val, ro = sv.setvar(name)
+                tag = " (read only)" if ro else ""
+                if isinstance(val, float):
+                    self._echo(f"{name} = {val:.4f}{tag}")
+                else:
+                    self._echo(f"{name} = {val}{tag}")
+                self._echo("Command:")
+            except KeyError:
+                self._echo(f"Unknown system variable: {name}")
+                self._echo("Command:")
+            return
+
+        # Set value
+        try:
+            sv.setvar_set(name, parts[1])
+            val = sv[name]
+            # Sync CLAYER with LayerManager
+            if name == "CLAYER":
+                lm = self._document.layer_manager
+                layer_name = str(val)
+                if layer_name not in lm.layers:
+                    lm.add_layer(layer_name)
+                lm.set_current(layer_name)
+            if name == "ORTHOMODE":
+                self._ortho_active = bool(int(val))
+            if isinstance(val, float):
+                self._echo(f"{name} = {val:.4f}")
+            else:
+                self._echo(f"{name} = {val}")
+            self._echo("Command:")
+        except (KeyError, ValueError, TypeError) as e:
+            self._echo(f"SETVAR error: {e}")
+            self._echo("Command:")
+
+    def _toggle_text_screen(self):
+        """F2: toggle between drawing area and expanded text screen."""
+        if not hasattr(self, '_text_screen_active'):
+            self._text_screen_active = False
+        if self._text_screen_active:
+            self._text_screen_off()
+        else:
+            self._text_screen_on()
+
+    def _text_screen_on(self):
+        """Show expanded text screen (hide drawing area)."""
+        self._text_screen_active = True
+        self._view.hide()
+        self._cmd_output.setFixedHeight(self.height() - 100)
+        self._echo("── TEXT SCREEN (TEXTSCR / F2 to return) ──")
+
+    def _text_screen_off(self):
+        """Return to drawing area (hide text screen)."""
+        self._text_screen_active = False
+        self._view.show()
+        self._cmd_output.setFixedHeight(80)
+
+    def _cmd_layer_list(self):
+        """LAYER command: list all layers with status."""
+        lm = self._document.layer_manager
+        self._echo(f"Current layer: {lm.current_layer_name}")
+        self._echo(f"{'Layer name':<20} {'Color':<15} {'State':<20}")
+        self._echo("-" * 55)
+        for name in sorted(lm.layers):
+            layer = lm.layers[name]
+            marker = ">" if name == lm.current_layer_name else " "
+            # Show ACI color human-friendly
+            from src.model.aci import color_to_display, parse_color
+            color_display = color_to_display(parse_color(layer.color))
+            state = []
+            if layer.visible:
+                state.append("ON")
+            else:
+                state.append("OFF")
+            if layer.locked:
+                state.append("LOCKED")
+            self._echo(f"{marker}{name:<19} {color_display:<15} {' '.join(state)}")
+        self._echo(f"Total layers: {len(lm.layers)}")
+        self._echo("Command:")
+
+    def _cmd_color(self, args: str):
+        """COLOR command: show/set current entity color (ACI 1-255)."""
+        from src.model.aci import aci_to_hex, aci_to_rgb, parse_color, color_to_display, COLOR_NAMES
+        sv = self._document.sysvars
+        if not args:
+            val = sv["CECOLOR"]
+            self._echo(f"Current entity color: {color_to_display(parse_color(val))}")
+            self._echo("Command:")
+            return
+        try:
+            idx = parse_color(args)
+            sv["CECOLOR"] = str(idx)
+            r, g, b = aci_to_rgb(idx)
+            name = COLOR_NAMES.get(idx, "")
+            self._echo(f"COLOR set to {idx} ({name})  RGB={r},{g},{b}  {aci_to_hex(idx)}")
+            self._echo("Command:")
+        except (ValueError, KeyError) as e:
+            self._echo(f"Invalid color: {args}")
+            self._echo("Command:")
+
+    def _cmd_help(self):
+        """HELP command: open documentation in Safari."""
+        import subprocess
+        from pathlib import Path
+        doc_path = Path(__file__).parent.parent.parent.parent / "docs" / "index.html"
+        if doc_path.exists():
+            subprocess.run(["open", "-a", "Safari", str(doc_path)])
+            self._echo("Opening documentation in Safari...")
+        else:
+            self._echo("Documentation not found.")
+        self._echo("Command:")
+
+    # ── Coord Status Update ───────────────────────────────
     def _update_coord_status(self, scene_pos: QPointF):
-        self._info_coords.setText(f"{scene_pos.x():.4f}, {scene_pos.y():.4f}")
-        self._info_layer.setText(f"LAYER: {self._document.layer_manager.current_layer_name}")
-        self._info_ortho.setText("ORTHO" if self._ortho_active else "")
-        self._layer_label.setText(f"L:{self._document.layer_manager.current_layer_name}")
+        x, y = scene_pos.x(), scene_pos.y()
+        self._sb_coords.setText(f"X={x:10.4f}  Y={y:10.4f}")
+        self._sb_layer.setText(f"LAYER:{self._document.layer_manager.current_layer_name}")
+        self._sb_ortho.setText("ORTHO" if self._ortho_active else "")
+        # Color from CECOLOR
+        try:
+            cec = self._document.sysvars["CECOLOR"]
+            from src.model.aci import parse_color, COLOR_NAMES
+            idx = parse_color(cec)
+            name = COLOR_NAMES.get(idx, str(idx))
+            self._sb_color.setText(f"COLOR:{name}")
+        except Exception:
+            self._sb_color.setText("COLOR:White")
+        # Linetype from CELTYPE
+        try:
+            lt = self._document.sysvars["CELTYPE"]
+            self._sb_ltype.setText(f"LINETYPE:{lt}")
+        except Exception:
+            self._sb_ltype.setText("LINETYPE:Continuous")
+        # File name
+        if self._filename:
+            self._sb_file.setText(f"🐾 {self._filename.name}")
+        else:
+            self._sb_file.setText("🐾 NEW")
 
     def _toggle_snap(self):
         self._snap_active = not self._snap_active
         self._snap_action.setChecked(self._snap_active)
-        self._snap_label.setText("SNAP" if self._snap_active else "    ")
+        self._sb_snap.setText("SNAP" if self._snap_active else "")
         # Toggle active snaps on current tool
         if self._tool_manager._active_tool:
             from src.model.snap import SnapType
@@ -806,7 +1074,7 @@ class MainWindow(QMainWindow):
     def _toggle_ortho(self):
         self._ortho_active = not self._ortho_active
         self._ortho_action.setChecked(self._ortho_active)
-        self._ortho_label.setText("ORTHO" if self._ortho_active else "")
+        self._sb_ortho.setText("ORTHO" if self._ortho_active else "")
 
     # ── Edit actions ───────────────────────────────────────
     def _on_erase(self):
@@ -1076,7 +1344,7 @@ class MainWindow(QMainWindow):
 
     def _on_open(self):
         path, _ = QFileDialog.getOpenFileName(self, "Open Drawing", "",
-                                              "CAD Lite Files (*.cadlite);;All Files (*)")
+                                              "DogCAD Files (*.cadlite);;All Files (*)")
         if path:
             self._document = load_document(Path(path))
             self._filename = Path(path)
@@ -1092,7 +1360,7 @@ class MainWindow(QMainWindow):
 
     def _on_save_as(self):
         path, _ = QFileDialog.getSaveFileName(self, "Save Drawing As", "",
-                                               "CAD Lite Files (*.cadlite);;All Files (*)")
+                                               "DogCAD Files (*.cadlite);;All Files (*)")
         if path:
             p = Path(path)
             if p.suffix != ".cadlite":
@@ -1172,4 +1440,15 @@ class MainWindow(QMainWindow):
             self._scene.addItem(item)
 
         self._init_tools()
-        self._refresh_screen_menu()
+
+    def keyPressEvent(self, event):
+        """Global ESC handler — focus command line regardless of widget focus."""
+        if event.key() == Qt.Key.Key_Escape:
+            if hasattr(self, '_cmd_input'):
+                self._cmd_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                self._cmd_input.setFocus()
+                self._cmd_input.raise_()
+                self._cmd_input.setCursorWidth(3)
+            event.accept()
+            return
+        super().keyPressEvent(event)

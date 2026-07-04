@@ -23,7 +23,7 @@ class Point:
 
 
 class CadEntity(ABC):
-    def __init__(self, *, layer_name: str = "0", color: str = "#FFFFFF",
+    def __init__(self, *, layer_name: str = "0", color: str = "7",
                  linetype: str = "CONTINUOUS", uuid: str | None = None):
         self.uuid = uuid or str(uuid4())
         self.layer_name = layer_name

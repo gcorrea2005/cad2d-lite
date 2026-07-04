@@ -1,5 +1,6 @@
 from src.model.layer_manager import LayerManager
 from src.model.entities.base import CadEntity
+from src.model.sysvars import SysVars
 from src.controller.commands.base_command import BaseCommand
 from src.controller.commands.add_entity import AddEntityCommand
 from src.controller.commands.delete_entity import DeleteEntityCommand
@@ -9,6 +10,7 @@ class Document:
     def __init__(self, filename: str | None = None):
         self.filename = filename
         self.layer_manager = LayerManager()
+        self.sysvars = SysVars()
         self._entities: dict[str, CadEntity] = {}
         self._entity_order: list[str] = []
         self._undo_stack: list[BaseCommand] = []

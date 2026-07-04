@@ -21,7 +21,7 @@ class PolylineTool(BaseTool):
         if event.button() == Qt.MouseButton.RightButton:
             if len(self._points) >= 2:
                 pl = Polyline(self._points.copy(), closed=False,
-                              layer_name=self.layer_manager.current_layer_name)
+                              layer_name=self._current_layer, color=self._current_color)
                 self.document.add_entity(pl)
                 gfx = GfxPolylineItem(pl)
                 self.view.scene().addItem(gfx)
@@ -44,7 +44,7 @@ class PolylineTool(BaseTool):
         elif event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
             if len(self._points) >= 2:
                 pl = Polyline(self._points.copy(), closed=False,
-                              layer_name=self.layer_manager.current_layer_name)
+                              layer_name=self._current_layer, color=self._current_color)
                 self.document.add_entity(pl)
                 gfx = GfxPolylineItem(pl)
                 self.view.scene().addItem(gfx)

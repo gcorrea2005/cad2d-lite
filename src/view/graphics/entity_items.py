@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsItem
-from PySide6.QtCore import QRectF, QPointF
+from PySide6.QtCore import QRectF, QPointF, Qt
 from PySide6.QtGui import QPen, QColor, QPainter
 from src.model.entities.line import Line
 from src.model.entities.circle import Circle
@@ -8,6 +8,21 @@ from src.model.entities.polyline import Polyline
 from src.model.entities.text import TextEntity
 from src.model.entities.dimension import Dimension
 from src.model.entities.point_entity import PointEntity
+from src.model.aci import aci_to_rgb
+
+
+def _entity_color(entity) -> QColor:
+    """Convert entity.color to QColor, supporting ACI indices and hex strings."""
+    c = entity.color
+    if isinstance(c, int):
+        r, g, b = aci_to_rgb(c)
+        return QColor(r, g, b)
+    if isinstance(c, str) and c.isdigit():
+        r, g, b = aci_to_rgb(int(c))
+        return QColor(r, g, b)
+    return QColor(c)
+
+
 import math
 
 
@@ -28,7 +43,7 @@ class GfxLineItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = QColor(self.entity.color)
+        color = _entity_color(self.entity)
         pen = QPen(color)
         pen.setWidthF(0)
         painter.setPen(pen)
@@ -55,7 +70,7 @@ class GfxCircleItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = QColor(self.entity.color)
+        color = _entity_color(self.entity)
         pen = QPen(color)
         pen.setWidthF(0)
         painter.setPen(pen)
@@ -81,7 +96,7 @@ class GfxArcItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = QColor(self.entity.color)
+        color = _entity_color(self.entity)
         pen = QPen(color)
         pen.setWidthF(0)
         painter.setPen(pen)
@@ -113,7 +128,7 @@ class GfxPolylineItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = QColor(self.entity.color)
+        color = _entity_color(self.entity)
         pen = QPen(color)
         pen.setWidthF(0)
         painter.setPen(pen)
@@ -150,7 +165,7 @@ class GfxTextItem(QGraphicsItem):
         return r
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = QColor(self.entity.color)
+        color = _entity_color(self.entity)
         pen = QPen(color)
         pen.setWidthF(0)
         painter.setPen(pen)
@@ -215,20 +230,99 @@ class GfxDimensionItem(QGraphicsItem):
 
 
 class GfxPointItem(QGraphicsItem):
+    """Point entity with AutoCAD-style PDMODE/PDSIZE rendering."""
+
+    # PDMODE style flags
+    _STYLE_DOT = 0
+    _STYLE_NONE = 1
+    _STYLE_CROSS = 2
+    _STYLE_X = 3
+    _STYLE_TICK = 4
+
+    _SHAPE_CIRCLE = 32
+    _SHAPE_SQUARE = 64
+
     def __init__(self, entity: PointEntity):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
 
     def boundingRect(self) -> QRectF:
-        return QRectF(QPointF(self.entity.position.x - 3, self.entity.position.y - 3),
-                      QPointF(self.entity.position.x + 3, self.entity.position.y + 3))
+        size = self._point_size()
+        half = size / 2 + 3
+        return QRectF(
+            self.entity.position.x - half,
+            self.entity.position.y - half,
+            half * 2, half * 2,
+        )
 
     def paint(self, painter: QPainter, option, widget=None):
-        color = QColor(self.entity.color)
-        pen = QPen(color)
-        pen.setWidthF(0)
+        color = _entity_color(self.entity)
+        pen = QPen(color, 1)
         painter.setPen(pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
         p = self.entity.position
-        painter.drawLine(QPointF(p.x - 2, p.y - 2), QPointF(p.x + 2, p.y + 2))
-        painter.drawLine(QPointF(p.x + 2, p.y - 2), QPointF(p.x - 2, p.y + 2))
+        x, y = p.x, p.y
+        size = self._point_size()
+        half = size / 2
+
+        # Read PDMODE from sysvars (default 3 = X)
+        pdmode = self._get_pdmode()
+        style = pdmode & 0x0F    # 0-4
+        shape = pdmode & 0xF0    # 0, 32, 64, 96
+
+        # ── Draw center style ──
+        if style == self._STYLE_DOT:
+            painter.drawPoint(QPointF(x, y))
+        elif style == self._STYLE_NONE:
+            pass  # invisible
+        elif style == self._STYLE_CROSS:
+            painter.drawLine(QPointF(x - half, y), QPointF(x + half, y))
+            painter.drawLine(QPointF(x, y - half), QPointF(x, y + half))
+        elif style == self._STYLE_X:
+            painter.drawLine(QPointF(x - half, y - half), QPointF(x + half, y + half))
+            painter.drawLine(QPointF(x + half, y - half), QPointF(x - half, y + half))
+        elif style == self._STYLE_TICK:
+            painter.drawLine(QPointF(x, y - half), QPointF(x, y + half))
+        else:
+            painter.drawPoint(QPointF(x, y))
+
+        # ── Draw surrounding shape ──
+        if shape & self._SHAPE_CIRCLE:
+            painter.drawEllipse(QPointF(x, y), half, half)
+        if shape & self._SHAPE_SQUARE:
+            painter.drawRect(QRectF(x - half, y - half, size, size))
+
+    def _point_size(self) -> float:
+        """Compute point size from PDSIZE + viewport scale."""
+        pdsize = self._get_pdsize()
+        if pdsize == 0:
+            # 5% of viewport height in scene units
+            view = self.scene().views()[0] if self.scene() and self.scene().views() else None
+            if view:
+                top_left = view.mapToScene(0, 0)
+                bot = view.mapToScene(0, int(view.viewport().height() * 0.05))
+                return abs(bot.y() - top_left.y())
+            return 5.0
+        return pdsize
+
+    def _get_pdmode(self) -> int:
+        """Read PDMODE from document sysvars, default 3 (X)."""
+        try:
+            ent = self.entity
+            if hasattr(ent, '_document') and ent._document:
+                return int(ent._document.sysvars["PDMODE"])
+        except Exception:
+            pass
+        return 3
+
+    def _get_pdsize(self) -> float:
+        """Read PDSIZE from document sysvars, default 0 (5% viewport)."""
+        try:
+            ent = self.entity
+            if hasattr(ent, '_document') and ent._document:
+                return float(ent._document.sysvars["PDSIZE"])
+        except Exception:
+            pass
+        return 0

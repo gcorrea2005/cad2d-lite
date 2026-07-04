@@ -1,5 +1,5 @@
 """
-Generate a 66m² apartment floor plan for CAD 2D Lite.
+Generate a 66m² apartment floor plan for DogCAD 2D Lite.
 2 bedrooms, 2 bathrooms, kitchen, living/dining, terrace.
 
 Layout (~11m x 6m = 66m²):

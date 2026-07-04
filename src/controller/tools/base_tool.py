@@ -32,6 +32,19 @@ class BaseTool:
         # Pixel-based snap tolerance (converted to scene units dynamically)
         self._snap_pixels = 20
 
+    @property
+    def _current_color(self) -> str:
+        """Read CECOLOR from sysvars (ACI index as string)."""
+        try:
+            return self.document.sysvars["CECOLOR"]
+        except Exception:
+            return "7"
+
+    @property
+    def _current_layer(self) -> str:
+        """Current layer name from layer_manager."""
+        return self.document.layer_manager.current_layer_name
+
     def activate(self):
         if self._snap_indicator.scene() is None:
             self.view.scene().addItem(self._snap_indicator)

@@ -37,6 +37,6 @@ class Line(CadEntity):
             end=Point(*data["end"]),
             uuid=data.get("uuid"),
             layer_name=data.get("layer_name", "0"),
-            color=data.get("color", "#FFFFFF"),
+            color=data.get("color", "7"),
             linetype=data.get("linetype", "CONTINUOUS"),
         )

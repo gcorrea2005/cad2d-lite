@@ -26,7 +26,7 @@ class RectangleTool(BaseTool):
             rect = Polyline(
                 [Point(x1, y1), Point(x2, y1), Point(x2, y2), Point(x1, y2)],
                 closed=True,
-                layer_name=self.layer_manager.current_layer_name,
+                layer_name=self._current_layer, color=self._current_color,
             )
             self.document.add_entity(rect)
             gfx = GfxPolylineItem(rect)

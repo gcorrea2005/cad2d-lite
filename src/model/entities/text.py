@@ -39,6 +39,6 @@ class TextEntity(CadEntity):
             rotation=data.get("rotation", 0.0),
             uuid=data.get("uuid"),
             layer_name=data.get("layer_name", "0"),
-            color=data.get("color", "#FFFFFF"),
+            color=data.get("color", "7"),
             linetype=data.get("linetype", "CONTINUOUS"),
         )

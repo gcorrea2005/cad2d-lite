@@ -24,6 +24,17 @@ class Arc(CadEntity):
         return Point(self.center.x + self.radius * math.cos(mid_angle),
                      self.center.y + self.radius * math.sin(mid_angle))
 
+    def contains_angle(self, angle: float) -> bool:
+        """Check if an angle (in radians) falls within this arc."""
+        ang = angle % (2 * math.pi)
+        start = self.start_angle % (2 * math.pi)
+        end = self.end_angle % (2 * math.pi)
+        if end < start:
+            end += 2 * math.pi
+        if ang < start:
+            ang += 2 * math.pi
+        return start <= ang <= end
+
     def bounding_box(self) -> tuple[Point, Point]:
         pts = [self.start_point(), self.end_point()]
         start = self.start_angle % (2 * math.pi)
@@ -65,6 +76,6 @@ class Arc(CadEntity):
             end_angle=data["end_angle"],
             uuid=data.get("uuid"),
             layer_name=data.get("layer_name", "0"),
-            color=data.get("color", "#FFFFFF"),
+            color=data.get("color", "7"),
             linetype=data.get("linetype", "CONTINUOUS"),
         )

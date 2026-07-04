@@ -41,8 +41,7 @@ class SolidTool(BaseTool):
 
     def _create_solid(self):
         pl = Polyline(self._points.copy(), closed=True,
-                      color=self._fill_color,
-                      layer_name=self.layer_manager.current_layer_name)
+                      layer_name=self._current_layer, color=self._current_color)
         self.document.add_entity(pl)
         # Override the graphics item to show fill
         # We reuse GfxPolylineItem but we can't easily fill it without custom paint
