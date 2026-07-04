@@ -16,6 +16,7 @@ class Document:
         self._undo_stack: list[BaseCommand] = []
         self._redo_stack: list[BaseCommand] = []
         self._dirty = False
+        self.block_defs: dict = {}  # block name → BlockDefinition
 
     @property
     def entities(self) -> list[CadEntity]:

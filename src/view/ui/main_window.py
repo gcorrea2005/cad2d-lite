@@ -864,6 +864,10 @@ class MainWindow(QMainWindow):
             "LTYPE": "linetype_cmd",
             "TEMPLATE": "layer_template",
             "UNITS": "units_cmd",
+            "BLOCK": "block_cmd",
+            "INSERT": "insert_cmd",
+            "DOOR": "door_cmd",
+            "WINDOW": "win_cmd",
         }
         action = aliases.get(cmd)
         if not action:
@@ -961,6 +965,18 @@ class MainWindow(QMainWindow):
             return
         elif action == "units_cmd":
             self._cmd_units(args)
+            return
+        elif action == "block_cmd":
+            self._cmd_block(args)
+            return
+        elif action == "insert_cmd":
+            self._cmd_insert(args)
+            return
+        elif action == "door_cmd":
+            self._cmd_library("DOOR", args)
+            return
+        elif action == "win_cmd":
+            self._cmd_library("WINDOW", args)
             return
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
@@ -1151,6 +1167,131 @@ class MainWindow(QMainWindow):
                     self._echo(f"Units: {msg}")
                 else:
                     self._echo(f"Unknown units: {args}")
+        self._echo("Command:")
+
+    def _cmd_block(self, args: str):
+        """BLOCK command: create a block from selected entities."""
+        from PySide6.QtWidgets import QInputDialog
+        from src.model.entities.block import BlockDefinition
+        
+        uuids = self._view._selected_uuids if hasattr(self._view, '_selected_uuids') else []
+        if not uuids:
+            self._echo("BLOCK: Select entities first (click them)")
+            self._echo("Command:")
+            return
+        
+        name = args.strip()
+        if not name:
+            name, ok = QInputDialog.getText(self, "Block Name", "Block name:")
+            if not ok or not name:
+                self._echo("BLOCK cancelled.")
+                self._echo("Command:")
+                return
+        
+        entities = [self._document._entities[u] for u in uuids if u in self._document._entities]
+        if not entities:
+            self._echo("BLOCK: No valid entities selected")
+            self._echo("Command:")
+            return
+        
+        # Base point = center of selection bounding box
+        xs = []
+        ys = []
+        for e in entities:
+            bmin, bmax = e.bounding_box()
+            xs.extend([bmin.x, bmax.x])
+            ys.extend([bmin.y, bmax.y])
+        from src.model.entities.base import Point
+        bp = Point(sum(xs) / len(xs), sum(ys) / len(ys))
+        
+        self._document.block_defs[name] = BlockDefinition(name, entities, bp)
+        self._echo(f"BLOCK \"{name}\" created with {len(entities)} entities")
+        self._echo("Command:")
+
+    def _cmd_insert(self, args: str):
+        """INSERT command: place a block instance."""
+        from PySide6.QtWidgets import QInputDialog
+        from src.model.entities.block import BlockInstance
+        from src.model.entities.base import Point
+        
+        block_names = list(self._document.block_defs.keys())
+        if not block_names:
+            self._echo("INSERT: No blocks defined. Use BLOCK first.")
+            self._echo("Command:")
+            return
+        
+        name = args.strip()
+        if not name or name not in block_names:
+            name, ok = QInputDialog.getItem(self, "Insert Block", "Block:", block_names, 0, False)
+            if not ok:
+                self._echo("INSERT cancelled.")
+                self._echo("Command:")
+                return
+        
+        # Use last point or 0,0
+        try:
+            lp_str = self._document.sysvars["LASTPOINT"]
+            parts = lp_str.split(',')
+            pt = Point(float(parts[0]), float(parts[1]))
+        except Exception:
+            pt = Point(0, 0)
+        
+        inst = BlockInstance(name, pt, layer_name=self._document.layer_manager.current_layer_name)
+        self._document.add_entity(inst)
+        self._rebuild_scene()
+        self._echo(f"INSERT \"{name}\" at {pt.x:.2f}, {pt.y:.2f}")
+        self._echo("Command:")
+
+    def _cmd_library(self, elem_type: str, args: str):
+        """Create a library element (door/window) and insert it."""
+        from src.model.entities.line import Line
+        from src.model.entities.circle import Circle
+        from src.model.entities.arc import Arc
+        from src.model.entities.base import Point
+        from src.model.entities.block import BlockDefinition, BlockInstance
+        import math
+        
+        # Determine size from args or default
+        size = 0.9  # default 90cm
+        if args:
+            try:
+                size = float(args)
+            except ValueError:
+                pass
+        
+        if elem_type == "DOOR":
+            name = "DOOR_90"
+            if name not in self._document.block_defs:
+                # Door: arc + line, 90cm wide, opens counterclockwise
+                ents = [
+                    Line(Point(0, 0), Point(size, 0)),  # door panel
+                    Arc(Point(0, 0), Point(size, 0), Point(size / 2, size / 2)),  # swing arc
+                ]
+                self._document.block_defs[name] = BlockDefinition(name, ents, Point(0, 0))
+                self._echo(f"Library: {name} created")
+        elif elem_type == "WINDOW":
+            name = f"WINDOW_{int(size*100)}"
+            if name not in self._document.block_defs:
+                ents = [
+                    Line(Point(0, 0), Point(size, 0)),
+                    Line(Point(0, 0.1), Point(size, 0.1)),  # frame thickness
+                    Line(Point(size/2, 0), Point(size/2, 0.1)),  # mullion
+                ]
+                self._document.block_defs[name] = BlockDefinition(name, ents, Point(0, 0))
+                self._echo(f"Library: {name} created")
+        
+        # Insert at last point
+        try:
+            lp_str = self._document.sysvars["LASTPOINT"]
+            parts = lp_str.split(',')
+            pt = Point(float(parts[0]), float(parts[1]))
+        except Exception:
+            pt = Point(0, 0)
+        
+        inst = BlockInstance(name, pt, layer_name=self._document.layer_manager.current_layer_name)
+        self._document.add_entity(inst)
+        self._rebuild_scene()
+        self._echo(f"{elem_type} inserted at {pt.x:.2f}, {pt.y:.2f}")
         self._echo("Command:")
 
     def _cmd_linetype(self, args: str):
@@ -1722,6 +1863,7 @@ class MainWindow(QMainWindow):
         from src.model.entities.text import TextEntity
         from src.model.entities.dimension import Dimension
         from src.model.entities.point_entity import PointEntity
+        from src.model.entities.block import BlockInstance
 
         for entity in self._document.entities:
             if isinstance(entity, Line):
@@ -1738,6 +1880,20 @@ class MainWindow(QMainWindow):
                 item = GfxDimensionItem(entity)
             elif isinstance(entity, PointEntity):
                 item = GfxPointItem(entity)
+            elif isinstance(entity, BlockInstance):
+                # Expand block instance into individual entity graphics
+                block_def = self._document.block_defs.get(entity.block_name)
+                if block_def:
+                    for sub_ent in entity.get_transformed_entities(block_def):
+                        if isinstance(sub_ent, Line):
+                            self._scene.addItem(GfxLineItem(sub_ent))
+                        elif isinstance(sub_ent, Circle):
+                            self._scene.addItem(GfxCircleItem(sub_ent))
+                        elif isinstance(sub_ent, Arc):
+                            self._scene.addItem(GfxArcItem(sub_ent))
+                        elif isinstance(sub_ent, Polyline):
+                            self._scene.addItem(GfxPolylineItem(sub_ent))
+                continue
             else:
                 continue
             self._scene.addItem(item)
