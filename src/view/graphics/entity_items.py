@@ -272,7 +272,7 @@ class GfxDimensionItem(QGraphicsItem):
             # Center text: measure width
             fm = painter.fontMetrics()
             tw = fm.horizontalAdvance(text)
-            painter.drawText(QPointF(-tw / 2, 3), text)
+            painter.drawText(QPointF(-tw / 2, -6), text)
             painter.restore()
 
         elif e.dim_type == "radius" or e.dim_type == "diameter":
@@ -344,7 +344,7 @@ class GfxDimensionItem(QGraphicsItem):
                 text = f"{dist:.2f}"
                 fm = painter.fontMetrics()
                 tw = fm.horizontalAdvance(text)
-                painter.drawText(QPointF(mid_x - tw / 2, dim_y - 3), text)
+                painter.drawText(QPointF(mid_x - tw / 2, dim_y + 4), text)
             else:
                 # Vertical
                 dim_x = tp.x
@@ -360,7 +360,7 @@ class GfxDimensionItem(QGraphicsItem):
                 painter.setFont(font)
                 text = f"{dist:.2f}"
                 painter.save()
-                painter.translate(QPointF(dim_x - 3, mid_y))
+                painter.translate(QPointF(dim_x + 4, mid_y))
                 painter.rotate(-90)
                 fm = painter.fontMetrics()
                 tw = fm.horizontalAdvance(text)
