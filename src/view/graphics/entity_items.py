@@ -135,8 +135,6 @@ class GfxTextItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
-        # Keep text readable at any zoom level
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations, True)
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()
@@ -168,7 +166,6 @@ class GfxDimensionItem(QGraphicsItem):
         super().__init__()
         self.entity = entity
         self.setZValue(0)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations, True)
 
     def boundingRect(self) -> QRectF:
         bmin, bmax = self.entity.bounding_box()

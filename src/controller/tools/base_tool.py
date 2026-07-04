@@ -10,8 +10,6 @@ class SnapIndicator(QGraphicsEllipseItem):
     def __init__(self):
         super().__init__()
         self.setZValue(10000)
-        # Use ItemIgnoresTransformations so it stays a constant size on screen
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations, True)
         self.setRect(-6, -6, 12, 12)
         pen = QPen(QColor("#00FF00"))
         pen.setWidthF(2)
