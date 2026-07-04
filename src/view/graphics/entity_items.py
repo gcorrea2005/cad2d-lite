@@ -212,102 +212,160 @@ class GfxDimensionItem(QGraphicsItem):
         painter.setPen(pen)
 
         p1, p2 = e.def_point1, e.def_point2
-        tp = e.text_position  # text position (offset perpendicular to dim line)
+        tp = e.text_position
         dist = e.measured_distance()
+        arrow_size = 6  # DIMASZ equivalent
+
+        # ── Helper: draw arrowhead ──
+        def draw_arrow(tip_x: float, tip_y: float, ang: float):
+            a1 = ang + math.radians(160)
+            a2 = ang - math.radians(160)
+            pts = [
+                QPointF(tip_x, tip_y),
+                QPointF(tip_x + arrow_size * math.cos(a1), tip_y + arrow_size * math.sin(a1)),
+                QPointF(tip_x + arrow_size * math.cos(a2), tip_y + arrow_size * math.sin(a2)),
+            ]
+            painter.save()
+            painter.setBrush(pen.color())
+            painter.drawPolygon(pts)
+            painter.restore()
 
         if e.dim_type == "aligned":
             # Angle of the line connecting the two points
             ang = math.atan2(p2.y - p1.y, p2.x - p1.x)
             cos_a, sin_a = math.cos(ang), math.sin(ang)
-
-            # Perpendicular direction (offset)
             perp_x, perp_y = -sin_a, cos_a
 
-            # Compute offset from text_position to the line p1→p2
-            # Project tp onto the perpendicular direction
+            # Compute offset from text_position
             mid = Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
-            dx_tp = tp.x - mid.x
-            dy_tp = tp.y - mid.y
-            # Sign of the offset (which side of the line)
-            ext_len = dx_tp * perp_x + dy_tp * perp_y
-            if abs(ext_len) < 2:
-                ext_len = 10  # minimum offset
+            ext_len = (tp.x - mid.x) * perp_x + (tp.y - mid.y) * perp_y
+            if abs(ext_len) < 5:
+                ext_len = 15
 
-            # Extension line 1: from p1 perpendicular to dim line
-            ext1_end = Point(
-                p1.x + perp_x * ext_len,
-                p1.y + perp_y * ext_len,
-            )
-            painter.drawLine(
-                QPointF(p1.x, p1.y),
-                QPointF(ext1_end.x, ext1_end.y),
-            )
-            # Extension line 2
-            ext2_end = Point(
-                p2.x + perp_x * ext_len,
-                p2.y + perp_y * ext_len,
-            )
-            painter.drawLine(
-                QPointF(p2.x, p2.y),
-                QPointF(ext2_end.x, ext2_end.y),
-            )
-            # Dimension line: parallel to p1→p2, offset by perp
-            painter.drawLine(
-                QPointF(ext1_end.x, ext1_end.y),
-                QPointF(ext2_end.x, ext2_end.y),
-            )
-            # Text at midpoint of dimension line
+            # Extension lines
+            ext1_end = Point(p1.x + perp_x * ext_len, p1.y + perp_y * ext_len)
+            ext2_end = Point(p2.x + perp_x * ext_len, p2.y + perp_y * ext_len)
+            painter.drawLine(QPointF(p1.x, p1.y), QPointF(ext1_end.x, ext1_end.y))
+            painter.drawLine(QPointF(p2.x, p2.y), QPointF(ext2_end.x, ext2_end.y))
+
+            # Dimension line
+            painter.drawLine(QPointF(ext1_end.x, ext1_end.y), QPointF(ext2_end.x, ext2_end.y))
+
+            # Arrowheads
+            dir_ang = ang if cos_a >= 0 else ang + math.pi
+            draw_arrow(ext1_end.x, ext1_end.y, dir_ang + math.pi)
+            draw_arrow(ext2_end.x, ext2_end.y, dir_ang)
+
+            # Text centered on dim line
             mid_x = (ext1_end.x + ext2_end.x) / 2
             mid_y = (ext1_end.y + ext2_end.y) / 2
             font = painter.font()
-            font.setPixelSize(12)
+            font.setPixelSize(11)
             painter.setFont(font)
             text = f"{dist:.2f}"
-            # Rotate text to match angle
             painter.save()
             painter.translate(QPointF(mid_x, mid_y))
             if cos_a < 0:
                 painter.rotate(math.degrees(ang) + 180)
             else:
                 painter.rotate(math.degrees(ang))
-            painter.drawText(QPointF(-15, 4), text)
+            # Center text: measure width
+            fm = painter.fontMetrics()
+            tw = fm.horizontalAdvance(text)
+            painter.drawText(QPointF(-tw / 2, 3), text)
             painter.restore()
+
         elif e.dim_type == "radius" or e.dim_type == "diameter":
-            # Radius/diameter: leader from center to circle edge
             center, edge = p1, p2
-            painter.drawLine(
-                QPointF(center.x, center.y),
-                QPointF(edge.x, edge.y),
-            )
-            dist = e.measured_distance()
+            ang = math.atan2(edge.y - center.y, edge.x - center.x)
+
+            # Leader line from edge to text
+            painter.drawLine(QPointF(center.x, center.y), QPointF(edge.x, edge.y))
+
+            # Arrow at edge point
+            draw_arrow(edge.x, edge.y, ang)
+
+            # Text at text_position offset
             font = painter.font()
-            font.setPixelSize(12)
+            font.setPixelSize(11)
             painter.setFont(font)
             prefix = "⌀ " if e.dim_type == "diameter" else "R "
             text = f"{prefix}{dist:.2f}"
-            mid_x = (center.x + edge.x) / 2
-            mid_y = (center.y + edge.y) / 2
-            painter.drawText(QPointF(mid_x + 4, mid_y - 2), text)
-        else:
-            # Linear (H/V) — existing behavior
-            painter.drawLine(
-                QPointF(p1.x, p1.y),
-                QPointF(p1.x, tp.y),
-            )
-            painter.drawLine(
-                QPointF(p2.x, p2.y),
-                QPointF(p2.x, tp.y),
-            )
-            painter.drawLine(
-                QPointF(p1.x, tp.y),
-                QPointF(p2.x, tp.y),
-            )
+            painter.drawText(QPointF(tp.x, tp.y - 4), text)
+
+        elif e.dim_type == "angular":
+            # p1=vertex, p2=point on arc, tp=text position
+            vertex, arc_pt = p1, p2
+            # Angle from vertex to arc_pt
+            ang1 = math.atan2(arc_pt.y - vertex.y, arc_pt.x - vertex.x)
+            # Use tp as the second angle direction
+            ang2 = math.atan2(tp.y - vertex.y, tp.x - vertex.x)
+            # Draw arc between the two angles
+            r = vertex.distance_to(arc_pt) * 0.6
+            # Draw rays
+            painter.drawLine(QPointF(vertex.x, vertex.y),
+                           QPointF(vertex.x + r * 2 * math.cos(ang1), vertex.y + r * 2 * math.sin(ang1)))
+            painter.drawLine(QPointF(vertex.x, vertex.y),
+                           QPointF(vertex.x + r * 2 * math.cos(ang2), vertex.y + r * 2 * math.sin(ang2)))
+            # Draw arc
+            start_deg = math.degrees(ang1)
+            end_deg = math.degrees(ang2)
+            span = end_deg - start_deg
+            if span > 180: span -= 360
+            if span < -180: span += 360
+            arc_rect = QRectF(vertex.x - r, vertex.y - r, r * 2, r * 2)
+            painter.drawArc(arc_rect, int(start_deg * 16), int(span * 16))
+            # Text
             font = painter.font()
-            font.setPixelSize(12)
+            font.setPixelSize(11)
             painter.setFont(font)
-            text = f"{dist:.2f}"
-            mid_x = (p1.x + p2.x) / 2
-            painter.drawText(QPointF(mid_x - 10, tp.y - 2), text)
+            angle_deg = abs(span)
+            text = f"{angle_deg:.1f}°"
+            mid_ang = ang1 + math.radians(span / 2)
+            tx = vertex.x + r * 1.3 * math.cos(mid_ang)
+            ty = vertex.y + r * 1.3 * math.sin(mid_ang)
+            painter.drawText(QPointF(tx, ty), text)
+
+        else:
+            # Linear H/V
+            if abs(p2.x - p1.x) >= abs(p2.y - p1.y):
+                # Horizontal
+                dim_y = tp.y
+                painter.drawLine(QPointF(p1.x, p1.y), QPointF(p1.x, dim_y))
+                painter.drawLine(QPointF(p2.x, p2.y), QPointF(p2.x, dim_y))
+                painter.drawLine(QPointF(p1.x, dim_y), QPointF(p2.x, dim_y))
+                left, right = (p1.x, p2.x) if p1.x < p2.x else (p2.x, p1.x)
+                draw_arrow(left, dim_y, math.pi)
+                draw_arrow(right, dim_y, 0)
+                mid_x = (p1.x + p2.x) / 2
+                font = painter.font()
+                font.setPixelSize(11)
+                painter.setFont(font)
+                text = f"{dist:.2f}"
+                fm = painter.fontMetrics()
+                tw = fm.horizontalAdvance(text)
+                painter.drawText(QPointF(mid_x - tw / 2, dim_y - 3), text)
+            else:
+                # Vertical
+                dim_x = tp.x
+                painter.drawLine(QPointF(p1.x, p1.y), QPointF(dim_x, p1.y))
+                painter.drawLine(QPointF(p2.x, p2.y), QPointF(dim_x, p2.y))
+                painter.drawLine(QPointF(dim_x, p1.y), QPointF(dim_x, p2.y))
+                bottom, top = (p1.y, p2.y) if p1.y < p2.y else (p2.y, p1.y)
+                draw_arrow(dim_x, bottom, -math.pi / 2)
+                draw_arrow(dim_x, top, math.pi / 2)
+                mid_y = (p1.y + p2.y) / 2
+                font = painter.font()
+                font.setPixelSize(11)
+                painter.setFont(font)
+                text = f"{dist:.2f}"
+                painter.save()
+                painter.translate(QPointF(dim_x - 3, mid_y))
+                painter.rotate(-90)
+                fm = painter.fontMetrics()
+                tw = fm.horizontalAdvance(text)
+                painter.drawText(QPointF(tw / 2, 3), text)
+                painter.restore()
 
 
 class GfxPointItem(QGraphicsItem):
