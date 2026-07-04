@@ -663,8 +663,70 @@ class MainWindow(QMainWindow):
         elif action == "dim_angular":
             self._tool_manager._dim_type = "angular"
             self._activate_tool("dimradius")
+        elif action == "layer_set":
+            from PySide6.QtWidgets import QInputDialog
+            layers = list(self._document.layer_manager.layers.keys())
+            name, ok = QInputDialog.getItem(self, "Set Layer", "Layer:", layers, 0, False)
+            if ok and name:
+                self._document.layer_manager.set_current(name)
+                self._document.sysvars["CLAYER"] = name
+                self._echo(f"Current layer: {name}")
+            self._echo("Command:")
+        elif action == "layer_new":
+            from PySide6.QtWidgets import QInputDialog
+            name, ok = QInputDialog.getText(self, "New Layer", "Layer name:")
+            if ok and name:
+                try:
+                    self._document.layer_manager.add_layer(name)
+                    self._echo(f"Layer {name} created")
+                except ValueError:
+                    self._echo(f"Layer {name} already exists")
+            self._echo("Command:")
+        elif action == "layer_del":
+            layers = [n for n in self._document.layer_manager.layers.keys() if n != "0"]
+            from PySide6.QtWidgets import QInputDialog
+            if layers:
+                name, ok = QInputDialog.getItem(self, "Delete Layer", "Layer:", layers, 0, False)
+                if ok and name:
+                    self._document.layer_manager.delete_layer(name)
+                    self._echo(f"Layer {name} deleted")
+            else:
+                self._echo("No layers to delete")
+            self._echo("Command:")
         elif action == "ni_dxfout":
             self._cmd_dxfout()
+        elif action == "ni_ltype":
+            self._cmd_linetype("")
+        elif action == "ni_color":
+            self._cmd_color("")
+        elif action == "ni_template":
+            self._cmd_layer_template()
+        elif action == "ni_setvardim":
+            from PySide6.QtWidgets import QInputDialog
+            var, ok = QInputDialog.getText(self, "SETVAR DIM", "Variable (DIMSCALE/DIMTXT/DIMASZ...):")
+            if ok and var:
+                val, ok2 = QInputDialog.getText(self, "SETVAR DIM", f"Value for {var}:")
+                if ok2 and val:
+                    try:
+                        self._document.sysvars[var.upper()] = float(val) if val.replace('.','').replace('-','').isdigit() else val
+                        self._echo(f"{var.upper()} = {val}")
+                    except Exception as e:
+                        self._echo(f"Error: {e}")
+            self._echo("Command:")
+        elif action == "ni_dimscale":
+            from PySide6.QtWidgets import QInputDialog
+            v, ok = QInputDialog.getDouble(self, "DIMSCALE", "Dimension scale:", 1.0, 0.1, 100, 2)
+            if ok:
+                self._document.sysvars["DIMSCALE"] = v
+                self._echo(f"DIMSCALE = {v}")
+            self._echo("Command:")
+        elif action == "ni_dimtxt":
+            from PySide6.QtWidgets import QInputDialog
+            v, ok = QInputDialog.getDouble(self, "DIMTXT", "Text height:", 2.5, 0.5, 50, 2)
+            if ok:
+                self._document.sysvars["DIMTXT"] = v
+                self._echo(f"DIMTXT = {v}")
+            self._echo("Command:")
         elif action and action.startswith("ni_"):
             cmd_name = action[3:].upper()
             self._echo(f"Command: {cmd_name} (not implemented)")
