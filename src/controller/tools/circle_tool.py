@@ -23,7 +23,8 @@ class CircleTool(BaseTool):
         else:
             radius = self._center.distance_to(pt)
             circle = Circle(self._center, radius,
-                            layer_name=self._current_layer, color=self._current_color)
+                            layer_name=self._current_layer, color=self._current_color,
+                            linetype=self._current_linetype)
             self.document.add_entity(circle)
             gfx = GfxCircleItem(circle)
             self.view.scene().addItem(gfx)

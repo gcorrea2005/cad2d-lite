@@ -22,8 +22,9 @@ class TextTool(BaseTool):
         )
         if ok and text.strip():
             entity = TextEntity(
-                pt, text.strip(),
-                layer_name=self._current_layer, color=self._current_color,
+                text = TextEntity(pt, content,
+                                         layer_name=self._current_layer, color=self._current_color,
+                                         linetype=self._current_linetype)
             )
             self.document.add_entity(entity)
             gfx = GfxTextItem(entity)

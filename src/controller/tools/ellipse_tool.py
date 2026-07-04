@@ -31,7 +31,8 @@ class EllipseTool(BaseTool):
 
             ellipse = Ellipse(self._center, self._major_pt, ratio,
                               layer_name=self._current_layer,
-                              color=self._current_color)
+                              color=self._current_color,
+                              linetype=self._current_linetype)
             self.document.add_entity(ellipse)
             self.view.scene().addItem(GfxEllipseItem(ellipse))
             self._center = None
