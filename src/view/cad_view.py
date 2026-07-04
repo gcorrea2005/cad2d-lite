@@ -97,12 +97,8 @@ class CadView(QGraphicsView):
         self._crosshair_overlay.setGeometry(self.viewport().rect())
 
     def wheelEvent(self, event: QWheelEvent):
-        self._save_viewport()
-        delta = event.angleDelta().y()
-        if delta > 0:
-            self.scale(self._zoom_factor, self._zoom_factor)
-        else:
-            self.scale(1 / self._zoom_factor, 1 / self._zoom_factor)
+        # Disable scroll zoom — use ZOOM commands instead
+        event.ignore()
 
     def mousePressEvent(self, event: QMouseEvent):
         if self.tool_manager and self.tool_manager._active_tool:
@@ -111,10 +107,22 @@ class CadView(QGraphicsView):
                 self.tool_manager._active_tool.mouse_press(event, scene_pos)
                 event.accept()
                 return
-        if event.button() == Qt.MouseButton.MiddleButton:
-            self._panning = True
-            self._last_pan_point = event.position()
-            self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            if event.button() == Qt.MouseButton.RightButton:
+                # Right-click = Enter / Repeat last command (ACAD style)
+                w = self.window()
+                if hasattr(w, '_cmd_input'):
+                    last_cmd = w._cmd_history[-1] if w._cmd_history else ""
+                    if last_cmd:
+                        w._cmd_input.setPlainText(last_cmd)
+                        w._process_command(last_cmd)
+                event.accept()
+                return
+        if event.button() == Qt.MouseButton.RightButton:
+            # Repeat last command even with no active tool
+            w = self.window()
+            if hasattr(w, '_cmd_history') and w._cmd_history:
+                last_cmd = w._cmd_history[-1]
+                w._process_command(last_cmd)
             event.accept()
             return
         super().mousePressEvent(event)
@@ -122,30 +130,14 @@ class CadView(QGraphicsView):
     def mouseMoveEvent(self, event: QMouseEvent):
         scene_pos = self.mapToScene(event.pos())
         self._cursor_scene_pos = scene_pos
-        self._crosshair_overlay.update()  # overlay-only repaint — super fast
+        self._crosshair_overlay.update()
         if self.tool_manager and self.tool_manager._active_tool:
             self.tool_manager._active_tool.mouse_move(event, scene_pos)
-            # Update status bar coordinates
             if hasattr(self, '_status_callback') and self._status_callback:
                 self._status_callback(scene_pos)
-        if self._panning:
-            delta = event.position() - self._last_pan_point
-            self._last_pan_point = event.position()
-            self.horizontalScrollBar().setValue(
-                self.horizontalScrollBar().value() - int(delta.x()))
-            self.verticalScrollBar().setValue(
-                self.verticalScrollBar().value() - int(delta.y()))
-            event.accept()
-            return
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.MouseButton.MiddleButton:
-            self._panning = False
-            self.setCursor(Qt.CursorShape.ArrowCursor)
-            self._save_viewport()  # save after pan
-            event.accept()
-            return
         # Forward release to tool
         if self.tool_manager and self.tool_manager._active_tool:
             scene_pos = self.mapToScene(event.pos())

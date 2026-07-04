@@ -34,11 +34,19 @@ class BaseTool:
 
     @property
     def _current_color(self) -> str:
-        """Read CECOLOR from sysvars (ACI index as string)."""
+        """Read CECOLOR from sysvars, resolving BYLAYER to layer color."""
         try:
-            return self.document.sysvars["CECOLOR"]
+            cec = self.document.sysvars["CECOLOR"]
         except Exception:
             return "7"
+        if isinstance(cec, str) and cec.upper() == "BYLAYER":
+            # Resolve to current layer's color
+            try:
+                lm = self.document.layer_manager
+                return lm.layers[lm.current_layer_name].color
+            except Exception:
+                return "7"
+        return cec
 
     @property
     def _current_layer(self) -> str:

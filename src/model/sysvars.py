@@ -63,7 +63,7 @@ _DEFAULTS: dict[str, SysVar] = {
     "LIMMIN":       SysVar("0,0",    vtype=str),
     "LIMMAX":       SysVar("12,9",   vtype=str),
     # Bloque D — Estilo de entidad
-    "CECOLOR":      SysVar("BYLAYER", vtype=str),
+    "CECOLOR":      SysVar("7", vtype=str),
     "CELTYPE":      SysVar("BYLAYER", vtype=str),
     "LTSCALE":      SysVar(1.0,      vtype=(int, float)),
     "FILLMODE":     SysVar(1,        vtype=int),

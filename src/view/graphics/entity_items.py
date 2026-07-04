@@ -22,7 +22,12 @@ def _entity_color(entity) -> QColor:
     if isinstance(c, str) and c.isdigit():
         r, g, b = aci_to_rgb(int(c))
         return QColor(r, g, b)
-    return QColor(c)
+    if isinstance(c, str) and c.upper() in ("BYLAYER", "BYBLOCK"):
+        return QColor(255, 255, 255)  # default white
+    qc = QColor(c)
+    if not qc.isValid():
+        return QColor(255, 255, 255)  # fallback
+    return qc
 
 
 def _entity_pen(entity, ltscale: float = 1.0) -> QPen:
