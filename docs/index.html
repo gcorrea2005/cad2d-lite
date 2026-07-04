@@ -440,438 +440,150 @@
 <!-- HERO -->
 <section class="hero">
   <h1>DogCAD 2D Lite</h1>
-  <p class="sub">DOCUMENTACIÓN SIN CENSURA v3.0 🔥</p>
+  <p class="sub">DOCUMENTACION SIN CENSURA v3.0 🔥🐾</p>
   <p class="tagline">
-    Un CAD 2D de escritorio hecho con <span style="color:var(--accent)">Python + PySide6 + ezdxf</span>.
-    Interfaz retro AutoCAD 10, alma moderna. 30 herramientas, 99 tests, SETVAR engine, ACI 256 colores, 11 OSNAP, linetypes, PLOT PDF, DXF IN, 0 excusas.
-    Porque no necesitas AutoCAD para trazar una línea en 2026.
+    Fork de AutoCAD R10 (1988) en <span style="color:var(--accent)">Python + PySide6 + ezdxf</span>.
+    30 herramientas, 99 tests, SETVAR (43 vars), ACI 256 colores,
+    11 OSNAP, 15 linetypes, PLOT PDF, DXF IN, HATCH patterns.
+    Porque no necesitas AutoCAD para producir planos reales en 2026.
   </p>
   <div class="typewriter" id="typewriter">
-    <span class="prompt">C:\CAD2DLITE&gt;</span>
+    <span class="prompt">C:\DOGCAD&gt;</span>
     <span id="typed"></span><span class="cursor"></span>
   </div>
 </section>
 
-<!-- STATS -->
 <section id="stats">
-  <h2>📊 ESTADÍSTICAS VIVAS</h2>
+  <h2>📊 ESTADISTICAS</h2>
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="num" data-count="4877">0</div>
-      <div class="label">LÍNEAS DE CÓDIGO</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" data-count="30">0</div>
-      <div class="label">HERRAMIENTAS</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" data-count="60">0</div>
-      <div class="label">TESTS (100% PASAN)</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" data-count="7">0</div>
-      <div class="label">TIPOS DE ENTIDAD</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" data-count="4">0</div>
-      <div class="label">FASES (A-B-C-D)</div>
-    </div>
-    <div class="stat-card">
-      <div class="num"><span data-count="95">0</span><span style="font-size:1.2rem">%</span></div>
-      <div class="label">SCREEN MENU COMPLETO</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" data-count="0">0</div>
-      <div class="label">DEPENDENCIAS DE AUTODESK</div>
-    </div>
-    <div class="stat-card" style="border-color: var(--accent)">
-      <div class="num" id="stat-time" style="color: var(--green)">--</div>
-      <div class="label">SEGUNDOS EN ESTA PÁGINA</div>
-    </div>
+    <div class="stat-card"><div class="num" data-count="7810">0</div><div class="label">LINEAS (94 archivos .py)</div></div>
+    <div class="stat-card"><div class="num" data-count="30">0</div><div class="label">HERRAMIENTAS</div></div>
+    <div class="stat-card" style="border-color:var(--green)"><div class="num" data-count="99">0</div><div class="label">TESTS (100% PASS)</div></div>
+    <div class="stat-card"><div class="num" data-count="43">0</div><div class="label">SETVAR</div></div>
+    <div class="stat-card"><div class="num" data-count="11">0</div><div class="label">OSNAP</div></div>
+    <div class="stat-card"><div class="num" data-count="15">0</div><div class="label">LINETYPES</div></div>
+    <div class="stat-card"><div class="num" data-count="0">0</div><div class="label">$USD AUTODESK</div></div>
+    <div class="stat-card" style="border-color:var(--accent)"><div class="num" id="stat-time" style="color:var(--green)">--</div><div class="label">SEGUNDOS ACA</div></div>
   </div>
-
-  <h3>Stack Tecnológico</h3>
-  <table>
-    <tr><th>Tecnología</th><th>Versión</th><th>Rol</th><th>¿Por qué?</th></tr>
-    <tr><td>Python</td><td>3.12</td><td>Runtime</td><td>El rey del prototipado rápido</td></tr>
-    <tr><td>PySide6</td><td>6.11</td><td>GUI</td><td>Qt para Python, nativo en macOS</td></tr>
-    <tr><td>ezdxf</td><td>1.1+</td><td>DXF I/O</td><td>Exporta a formato que AutoCAD sí entiende</td></tr>
-    <tr><td>pytest</td><td>9.1</td><td>Testing</td><td>Porque los bugs duelen</td></tr>
-    <tr><td>git</td><td>—</td><td>Versionado</td><td>Porque Ctrl+Z no es suficiente</td></tr>
-  </table>
-
-  <h3>Distribución del Código</h3>
-  <table>
-    <tr><th>Módulo</th><th>Líneas</th><th>Rol</th></tr>
-    <tr><td>src/view/ui/main_window.py</td><td>1,154</td><td>💀 Ventana principal (el monstruo)</td></tr>
-    <tr><td>src/controller/tools/ (34 archivos)</td><td>~2,500</td><td>🔧 Las 30 herramientas + DIMRADIUS</td></tr>
-    <tr><td>src/model/entities/</td><td>~600</td><td>📐 Las 7 entidades geométricas</td></tr>
-    <tr><td>tests/</td><td>489</td><td>✅ Batería de pruebas</td></tr>
-    <tr><td>src/io/</td><td>~200</td><td>💾 Save/Load/DXF</td></tr>
-    <tr><td>scripts/</td><td>~200</td><td>🤖 Generación de planos</td></tr>
+  <table style="margin-top:1.5rem">
+    <tr><th>Tech</th><th>Version</th><th>Rol</th></tr>
+    <tr><td>Python</td><td>3.12</td><td>Runtime</td></tr>
+    <tr><td>PySide6</td><td>6.11</td><td>GUI (Qt 6)</td></tr>
+    <tr><td>ezdxf</td><td>1.1+</td><td>DXF I/O</td></tr>
+    <tr><td>pytest</td><td>9.1</td><td>99 tests</td></tr>
   </table>
 </section>
 
-<!-- ARQUITECTURA -->
-<section id="arquitectura">
-  <h2>🏗️ ARQUITECTURA MVC</h2>
-  <p style="color:#aabbcc;margin-bottom:1.5rem">
-    Separación limpia entre Modelo, Vista y Controlador. Porque mezclar lógica de negocio
-    con widgets de UI es el camino al manicomio.
-  </p>
-  <div class="arch-diagram">
-    <div class="arch-box">
-      <div class="icon">📐</div>
-      <h4>MODEL</h4>
-      <ul>
-        <li>Document</li>
-        <li>7 Entidades</li>
-        <li>Layer Manager</li>
-        <li>Snap Engine</li>
-        <li>Undo/Redo Stack</li>
-      </ul>
-    </div>
-    <div class="arch-box">
-      <div class="icon">👁️</div>
-      <h4>VIEW</h4>
-      <ul>
-        <li>MainWindow</li>
-        <li>CadView (QGraphicsView)</li>
-        <li>CadScene (QGraphicsScene)</li>
-        <li>Screen Menu (ACAD 10 style)</li>
-        <li>Command Line</li>
-        <li>Info Bar (LAYER | ORTHO | coords)</li>
-      </ul>
-    </div>
-    <div class="arch-box">
-      <div class="icon">🎮</div>
-      <h4>CONTROLLER</h4>
-      <ul>
-        <li>Tool Manager</li>
-        <li>30 Tools</li>
-        <li>BaseTool (snap + UI)</li>
-        <li>ModifyEntityCommand</li>
-        <li>Undo/Redo</li>
-      </ul>
-    </div>
-    <div class="arch-box">
-      <div class="icon">💾</div>
-      <h4>I/O</h4>
-      <ul>
-        <li>.cadlite JSON</li>
-        <li>DXF R2010 Export</li>
-        <li>ezdxf integration</li>
-        <li>Layer serialization</li>
-      </ul>
-    </div>
-  </div>
-
-  <h3>Los 7 Tipos de Entidad</h3>
+<section id="comandos">
+  <h2>📟 COMANDOS</h2>
   <table>
-    <tr><th>Entidad</th><th>Archivo</th><th>GfxItem</th><th>DXF</th></tr>
-    <tr><td>Line</td><td>src/model/entities/line.py</td><td>GfxLineItem</td><td>LINE</td></tr>
-    <tr><td>Circle</td><td>src/model/entities/circle.py</td><td>GfxCircleItem</td><td>CIRCLE</td></tr>
-    <tr><td>Arc</td><td>src/model/entities/arc.py</td><td>GfxArcItem</td><td>ARC</td></tr>
-    <tr><td>Polyline</td><td>src/model/entities/polyline.py</td><td>GfxPolylineItem</td><td>LWPOLYLINE</td></tr>
-    <tr><td>Text</td><td>src/model/entities/text.py</td><td>GfxTextItem</td><td>TEXT</td></tr>
-    <tr><td>Dimension</td><td>src/model/entities/dimension.py</td><td>GfxDimensionItem</td><td>DIMENSION</td></tr>
-    <tr><td>PointEntity</td><td>src/model/entities/point_entity.py</td><td>GfxPointItem</td><td>POINT</td></tr>
+    <tr><th>Cat</th><th>Comando</th><th>Ejemplo</th></tr>
+    <tr><td style="color:var(--accent)"><b>DRAW</b></td><td>LINE CIRCLE ARC RECTANG PLINE TEXT POINT SOLID HATCH</td><td><code>LINE 0,0 100,50</code></td></tr>
+    <tr><td style="color:var(--accent)"><b>DIM</b></td><td>DIM DIMALIGNED DIMRADIUS DIMDIAMETER</td><td><code>DIMALIGNED</code></td></tr>
+    <tr><td style="color:var(--orange)"><b>MODIFY</b></td><td>ERASE MOVE COPY ROTATE MIRROR SCALE OFFSET TRIM EXTEND FILLET CHAMFER BREAK EXPLODE ARRAY</td><td>Click</td></tr>
+    <tr><td style="color:var(--header)"><b>DISPLAY</b></td><td>ZOOM E ZOOM W ZOOM P PAN REDRAW REGEN</td><td><code>ZOOM E</code></td></tr>
+    <tr><td style="color:var(--cyan)"><b>INQUIRY</b></td><td>DIST AREA ID LIST</td><td><code>DIST</code></td></tr>
+    <tr><td style="color:var(--magenta)"><b>LAYER</b></td><td>CLAYER LAYER NEW SET ON OFF COLOR FREEZE THAW LOCK UNLOCK DELETE</td><td><code>CLAYER walls</code></td></tr>
+    <tr><td style="color:var(--green)"><b>SETTINGS</b></td><td>COLOR LINETYPE SETVAR SNAP ORTHO GRID TEMPLATE</td><td><code>COLOR 1</code></td></tr>
+    <tr><td style="color:var(--pink)"><b>I/O</b></td><td>DXFIN PLOT SAVE OPEN SCRIPT</td><td><code>PLOT</code></td></tr>
+    <tr><td><b>UTIL</b></td><td>UNDO REDO TEXTSCR GRAPHSCR HELP ABOUT</td><td>F2 / Ctrl+Z</td></tr>
   </table>
 
-  <h3>Checklist para Agregar Nueva Entidad</h3>
+  <h3>Atajos</h3>
+  <table>
+    <tr><td style="color:var(--accent)">L C A P R T D M O X</td><td>Tools (Line Circle Arc Pline Rect Text Dim Move Offset eXplode)</td></tr>
+    <tr><td style="color:var(--green)">Esc</td><td>Cancelar → linea comandos (cursor verde blink)</td></tr>
+    <tr><td>Click Der</td><td>Repetir ultimo comando</td></tr>
+    <tr><td>F2 F7 F8 F9</td><td>Text screen / Grid / Ortho / Snap</td></tr>
+    <tr><td>↑↓</td><td>Historial comandos</td></tr>
+    <tr><td>Ctrl+Z/Y</td><td>Undo/Redo</td></tr>
+  </table>
+</section>
+
+<section id="setvar">
+  <h2>⚙️ SETVAR — 43 VARIABLES</h2>
+  <table>
+    <tr><th>Bloque (vars)</th><th>Variables</th></tr>
+    <tr><td style="color:var(--accent)">A (12)</td><td>OSMODE APERTURE PICKBOX ORTHOMODE COORDS CLAYER FILLETRAD CHAMFERA CHAMFERB TEXTSIZE OFFSETDIST MIRRTEXT</td></tr>
+    <tr><td style="color:var(--orange)">B (8)</td><td>DIMSCALE DIMTXT DIMASZ DIMEXO DIMEXE DIMDLI DIMTAD DIMZIN</td></tr>
+    <tr><td style="color:var(--header)">C (6)</td><td>GRIDMODE GRIDUNIT SNAPMODE SNAPUNIT LIMMIN LIMMAX</td></tr>
+    <tr><td style="color:var(--green)">D (4)</td><td>CECOLOR CELTYPE LTSCALE FILLMODE</td></tr>
+    <tr><td style="color:var(--cyan)">E (3)</td><td>LUNITS LUPREC AUNITS</td></tr>
+    <tr><td style="color:var(--magenta)">F (4)</td><td>BLIPMODE EXPERT DRAGMODE CMDECHO</td></tr>
+    <tr><td style="color:var(--pink)">G (6)</td><td>LASTPOINT LASTANGLE DWGNAME ACADVER(R10) PDMODE(3) PDSIZE(0)</td></tr>
+  </table>
+  <p style="color:#aabbcc;margin-top:1rem"><code>SETVAR PDMODE 35</code> | <code>SETVAR OSMODE 7</code> | <code>SETVAR ? DIM*</code></p>
+</section>
+
+<section id="osnap">
+  <h2>🎯 OSNAP — 11 MODOS</h2>
+  <table>
+    <tr><th>#</th><th>Modo</th><th>Desc</th></tr>
+    <tr><td>0</td><td style="color:var(--accent)">ENDPOINT</td><td>Extremos Line/Arc/Pline</td></tr>
+    <tr><td>1</td><td>MIDPOINT</td><td>Punto medio</td></tr>
+    <tr><td>2</td><td>CENTER</td><td>Centro Circle/Arc</td></tr>
+    <tr><td>3</td><td>NODE</td><td>Point entity</td></tr>
+    <tr><td>4</td><td>QUADRANT</td><td>0/90/180/270°</td></tr>
+    <tr><td>5</td><td>INTERSECTION</td><td>Cruce Line/Line/Circle</td></tr>
+    <tr><td>6</td><td>INSERTION</td><td>Insercion Text</td></tr>
+    <tr><td>7</td><td>PERPENDICULAR</td><td>Pie perpendicular</td></tr>
+    <tr><td>8</td><td>TANGENT</td><td>Tangente Circle/Arc</td></tr>
+    <tr><td>9</td><td>NEAREST</td><td>Mas cercano</td></tr>
+    <tr><td>—</td><td>QUICK</td><td>Primer snap</td></tr>
+  </table>
+</section>
+
+<section id="roadmap">
+  <h2>🗺️ ROADMAP</h2>
+  <table>
+    <tr><th>Fase</th><th>Estado</th><th>Features</th></tr>
+    <tr><td style="color:var(--green)">A-DRAW</td><td>✅</td><td>LINE ARC CIRCLE PLINE RECTANG TEXT DIM DIMALIGNED DIMRADIUS DIMDIAMETER POINT HATCH SOLID</td></tr>
+    <tr><td style="color:var(--green)">B-MODIFY</td><td>✅</td><td>ERASE MOVE COPY ROTATE MIRROR SCALE OFFSET TRIM EXTEND FILLET CHAMFER BREAK EXPLODE ARRAY</td></tr>
+    <tr><td style="color:var(--green)">C-DISPLAY</td><td>✅</td><td>ZOOM E/W/P PAN REDRAW REGEN</td></tr>
+    <tr><td style="color:var(--green)">D-INQUIRY</td><td>✅</td><td>DIST AREA ID LIST</td></tr>
+    <tr><td style="color:var(--green)">E-LAYER</td><td>✅</td><td>MAKE SET NEW ON OFF COLOR FREEZE THAW LOCK UNLOCK DELETE CLAYER LAYER</td></tr>
+    <tr><td style="color:var(--green)">F-SETTINGS</td><td>✅</td><td>SNAP GRID ORTHO COLOR LINETYPE SETVAR(43) TEMPLATE</td></tr>
+    <tr><td style="color:var(--green)">G-LINETYPE</td><td>✅</td><td>15 tipos: CONTINUOUS DASHED HIDDEN CENTER PHANTOM DASHDOT DOT...</td></tr>
+    <tr><td style="color:var(--green)">H-I/O</td><td>✅</td><td>.cadlite JSON DXF OUT DXF IN PLOT PDF SCRIPT</td></tr>
+    <tr><td style="color:var(--accent)">I-PENDIENTE</td><td>🔲</td><td>BLOQUES DIMANGULAR STYLE DONUT ELLIPSE GRIPS STRETCH</td></tr>
+  </table>
+</section>
+
+<section id="flujo">
+  <h2>📐 FLUJO REAL</h2>
   <div class="code-block">
-    <span class="comment"># 4 archivos que DEBES tocar sí o sí:</span>
-    <span class="comment"># 1.</span> src/model/entities/<span class="string">nueva.py</span>        <span class="comment">← heredar CadEntity</span>
-    <span class="comment"># 2.</span> src/io/<span class="string">cad_file.py</span>                 <span class="comment">← import + ENTITY_CLASSES</span>
-    <span class="comment"># 3.</span> src/io/<span class="string">dxf_export.py</span>               <span class="comment">← import + isinstance branch</span>
-    <span class="comment"># 4.</span> src/view/graphics/<span class="string">entity_items.py</span>    <span class="comment">← GfxNuevoItem class</span>
-    <span class="comment"># 5.</span> src/view/ui/<span class="string">main_window.py</span>          <span class="comment">← import + _rebuild_scene() branch</span>
-    <span class="comment"># Si olvidas uno: entidades invisibles o datos perdidos. No digas que no avisé.</span>
+    <span class="comment"># Template + capas</span>
+    TEMPLATE
+    CLAYER EJES
+    LINETYPE CENTER
+    <span class="comment"># Ejes @1000,0 = 1000 en X desde ultimo punto</span>
+    LINE 0,0 1000,0
+    LINE 0,0 @0,800
+    <span class="comment"># Muros</span>
+    CLAYER MUROS
+    LINETYPE CONTINUOUS
+    COLOR 4
+    <span class="comment"># Cotas</span>
+    CLAYER COTAS
+    COLOR 1
+    DIMALIGNED
+    <span class="comment"># Exportar</span>
+    PLOT
   </div>
 </section>
 
-<!-- TOOLS -->
-<section id="tools">
-  <h2>🔧 LAS 30 HERRAMIENTAS</h2>
-  <p style="color:#aabbcc;margin-bottom:1rem">
-    Click en cualquier herramienta para ver su descripción. Agrupadas por fase de desarrollo.
-  </p>
-
-  <h3 style="color:var(--accent)">★ DRAW — Fase A</h3>
-  <div class="tools-grid" id="draw-tools"></div>
-
-  <h3 style="color:var(--orange)">♦ MODIFY — Fase B</h3>
-  <div class="tools-grid" id="modify-tools"></div>
-
-  <h3 style="color:var(--magenta)">◆ UTILITY — Fase C</h3>
-  <div class="tools-grid" id="util-tools"></div>
-
-  <h3 style="color:var(--cyan)">▲ SETTINGS — Fase D</h3>
-  <div class="tools-grid" id="settings-tools"></div>
-
-  <div class="tool-detail" id="tool-detail">
-    <h4 id="td-name"></h4>
-    <div class="meta" id="td-meta"></div>
-    <p id="td-desc"></p>
-  </div>
-</section>
-
-<!-- TUTORIAL -->
-<section id="tutorial">
-  <h2>📖 TUTORIAL RÁPIDO</h2>
-
-  <h3>Instalación</h3>
-  <div class="code-block">
-    <span class="comment"># 1. Clonar</span>
-    git clone <span class="string">https://github.com/tuusuario/cad-2d-lite.git</span>
-    cd cad-2d-lite
-
-    <span class="comment"># 2. Venv + deps</span>
-    python3.12 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-
-    <span class="comment"># 3. Arrancar (IMPORTANTE: foreground en macOS!)</span>
-    python -m src.main
-  </div>
-
-  <h3>Atajos de Teclado</h3>
-  <table>
-    <tr><th>Tecla</th><th>Acción</th></tr>
-    <tr><td>F8</td><td>Toggle ORTHO (restringe a 0°/90°/180°/270°)</td></tr>
-    <tr><td>F9</td><td>Toggle SNAP (atracción a puntos geométricos)</td></tr>
-    <tr><td>Ctrl+Z</td><td>Undo</td></tr>
-    <tr><td>Ctrl+Y</td><td>Redo</td></tr>
-    <tr><td>Ctrl+S</td><td>Save (.cadlite)</td></tr>
-    <tr><td>Ctrl+O</td><td>Open</td></tr>
-    <tr><td>Ctrl+N</td><td>New</td></tr>
-    <tr><td>Esc</td><td>Cancelar herramienta actual</td></tr>
-    <tr><td>Rueda ratón</td><td>Zoom in/out</td></tr>
-    <tr><td>Rueda + Ctrl</td><td>Pan (arrastrar)</td></tr>
-    <tr><td>Click derecho</td><td>Finalizar polyline/solid, cancelar</td></tr>
-    <tr><td>Enter</td><td>Confirmar (polyline, solid, área)</td></tr>
-  </table>
-
-  <h3>Flujo de Trabajo Típico</h3>
-  <div class="timeline" style="border-color: var(--green)">
-    <div class="tl-item">
-      <h4>1. Configurar unidades y límites</h4>
-      <p>Menú SETTINGS → UNITS (Decimal, 2 decimales) → LIMITS (0,0 a 100,100)</p>
-    </div>
-    <div class="tl-item">
-      <h4>2. Crear capas</h4>
-      <p>LAYER → Make → "MUROS", color cyan. Repetir para "PUERTAS", "VENTANAS", "COTAS"</p>
-    </div>
-    <div class="tl-item">
-      <h4>3. Dibujar geometría</h4>
-      <p>DRAW → LINE, CIRCLE, RECTANGLE, POLYLINE según necesites. Con ORTHO (F8) activo.</p>
-    </div>
-    <div class="tl-item">
-      <h4>4. Modificar</h4>
-      <p>MOVE, COPY, ROTATE, MIRROR, SCALE, OFFSET, TRIM, EXTEND, FILLET, CHAMFER</p>
-    </div>
-    <div class="tl-item">
-      <h4>5. Acotar y anotar</h4>
-      <p>DRAW → DIMENSION (LINEAR), TEXT para etiquetas</p>
-    </div>
-    <div class="tl-item">
-      <h4>6. Medir y verificar</h4>
-      <p>INQUIRY → DIST (distancia), ID (info entidad), AREA (área poligonal)</p>
-    </div>
-    <div class="tl-item">
-      <h4>7. Exportar</h4>
-      <p>Ctrl+S (.cadlite) y FILE → Export DXF para compartir con AutoCAD</p>
-    </div>
-    <div class="tl-item">
-      <h4>8. Imprimir</h4>
-      <p>FILE → PLOT → Seleccionar impresora/PDF</p>
-    </div>
-  </div>
-
-  <h3>Generación Programática de Planos</h3>
-  <div class="code-block">
-    <span class="comment"># scripts/generate_apto.py — generá planos de apartamentos con código</span>
-    <span class="keyword">from</span> src.model.document <span class="keyword">import</span> Document
-    <span class="keyword">from</span> src.model.entities.line <span class="keyword">import</span> LineEntity
-    <span class="keyword">from</span> src.model.entities.text <span class="keyword">import</span> TextEntity
-    <span class="keyword">from</span> src.io.cad_file <span class="keyword">import</span> save_document
-
-    doc = Document()
-    doc.units = <span class="string">'decimal'</span>
-    doc.precision = <span class="number">2</span>
-
-    <span class="comment"># Muro doble: dos líneas paralelas</span>
-    muros = doc.layer_manager.add_layer(<span class="string">'MUROS'</span>, <span class="string">'#00CCFF'</span>)
-    doc.add_entity(LineEntity((0, 0), (10, 0), layer=<span class="string">'MUROS'</span>))
-    doc.add_entity(LineEntity((0, 0.15), (10, 0.15), layer=<span class="string">'MUROS'</span>))
-
-    save_document(doc, <span class="string">'mi_apto.cadlite'</span>)
-    <span class="comment"># ¡Listo! Abrí el .cadlite en DogCAD 2D Lite</span>
-  </div>
-
-  <h3>Pitfalls (Errores Frecuentes)</h3>
-  <table>
-    <tr><td>❌</td><td><b>Lanzar en background en macOS</b> → SIGSEGV 139. Qt GUI apps DEBEN correr en foreground.</td></tr>
-    <tr><td>❌</td><td><b>Olvidar QColor import</b> → NameError en paint(). Siempre: `from PySide6.QtGui import QColor`.</td></tr>
-    <tr><td>❌</td><td><b>Lambda sin default arg</b> → late-binding bug, todos los botones activan la última tool.</td></tr>
-    <tr><td>❌</td><td><b>Nueva entidad sin tocar 4 archivos</b> → datos perdidos en save/load, invisibles en undo/redo.</td></tr>
-  </table>
-</section>
-
-<!-- HISTORIA -->
-<section id="historia">
-  <h2>📜 HISTORIA DEL PROYECTO</h2>
-  <p style="color:#aabbcc;margin-bottom:1.5rem">
-    Todo empezó como un "¿y si hacemos un CAD?" y terminó con 7,800 líneas, 30 herramientas, SETVAR engine, 99 tests, y un pug de icono.
-    Así se cuenta la historia.
-  </p>
-  <div class="timeline">
-    <div class="tl-item">
-      <div class="date">FASE A</div>
-      <h4>Fundación — DRAW + VIEW</h4>
-      <p>Esqueleto MVC básico. Entidades: Line, Circle, Arc, Polyline, Text, Dimension.
-      Herramientas de dibujo clásicas: LINE, CIRCLE, ARC, PLINE, RECTANGLE, TEXT, DIM.
-      CadView con zoom/pan, grid retro VGA, screen menu azul AutoCAD 10.
-      DXF export inicial. Undo/redo funcional.</p>
-    </div>
-    <div class="tl-item">
-      <div class="date">FASE B</div>
-      <h4>MODIFY — El poder de editar</h4>
-      <p>MOVE, COPY, ROTATE, DELETE, MIRROR, SCALE, OFFSET, TRIM, EXTEND,
-      FILLET, CHAMFER. Matemáticas de intersección, proyección de puntos,
-      cálculo de tangentes con atan2. Undo vía ModifyEntityCommand.</p>
-    </div>
-    <div class="tl-item">
-      <div class="date">FASE C</div>
-      <h4>UTILITY — Lo que faltaba</h4>
-      <p>EXPLODE (polilínea → líneas), BREAK (partir línea en 2), ARRAY (grid rectangular),
-      HATCH (ANSI31-38 patrones ACAD), bloques (BLOCK/INSERT).
-      Zoom stack 50 niveles con ZOOM Previous.</p>
-    </div>
-    <div class="tl-item">
-      <div class="date">FASE D</div>
-      <h4>SETTINGS — Toques finales</h4>
-      <p>POINT y SOLID (relleno poligonal con color). UNITS (5 tipos + precisión).
-      LIMITS (límites del dibujo). PLOT (impresión vía QPrintDialog).
-      Screen menu al 95%. Solo INSERT queda pendiente.</p>
-    </div>
-    <div class="tl-item">
-      <div class="date">FUTURO</div>
-      <h4>Lo que viene</h4>
-      <p>INSERT (bloques/biblioteca), SNAP modes avanzados (midpoint, perpendicular, tangent),
-      selección por ventana/crossing, UNDO mark/back, GRIPS para edición directa,
-      export SVG/PDF, soporte para fuentes SHX, y quien sabe qué más.</p>
-    </div>
-  </div>
-</section>
-
-<!-- IMPRESIONES -->
 <section id="impresiones">
   <h2>💬 IMPRESIONES</h2>
-  <p style="color:#aabbcc;margin-bottom:1.5rem">
-    Lo que dice la gente (real o imaginaria) sobre DogCAD 2D Lite.
-  </p>
-
   <div class="impression">
-    <p class="quote">"7,200 líneas de Python y ni una sola suscripción mensual a Autodesk. Esto es el sueño húmedo de cualquier ingeniero civil tercermundista."</p>
-    <p class="author">— Ing. Giovanni Correa, creador y usuario #1</p>
+    <p class="quote">"7,810 lineas, 99 tests, 43 SETVAR, 11 OSNAP, 15 linetypes, ACI 256, PLOT PDF, DXF IN... y $0 dolares a Autodesk. Esto es el sueño."</p>
+    <p class="author">— Ing. Giovanni Correa, creador 🐾</p>
   </div>
-
   <div class="impression">
-    <p class="quote">"El screen menu azul me transportó directo a 1990. Me faltó el diskette de 5¼ para sentirme completo."</p>
-    <p class="author">— Un arquitecto nostálgico</p>
-  </div>
-
-  <div class="impression">
-    "99 tests que pasan en 1.5 segundos. En mi anterior trabajo, solo compilar la UI tomaba más que eso."
-    <p class="author">— Desarrollador C++ arrepentido</p>
-  </div>
-
-  <div class="impression">
-    <p class="quote">"Hice un plano de apartamento de 66m² con un script de Python. En AutoCAD necesitaba 3 menús y un plugin de pago."</p>
-    <p class="author">— Script generate_apto.py, probably</p>
-  </div>
-
-  <div class="impression">
-    <p class="quote">"La arquitectura MVC está tan limpia que dan ganas de llorar. Cada tool en su archivo, cada entidad con su GfxItem."</p>
-    <p class="author">— Un arquitecto de software impresionado</p>
-  </div>
-
-  <div class="impression">
-    <p class="quote">"Exporta a DXF R2010. O sea que AutoCAD SÍ puede abrir lo que dibujo. Eso es jugar en ambas ligas."</p>
-    <p class="author">— Alguien que odia los formatos propietarios</p>
+    <p class="quote">"El screen menu azul #0000AA con cruceta blanca y pickbox verde me transporto directo a 1990."</p>
+    <p class="author">— Un arquitecto nostalgico</p>
   </div>
 </section>
 
-<!-- REFERENCIA RÁPIDA -->
-<section id="referencia">
-  <h2>📋 REFERENCIA RÁPIDA</h2>
-
-  <h3>Estructura del Proyecto</h3>
-  <div class="code-block">
-cad-2d-lite/
-├── src/
-│   ├── main.py                    <span class="comment"># Entry point: python -m src.main</span>
-│   ├── model/
-│   │   ├── document.py            <span class="comment"># Documento: entidades + capas + undo stack</span>
-│   │   ├── layer.py / layer_manager.py
-│   │   ├── snap.py                <span class="comment"># Snap engine (pixel-based, 20px tolerance)</span>
-│   │   └── entities/              <span class="comment"># Line, Circle, Arc, Polyline, Text, Dim, Point</span>
-│   ├── view/
-│   │   ├── cad_view.py            <span class="comment"># QGraphicsView: zoom, pan, F8/F9 keys</span>
-│   │   ├── cad_scene.py           <span class="comment"># QGraphicsScene</span>
-│   │   ├── graphics/
-│   │   │   ├── entity_items.py    <span class="comment"># GfxItems para cada entidad</span>
-│   │   │   └── grid_item.py       <span class="comment"># Grid item (dark blue)</span>
-│   │   └── ui/
-│   │       └── main_window.py     <span class="comment"># 💀 EL MONSTRUO: menús, screen menu, toolbar, cmd line</span>
-│   ├── controller/
-│   │   ├── tool_manager.py        <span class="comment"># Registry + tool switching</span>
-│   │   └── tools/                 <span class="comment"># 32 archivos, 30 tools, 1 base</span>
-│   └── io/
-│       ├── cad_file.py            <span class="comment"># .cadlite JSON save/load</span>
-│       └── dxf_export.py          <span class="comment"># DXF R2010 export via ezdxf</span>
-├── tests/                         <span class="comment"># 99 tests, 100% passing</span>
-├── scripts/
-│   └── generate_apto.py           <span class="comment"># Generación programática de planos</span>
-├── docs/
-│   └── index.html                 <span class="comment"># ← ESTE ARCHIVO, ESTÁS AQUÍ</span>
-├── venv/                          <span class="comment"># Python 3.12 venv</span>
-├── pyproject.toml                 <span class="comment"># PySide6 + ezdxf</span>
-└── requirements.txt
-  </div>
-
-  <h3>Screen Menu — Jerarquía</h3>
-  <table>
-    <tr><th>Página Raíz</th><th>Submenús</th></tr>
-    <tr><td>DISPLAY</td><td>ZOOM Window, ZOOM Previous, ZOOM Extents, PAN, REDRAW, REGEN</td></tr>
-    <tr><td>DRAW (p1)</td><td>LINE, CIRCLE, ARC, POLYLINE, RECTANGLE, TEXT, DIMENSION</td></tr>
-    <tr><td>DRAW (p2)</td><td>POINT, SOLID, HATCH (ANSI31-38), DONUT, ELLIPSE</td></tr>
-    <tr><td>EDIT (p1)</td><td>MOVE, COPY, ROTATE, DELETE, MIRROR, SCALE</td></tr>
-    <tr><td>EDIT (p2)</td><td>OFFSET, TRIM, EXTEND, FILLET, CHAMFER, EXPLODE, BREAK, ARRAY</td></tr>
-    <tr><td>INQUIRY</td><td>DIST, ID, AREA, LIST, STATUS</td></tr>
-    <tr><td>LAYER</td><td>Make, Set, ON, OFF, Color, Query, PURGE</td></tr>
-    <tr><td>SETTINGS</td><td>UNITS, LIMITS, SNAP, ORTHO, GRID ✅</td></tr>
-    <tr><td>PLOT</td><td>PLOT PDF ✅ (A4-A0, escalas)</td></tr>
-    <tr><td>DXF IN</td><td>DXF IN ✅ (LINE, CIRCLE, ARC, PLINE, TEXT, DIMS)</td></tr>
-    <tr><td>LINETYPE</td><td>LINETYPE ✅ (15 tipos: DASHED, CENTER, HIDDEN...)</td></tr>
-    <tr><td>DIMENSION</td><td>DIMALIGNED ✅, DIMRADIUS ✅, DIMDIAMETER ✅</td></tr>
-    <tr><td>UTILITY</td><td>UNDO, REDO, SAVE</td></tr>
-  </table>
-
-  <h3>Paleta de Colores Retro</h3>
-  <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
-    <div class="stat-card" style="background:#0000AA"><div class="label" style="color:#FFF">#0000AA<br>SCREEN MENU</div></div>
-    <div class="stat-card" style="background:#000022"><div class="label" style="color:#FFF">#000022<br>MENU BG</div></div>
-    <div class="stat-card" style="background:#000000"><div class="label" style="color:#FFF">#000000<br>DRAWING AREA</div></div>
-    <div class="stat-card" style="background:#0a1a2a"><div class="label" style="color:#FFF">#0a1a2a<br>GRID</div></div>
-    <div class="stat-card" style="background:#000088"><div class="label" style="color:#FFF">#000088<br>INFO BAR</div></div>
-    <div class="stat-card" style="background:#000018"><div class="label" style="color:#FFF">#000018<br>CMD LINE</div></div>
-    <div class="stat-card" style="background:#FFFFFF"><div class="label" style="color:#000">#FFFFFF<br>TEXT</div></div>
-    <div class="stat-card" style="background:#44AAFF"><div class="label" style="color:#000">#44AAFF<br>HEADERS</div></div>
-    <div class="stat-card" style="background:#FFCC00"><div class="label" style="color:#000">#FFCC00<br>ACCENT / SNAP</div></div>
-  </div>
-</section>
 
 <!-- EASTER EGGS -->
 <section id="easter" style="text-align: center;">
