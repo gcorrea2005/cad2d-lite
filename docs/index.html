@@ -51,6 +51,7 @@
     letter-spacing: -0.022em;
     -webkit-font-smoothing: antialiased;
   }
+  p, li, td { color: var(--text); }
 
   /* ─── CRT POWER-ON FLASH ─── */
   #crt-flash {
@@ -133,9 +134,10 @@
     font-size: 1.3rem; font-weight: 400; color: var(--white); margin-top: 0.5rem; letter-spacing: 0;
   }
   .hero .tagline {
-    font-size: 1.1rem; font-weight: 400; color: rgba(255,255,255,0.7); margin-top: 1rem;
+    font-size: 1.1rem; font-weight: 400; color: rgba(255,255,255,0.8); margin-top: 1rem;
     max-width: 650px; line-height: 1.4;
   }
+  .hero .tagline span { color: var(--link-dark); }
   @keyframes glitch {
     0%,90%,100%{transform:none}
     92%{transform:skewX(2deg) translate(3px,-2px)}
@@ -248,8 +250,8 @@
     transform: translateY(-2px);
   }
   .arch-box .icon { font-size: 2rem; margin-bottom: 0.5rem; }
-  .arch-box h4 { color: var(--header); margin-bottom: 0.5rem; letter-spacing: 1px; }
-  .arch-box ul { list-style: none; font-size: 0.8rem; color: #8899bb; }
+  .arch-box h4 { color: var(--text); margin-bottom: 0.5rem; font-weight: 600; }
+  .arch-box ul { list-style: none; font-size: 0.8rem; color: var(--text-secondary); }
   .arch-box li { padding: 0.2rem 0; }
   .arch-box li::before { content: '▸ '; color: var(--accent); }
 
@@ -289,9 +291,9 @@
     font-family: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
     max-width: 980px; margin: 1.5rem auto;
   }
-  .code-block .comment { color: #667799; }
-  .code-block .keyword { color: var(--accent); }
-  .code-block .string { color: var(--orange); }
+  .code-block .comment { color: #8899aa; }
+  .code-block .keyword { color: #64ffda; }
+  .code-block .string { color: #ffcc80; }
 
   /* ─── TIMELINE ─── */
   .timeline {
@@ -308,8 +310,8 @@
   .tl-item .date {
     color: var(--accent); font-size: 0.7rem; letter-spacing: 2px;
   }
-  .tl-item h4 { color: var(--header); margin: 0.3rem 0; }
-  .tl-item p { color: #8899bb; font-size: 0.85rem; }
+  .tl-item h4 { color: var(--text); margin: 0.3rem 0; }
+  .tl-item p { color: var(--text-secondary); font-size: 0.85rem; }
 
   /* ─── QUOTES ─── */
   .impression {
@@ -318,12 +320,13 @@
     transition: all 0.3s;
   }
   .impression:hover { box-shadow: var(--shadow); }
-  .impression .quote { font-style: italic; color: var(--white); font-size: 1rem; }
+  .impression .quote { font-style: italic; color: var(--text); font-size: 1rem; }
   .impression .author { color: var(--accent); margin-top: 0.5rem; font-size: 0.8rem; }
 
   /* ─── TABLE ─── */
   table {
     width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem;
+    color: var(--text);
   }
   th {
     background: var(--bg-light); color: var(--text); padding: 0.7rem 1rem;
