@@ -111,10 +111,10 @@ class MainWindow(QMainWindow):
                 color: {CLR_MENU_TEXT};
                 border: none;
                 font-family: 'Courier New', monospace;
-                font-size: 12px;
+                font-size: 14px;
             }}
             QListWidget::item {{
-                padding: 3px 6px;
+                padding: 4px 6px;
             }}
             QListWidget::item:selected {{
                 background-color: {CLR_MENU_SEL};
@@ -127,13 +127,13 @@ class MainWindow(QMainWindow):
                 color: {CLR_CMD_TEXT};
                 border: 1px solid #1a1a2e;
                 font-family: 'Courier New', monospace;
-                font-size: 12px;
+                font-size: 13px;
             }}
             QStatusBar {{
                 background-color: {CLR_STATUS_BG};
                 color: {CLR_TEXT};
                 font-family: 'Courier New', monospace;
-                font-size: 11px;
+                font-size: 12px;
                 border-top: 1px solid #1a1a2e;
             }}
             QDockWidget {{
@@ -145,7 +145,7 @@ class MainWindow(QMainWindow):
                 border-bottom: 1px solid #1a1a2e;
                 padding: 4px;
                 font-family: 'Courier New', monospace;
-                font-size: 11px;
+                font-size: 12px;
                 text-align: center;
             }}
         """)
@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
             QLabel {{
                 color: {CLR_MENU_TEXT};
                 font-family: 'Courier New', monospace;
-                font-size: 11px;
+                font-size: 13px;
             }}
         """)
         self._info_layer = QLabel("LAYER: 0")
@@ -322,7 +322,7 @@ class MainWindow(QMainWindow):
         dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
 
         self._screen_menu = QListWidget()
-        self._screen_menu.setFixedWidth(140)
+        self._screen_menu.setFixedWidth(160)
         self._screen_menu.itemClicked.connect(self._on_screen_menu_click)
 
         dock.setWidget(self._screen_menu)
