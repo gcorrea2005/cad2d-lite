@@ -68,6 +68,36 @@ class BaseTool:
         """Current layer name from layer_manager."""
         return self.document.layer_manager.current_layer_name
 
+    @property
+    def _current_color(self) -> str:
+        """Read CECOLOR from sysvars, resolving BYLAYER to layer color."""
+        try:
+            cec = self.document.sysvars["CECOLOR"]
+        except Exception:
+            return "7"
+        if isinstance(cec, str) and cec.upper() == "BYLAYER":
+            try:
+                lm = self.document.layer_manager
+                return lm.layers[lm.current_layer_name].color
+            except Exception:
+                return "7"
+        return cec
+
+    @property
+    def _current_linetype(self) -> str:
+        """Read CELTYPE from sysvars, resolving BYLAYER to layer linetype."""
+        try:
+            celt = self.document.sysvars["CELTYPE"]
+        except Exception:
+            return "CONTINUOUS"
+        if isinstance(celt, str) and celt.upper() == "BYLAYER":
+            try:
+                lm = self.document.layer_manager
+                return lm.layers[lm.current_layer_name].linetype
+            except Exception:
+                return "CONTINUOUS"
+        return celt
+
     def activate(self):
         if self._snap_indicator.scene() is None:
             self.view.scene().addItem(self._snap_indicator)

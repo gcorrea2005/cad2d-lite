@@ -104,7 +104,12 @@ class CadView(QGraphicsView):
         if self.tool_manager and self.tool_manager._active_tool:
             if event.button() == Qt.MouseButton.LeftButton:
                 scene_pos = self.mapToScene(event.pos())
-                self.tool_manager._active_tool.mouse_press(event, scene_pos)
+                try:
+                    self.tool_manager._active_tool.mouse_press(event, scene_pos)
+                except Exception as e:
+                    import traceback
+                    print(f"MOUSE PRESS ERROR: {e}")
+                    traceback.print_exc()
                 event.accept()
                 return
             if event.button() == Qt.MouseButton.RightButton:

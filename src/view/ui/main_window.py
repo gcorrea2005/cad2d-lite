@@ -1496,7 +1496,7 @@ class MainWindow(QMainWindow):
     def _cmd_plot(self, args: str):
         """PLOT command: export viewport to PDF."""
         from PySide6.QtWidgets import QFileDialog, QInputDialog
-        from PySide6.QtPrintSupport import QPrinter, QPageSize
+        from PySide6.QtPrintSupport import QPrinter
         from PySide6.QtGui import QPainter, QColor
         from PySide6.QtCore import QRectF, Qt
         from pathlib import Path
