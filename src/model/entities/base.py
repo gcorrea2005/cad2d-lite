@@ -38,7 +38,13 @@ class CadEntity(ABC):
     @abstractmethod
     def to_dict(self) -> dict:
         """Serialize to JSON-compatible dict."""
-        ...
+        return {
+            "type": self.__class__.__name__,
+            "uuid": self.uuid,
+            "layer_name": self.layer_name,
+            "color": self.color,
+            "linetype": self.linetype if hasattr(self, 'linetype') else "CONTINUOUS",
+        }
 
     @classmethod
     @abstractmethod

@@ -88,6 +88,13 @@ class BlockInstance(CadEntity):
 
         return result
 
+    def bounding_box(self) -> tuple[Point, Point]:
+        """Return bounding box of insertion point."""
+        return (
+            Point(self.insertion_point.x - 1, self.insertion_point.y - 1),
+            Point(self.insertion_point.x + 1, self.insertion_point.y + 1),
+        )
+
     def _transform_point(self, pt: Point, bp: Point, cos_r: float, sin_r: float) -> Point:
         """Apply block transform to a point."""
         # Translate to origin relative to base point

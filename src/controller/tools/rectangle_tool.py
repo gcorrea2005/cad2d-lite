@@ -25,10 +25,9 @@ class RectangleTool(BaseTool):
             x2, y2 = pt.x, pt.y
             rect = Polyline(
                 [Point(x1, y1), Point(x2, y1), Point(x2, y2), Point(x1, y2)],
-                line = Line(Point(x1, y1), Point(x2, y1),
-                                    layer_name=self._current_layer, color=self._current_color,
-                                    linetype=self._current_linetype)
-                                          linetype=self._current_linetype)
+                closed=True,
+                layer_name=self._current_layer, color=self._current_color,
+                linetype=self._current_linetype,
             )
             self.document.add_entity(rect)
             gfx = GfxPolylineItem(rect)

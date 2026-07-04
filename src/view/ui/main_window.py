@@ -1399,12 +1399,12 @@ class MainWindow(QMainWindow):
         ]
         count = 0
         for name, aci, ltype in template:
-            for name, color, ltype in layers:
-                        lm.add_layer(name, color, ltype)
-                if ltype != "CONTINUOUS":
-                    pass  # layer doesn't store linetype yet
+            try:
+                lm.add_layer(name, aci, ltype)
                 count += 1
-                self._echo(f"  Created layer: {name} (ACI {aci})")
+                self._echo(f"  Created layer: {name} (ACI {aci}, {ltype})")
+            except ValueError:
+                pass  # layer already exists
         self._echo(f"Template loaded: {count} layers")
         sv["CLAYER"] = "0"
         lm.set_current("0")
