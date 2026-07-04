@@ -25,6 +25,8 @@ from src.controller.tools.dim_radius_tool import DimRadiusTool
 from src.controller.tools.select_tool import SelectTool
 from src.controller.tools.stretch_tool import StretchTool
 from src.controller.tools.ellipse_tool import EllipseTool
+from src.controller.tools.dim_baseline_tool import DimBaselineTool
+from src.controller.tools.donut_tool import DonutTool
 from src.controller.tools.move_tool import MoveTool
 from src.controller.tools.copy_tool import CopyTool
 from src.controller.tools.rotate_tool import RotateTool
@@ -177,6 +179,8 @@ class MainWindow(QMainWindow):
         self._tool_manager.register_tool("select", SelectTool(v, d))
         self._tool_manager.register_tool("stretch", StretchTool(v, d, lm))
         self._tool_manager.register_tool("ellipse", EllipseTool(v, d, lm))
+        self._tool_manager.register_tool("dimbase", DimBaselineTool(v, d, lm))
+        self._tool_manager.register_tool("donut", DonutTool(v, d, lm))
         self._tool_manager.register_tool("line", LineTool(v, d, lm))
         self._tool_manager.register_tool("circle", CircleTool(v, d, lm))
         self._tool_manager.register_tool("arc", ArcTool(v, d, lm))
@@ -345,6 +349,7 @@ class MainWindow(QMainWindow):
 
         # Initial state: root menu
         self._screen_menu_state = "root"
+        self._autosave_counter = 0
         self._refresh_screen_menu()
 
         # Keyboard shortcuts for screen menu navigation
@@ -390,9 +395,14 @@ class MainWindow(QMainWindow):
                 (" TEXT   ", "text"),
                 (" DIM    ", "dim"),
                 (" POINT  ", "point"),
-                (" ELLIPSE", "ellipse"),
+                "ELLIPSE": "ellipse",
+                            "DIMBASELINE": "dimbase",
+                            "DIMBASE": "dimbase",
+                            "DONUT": "donut",
+            "CHPROP": "chprop_cmd",
                 (" HATCH  ", "hatch"),
                 (" SOLID  ", "solid"),
+                (" DONUT  ", "donut"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -467,6 +477,7 @@ class MainWindow(QMainWindow):
                 (" RADIUS ", "dim_radius"),
                 (" DIAMETR", "dim_diameter"),
                 (" ANGULAR", "dim_angular"),
+                (" BASELINE","dimbase"),
                 ("", None),
                 (" SETVAR ", "ni_setvardim"),
                 ("  DIMSCALE", "ni_dimscale"),
@@ -813,6 +824,7 @@ class MainWindow(QMainWindow):
                 self._document, self._view,
                 self._echo, self._rebuild_scene)
             engine._exec_line(text)
+            self._autosave()
             self._rebuild_scene()
             self._echo("Command:")
             return
@@ -983,6 +995,9 @@ class MainWindow(QMainWindow):
             return
         elif action == "win_cmd":
             self._cmd_library("WINDOW", args)
+            return
+        elif action == "chprop_cmd":
+            self._cmd_chprop(args)
             return
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
@@ -1298,6 +1313,36 @@ class MainWindow(QMainWindow):
         self._document.add_entity(inst)
         self._rebuild_scene()
         self._echo(f"{elem_type} inserted at {pt.x:.2f}, {pt.y:.2f}")
+        self._echo("Command:")
+
+    def _cmd_chprop(self, args: str):
+        """CHPROP: change properties of selected entities."""
+        uuids = self._view._selected_uuids if hasattr(self._view, '_selected_uuids') else []
+        if not uuids:
+            self._echo("CHPROP: Select entities first")
+            self._echo("Command:")
+            return
+        parts = args.upper().split() if args else []
+        prop = parts[0] if parts else ""
+        val = parts[1] if len(parts) > 1 else ""
+        
+        count = 0
+        for uid in uuids:
+            ent = self._document._entities.get(uid)
+            if not ent:
+                continue
+            if prop == "COLOR" and val:
+                ent.color = val
+                count += 1
+            elif prop == "LINETYPE" and val:
+                ent.linetype = val
+                count += 1
+            elif prop == "LAYER" and val:
+                ent.layer_name = val
+                count += 1
+        
+        self._rebuild_scene()
+        self._echo(f"CHPROP: {count} entities updated")
         self._echo("Command:")
 
     def _cmd_linetype(self, args: str):
@@ -1852,6 +1897,19 @@ class MainWindow(QMainWindow):
         self._rebuild_scene()
 
     # ── Scene rebuild ──────────────────────────────────────
+    def _autosave(self):
+        """Auto-save every ~5 entity additions."""
+        self._autosave_counter += 1
+        if self._autosave_counter >= 5:
+            self._autosave_counter = 0
+            from pathlib import Path
+            bak = self._filename or Path.home() / "dogcad_autosave.cadlite"
+            try:
+                from src.io.cad_file import save_document
+                save_document(self._document, Path(str(bak) + ".bak"))
+            except Exception:
+                pass
+
     def _rebuild_scene(self):
         for item in list(self._scene.items()):
             if item is not self._grid:
