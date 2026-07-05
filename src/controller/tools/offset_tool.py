@@ -5,7 +5,7 @@ from src.model.entities.line import Line
 from src.model.entities.circle import Circle
 from src.model.entities.arc import Arc
 from src.model.entities.polyline import Polyline
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QInputDialog
 import math
@@ -22,7 +22,7 @@ class OffsetTool(BaseTool):
 
     def activate(self):
         super().activate()
-        # Show distance dialog immediately
+        self._echo("Select entity to offset")
         try:
             default = float(self.document.sysvars["OFFSETDIST"])
         except Exception:
@@ -36,19 +36,27 @@ class OffsetTool(BaseTool):
         self._distance = abs(dist)
         self.document.sysvars["OFFSETDIST"] = self._distance
 
+    def _echo(self, msg: str):
+        w = self.view.window()
+        if hasattr(w, '_echo'):
+            w._echo(msg)
+
     def mouse_press(self, event, scene_pos: QPointF):
         if self._distance is None:
             return
 
         if self._entity is None:
-            # Pick entity
-            items = self.view.scene().items(scene_pos)
+            # Pick entity — search in a small area around click
+            r = 5.0  # search radius in scene units
+            search_rect = QRectF(scene_pos.x() - r, scene_pos.y() - r, r * 2, r * 2)
+            items = self.view.scene().items(search_rect, Qt.ItemSelectionMode.IntersectsItemShape)
             for item in items:
-                if not hasattr(item, 'entity'):
+                ent = getattr(item, 'entity', None)
+                if ent is None:
                     continue
-                ent = item.entity
                 if isinstance(ent, (Line, Circle, Arc, Polyline)):
                     self._entity = ent
+                    self._echo("Select side to offset")
                     return
         else:
             # Pick side and offset
@@ -62,11 +70,12 @@ class OffsetTool(BaseTool):
             elif isinstance(ent, Polyline):
                 self._offset_polyline(ent, scene_pos)
             self._entity = None
-            self._distance = None  # ask again next time
+            self._distance = None
+            self._echo("Command:")
 
-    def _side_sign(self, mid: Point, normal: Point, click: QPointF) -> float:
+    def _side_sign(self, mid: Point, nx: float, ny: float, click: QPointF) -> float:
         to_click = Point(click.x() - mid.x, click.y() - mid.y)
-        dot = to_click.x * normal.x + to_click.y * normal.y
+        dot = to_click.x * nx + to_click.y * ny
         return 1.0 if dot > 0 else -1.0
 
     def _offset_line(self, line: Line, click_pos: QPointF):
@@ -77,7 +86,7 @@ class OffsetTool(BaseTool):
             return
         nx = -dy / length
         ny = dx / length
-        side = self._side_sign(line.midpoint(), Point(nx, ny), click_pos)
+        side = self._side_sign(line.midpoint(), nx, ny, click_pos)
         off = self._distance * side
         new_line = Line(
             Point(line.start.x + off * nx, line.start.y + off * ny),
@@ -114,7 +123,7 @@ class OffsetTool(BaseTool):
         nx = -dy / length
         ny = dx / length
         mid = Point((v0.x + v1.x) / 2, (v0.y + v1.y) / 2)
-        side = self._side_sign(mid, Point(nx, ny), click_pos)
+        side = self._side_sign(mid, nx, ny, click_pos)
         off = self._distance * side
         new_verts = [Point(v.x + off * nx, v.y + off * ny) for v in pl.vertices]
         new_pl = Polyline(new_verts, closed=pl.is_closed,
