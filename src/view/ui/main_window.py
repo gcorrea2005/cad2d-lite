@@ -918,6 +918,9 @@ class MainWindow(QMainWindow):
             "RO": "rotate", "ROTATE": "rotate",
             "E": "delete", "ERASE": "delete",
             "Z": "zoom_extents", "ZOOM": "zoom_extents",
+            "PAN": "pan_cmd",
+            "ZOOMIN": "zoom_in",
+            "ZOOMOUT": "zoom_out",
             "U": "undo", "UNDO": "undo",
             "REDO": "redo",
             "SAVE": "save", "OPEN": "open",
@@ -1025,6 +1028,19 @@ class MainWindow(QMainWindow):
             return
         elif action == "dxfin_cmd":
             self._cmd_dxfin()
+            return
+        elif action == "pan_cmd":
+            self._activate_tool("pan")
+            return
+        elif action == "zoom_in":
+            self._view.zoom_in()
+            self._echo("ZOOM In")
+            self._echo("Command:")
+            return
+        elif action == "zoom_out":
+            self._view.zoom_out()
+            self._echo("ZOOM Out")
+            self._echo("Command:")
             return
         elif action == "plot_cmd":
             self._cmd_plot(args)
