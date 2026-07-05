@@ -22,7 +22,7 @@ class OffsetTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        # Read OFFSETDIST from SETVAR if not set
+        # Read/set distance
         if self._distance is None:
             try:
                 self._distance = float(self.document.sysvars["OFFSETDIST"])
@@ -36,27 +36,38 @@ class OffsetTool(BaseTool):
             if not ok:
                 return
             self._distance = abs(dist)
-            # Save to SETVAR
             try:
                 self.document.sysvars["OFFSETDIST"] = self._distance
             except Exception:
                 pass
+            # Don't try to find entity on this same click — dialog stole focus
+            return
 
-        # Find entity under cursor
-        items = self.view.scene().items(scene_pos)
+        # Find entity under cursor using snap for accuracy
+        pt = self._snap(scene_pos)
+        click_pt = QPointF(pt.x, pt.y)
+        items = self.view.scene().items(click_pt)
+        found = False
         for item in items:
             if not hasattr(item, 'entity'):
                 continue
             ent = item.entity
             if isinstance(ent, Line):
-                self._offset_line(ent, scene_pos)
+                self._offset_line(ent, click_pt)
+                found = True
             elif isinstance(ent, Circle):
-                self._offset_circle(ent, scene_pos)
+                self._offset_circle(ent, click_pt)
+                found = True
             elif isinstance(ent, Arc):
-                self._offset_circle(ent, scene_pos)  # same logic
+                self._offset_circle(ent, click_pt)
+                found = True
             elif isinstance(ent, Polyline):
-                self._offset_polyline(ent, scene_pos)
+                self._offset_polyline(ent, click_pt)
+                found = True
             break
+        if not found:
+            # Nothing clicked — keep distance for next attempt
+            pass
 
     def _side_sign(self, mid: Point, normal: Point, click: QPointF) -> float:
         """Determine offset direction: +1 or -1 based on click side."""
