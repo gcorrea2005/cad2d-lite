@@ -267,8 +267,19 @@ class CadView(QGraphicsView):
         self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def zoom_window(self, rect):
+        """Zoom to the given rectangle."""
         self._save_viewport()
         self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
+
+    def zoom_in(self):
+        """Zoom in 2x from viewport center."""
+        self._save_viewport()
+        self.scale(2.0, 2.0)
+
+    def zoom_out(self):
+        """Zoom out 0.5x from viewport center."""
+        self._save_viewport()
+        self.scale(0.5, 0.5)
 
     def _save_viewport(self):
         """Push current viewport onto zoom history stack."""

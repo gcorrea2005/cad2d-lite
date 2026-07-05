@@ -430,6 +430,8 @@ class MainWindow(QMainWindow):
                 (" REDRAW ", "redraw"),
                 (" REGEN  ", "regen"),
                 (" ZOOM E ", "zoom_extents"),
+                (" ZOOM IN", "zoom_in"),
+                (" ZOOM OUT","zoom_out"),
                 (" ZOOM P ", "zoom_previous"),
                 (" ZOOM W ", "zoom_window"),
                 ("", None),
@@ -565,6 +567,14 @@ class MainWindow(QMainWindow):
         elif action == "zoom_previous":
             self._view.zoom_previous()
             self._echo("ZOOM Previous")
+            self._echo("Command:")
+        elif action == "zoom_in":
+            self._view.zoom_in()
+            self._echo("ZOOM In")
+            self._echo("Command:")
+        elif action == "zoom_out":
+            self._view.zoom_out()
+            self._echo("ZOOM Out")
             self._echo("Command:")
         elif action == "redraw":
             self._rebuild_scene()
