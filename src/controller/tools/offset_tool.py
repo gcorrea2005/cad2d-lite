@@ -22,17 +22,16 @@ class OffsetTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        # Read/set distance
+        # First call: ask distance. Second call: pick entity+side.
         if self._distance is None:
             try:
-                self._distance = float(self.document.sysvars["OFFSETDIST"])
+                default = float(self.document.sysvars["OFFSETDIST"])
             except Exception:
-                pass
+                default = 1.0
 
-        if self._distance is None or self._distance == 0:
             dist, ok = QInputDialog.getDouble(
                 self.view, "Offset", "Offset distance:",
-                1.0, 0.001, 10000, 4)
+                default, 0.001, 10000, 4)
             if not ok:
                 return
             self._distance = abs(dist)
@@ -40,10 +39,9 @@ class OffsetTool(BaseTool):
                 self.document.sysvars["OFFSETDIST"] = self._distance
             except Exception:
                 pass
-            # Don't try to find entity on this same click — dialog stole focus
-            return
+            return  # wait for second click
 
-        # Find entity under cursor using snap for accuracy
+        # Second call: pick entity and offset
         pt = self._snap(scene_pos)
         click_pt = QPointF(pt.x, pt.y)
         items = self.view.scene().items(click_pt)
@@ -65,9 +63,8 @@ class OffsetTool(BaseTool):
                 self._offset_polyline(ent, click_pt)
                 found = True
             break
-        if not found:
-            # Nothing clicked — keep distance for next attempt
-            pass
+        if found:
+            self._distance = None  # reset for next offset operation
 
     def _side_sign(self, mid: Point, normal: Point, click: QPointF) -> float:
         """Determine offset direction: +1 or -1 based on click side."""
