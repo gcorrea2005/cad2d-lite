@@ -919,6 +919,7 @@ class MainWindow(QMainWindow):
             "E": "delete", "ERASE": "delete",
             "Z": "zoom_extents", "ZOOM": "zoom_extents",
             "PAN": "pan_cmd",
+            "LIST": "list_entities",
             "ZOOMIN": "zoom_in",
             "ZOOMOUT": "zoom_out",
             "U": "undo", "UNDO": "undo",
@@ -1028,6 +1029,9 @@ class MainWindow(QMainWindow):
             return
         elif action == "dxfin_cmd":
             self._cmd_dxfin()
+            return
+        elif action == "list_entities":
+            self._on_list_entities()
             return
         elif action == "pan_cmd":
             self._activate_tool("pan")
