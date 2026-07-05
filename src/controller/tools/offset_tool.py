@@ -42,25 +42,24 @@ class OffsetTool(BaseTool):
             return  # wait for second click
 
         # Second call: pick entity and offset
-        pt = self._snap(scene_pos)
-        click_pt = QPointF(pt.x, pt.y)
-        items = self.view.scene().items(click_pt)
+        # Use raw click for entity detection, snapped point for accuracy
+        items = self.view.scene().items(scene_pos)
         found = False
         for item in items:
             if not hasattr(item, 'entity'):
                 continue
             ent = item.entity
             if isinstance(ent, Line):
-                self._offset_line(ent, click_pt)
+                self._offset_line(ent, scene_pos)
                 found = True
             elif isinstance(ent, Circle):
-                self._offset_circle(ent, click_pt)
+                self._offset_circle(ent, scene_pos)
                 found = True
             elif isinstance(ent, Arc):
-                self._offset_circle(ent, click_pt)
+                self._offset_circle(ent, scene_pos)
                 found = True
             elif isinstance(ent, Polyline):
-                self._offset_polyline(ent, click_pt)
+                self._offset_polyline(ent, scene_pos)
                 found = True
             break
         if found:
