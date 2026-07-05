@@ -22,6 +22,8 @@ class OffsetTool(BaseTool):
 
     def activate(self):
         super().activate()
+        self._entity = None
+        self._distance = None
         self._echo("Select entity to offset")
         try:
             default = float(self.document.sysvars["OFFSETDIST"])
@@ -31,8 +33,7 @@ class OffsetTool(BaseTool):
             self.view, "Offset", "Offset distance:",
             default, 0.001, 10000, 4)
         if not ok:
-            self.view.tool_manager.activate_tool("select")
-            return
+            return  # stay active, let user cancel manually
         self._distance = abs(dist)
         self.document.sysvars["OFFSETDIST"] = self._distance
 
