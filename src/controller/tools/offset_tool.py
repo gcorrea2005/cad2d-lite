@@ -1,4 +1,4 @@
-"""OFFSET tool — parallel copy of entity: pick entity, pick side. Distance from OFFSETDIST."""
+"""OFFSET — cuadro distancia + click entidad + click lado."""
 from src.controller.tools.base_tool import BaseTool
 from src.model.entities.base import Point
 from src.model.entities.line import Line
@@ -7,41 +7,40 @@ from src.model.entities.arc import Arc
 from src.model.entities.polyline import Polyline
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QCursor
+from PySide6.QtWidgets import QInputDialog
 import math
 
 
 class OffsetTool(BaseTool):
-    """Offset entity at OFFSETDIST: click entity, click side."""
-
     def __init__(self, view, document):
         super().__init__(view, document)
-        self._entity = None   # entity to offset
-        self._step = 0        # 0=pick entity, 1=pick side
+        self._entity = None
+        self._distance = None
 
     def cursor(self):
         return QCursor(Qt.CursorShape.CrossCursor)
 
-    def mouse_press(self, event, scene_pos: QPointF):
-        if self._step == 0:
-            # Ask distance first
-            if self._distance is None:
-                try:
-                    default = float(self.document.sysvars["OFFSETDIST"])
-                except Exception:
-                    default = 1.0
-                from PySide6.QtWidgets import QInputDialog
-                dist, ok = QInputDialog.getDouble(
-                    self.view, "Offset", "Offset distance:",
-                    default, 0.001, 10000, 4)
-                if not ok:
-                    return
-                self._distance = abs(dist)
-                try:
-                    self.document.sysvars["OFFSETDIST"] = self._distance
-                except Exception:
-                    pass
-                # Fall through to pick entity on same click
+    def activate(self):
+        super().activate()
+        # Show distance dialog immediately
+        try:
+            default = float(self.document.sysvars["OFFSETDIST"])
+        except Exception:
+            default = 1.0
+        dist, ok = QInputDialog.getDouble(
+            self.view, "Offset", "Offset distance:",
+            default, 0.001, 10000, 4)
+        if not ok:
+            self.view.tool_manager.activate_tool("select")
+            return
+        self._distance = abs(dist)
+        self.document.sysvars["OFFSETDIST"] = self._distance
 
+    def mouse_press(self, event, scene_pos: QPointF):
+        if self._distance is None:
+            return
+
+        if self._entity is None:
             # Pick entity
             items = self.view.scene().items(scene_pos)
             for item in items:
@@ -50,13 +49,9 @@ class OffsetTool(BaseTool):
                 ent = item.entity
                 if isinstance(ent, (Line, Circle, Arc, Polyline)):
                     self._entity = ent
-                    self._step = 1
                     return
         else:
             # Pick side and offset
-            if self._entity is None:
-                self._step = 0
-                return
             ent = self._entity
             if isinstance(ent, Line):
                 self._offset_line(ent, scene_pos)
@@ -67,7 +62,7 @@ class OffsetTool(BaseTool):
             elif isinstance(ent, Polyline):
                 self._offset_polyline(ent, scene_pos)
             self._entity = None
-            self._step = 0
+            self._distance = None  # ask again next time
 
     def _side_sign(self, mid: Point, normal: Point, click: QPointF) -> float:
         to_click = Point(click.x() - mid.x, click.y() - mid.y)
@@ -82,17 +77,15 @@ class OffsetTool(BaseTool):
             return
         nx = -dy / length
         ny = dx / length
-        normal = Point(nx, ny)
-        side = self._side_sign(line.midpoint(), normal, click_pos)
+        side = self._side_sign(line.midpoint(), Point(nx, ny), click_pos)
         off = self._distance * side
-
         new_line = Line(
             Point(line.start.x + off * nx, line.start.y + off * ny),
             Point(line.end.x + off * nx, line.end.y + off * ny),
             layer_name=line.layer_name, color=line.color, linetype=line.linetype,
         )
         self.document.add_entity(new_line)
-        self.view.scene().addItem(self._make_gfx(new_line))
+        self.view.scene().addItem(self._gfx(new_line))
 
     def _offset_circle(self, circle: Circle, click_pos: QPointF):
         to_center = Point(click_pos.x() - circle.center.x, click_pos.y() - circle.center.y)
@@ -107,7 +100,7 @@ class OffsetTool(BaseTool):
                             layer_name=circle.layer_name, color=circle.color,
                             linetype=circle.linetype)
         self.document.add_entity(new_circle)
-        self.view.scene().addItem(self._make_gfx(new_circle))
+        self.view.scene().addItem(self._gfx(new_circle))
 
     def _offset_polyline(self, pl: Polyline, click_pos: QPointF):
         if len(pl.vertices) < 2:
@@ -120,19 +113,17 @@ class OffsetTool(BaseTool):
             return
         nx = -dy / length
         ny = dx / length
-        normal = Point(nx, ny)
         mid = Point((v0.x + v1.x) / 2, (v0.y + v1.y) / 2)
-        side = self._side_sign(mid, normal, click_pos)
+        side = self._side_sign(mid, Point(nx, ny), click_pos)
         off = self._distance * side
-
         new_verts = [Point(v.x + off * nx, v.y + off * ny) for v in pl.vertices]
         new_pl = Polyline(new_verts, closed=pl.is_closed,
                           layer_name=pl.layer_name, color=pl.color,
                           linetype=pl.linetype)
         self.document.add_entity(new_pl)
-        self.view.scene().addItem(self._make_gfx(new_pl))
+        self.view.scene().addItem(self._gfx(new_pl))
 
-    def _make_gfx(self, entity):
+    def _gfx(self, entity):
         from src.view.graphics.entity_items import (
             GfxLineItem, GfxCircleItem, GfxPolylineItem,
         )
@@ -146,5 +137,5 @@ class OffsetTool(BaseTool):
 
     def deactivate(self):
         self._entity = None
-        self._step = 0
+        self._distance = None
         super().deactivate()
