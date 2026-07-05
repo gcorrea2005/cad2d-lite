@@ -2,11 +2,21 @@
 
 > *"Si AutoCAD R10 y Python tuvieran un hijo en Zipaquirá"*
 
-Desktop 2D CAD hecho en **Zipaquirá, Cundinamarca 🇨🇴** con Python, PySide6, ezdxf, y puro vicio. Interfaz retro AutoCAD 10 (1988) — screen menu azul VGA, línea de comandos con historial, coordenadas Y+ arriba, ACI 256 colores, 11 modos OSNAP, engine SETVAR, y un pug de icono.
+```
+   ▄████▄   ██████╗  ██████╗  ██████╗ █████╗ ██████╗
+  ██▀  ▀██  ██╔══██╗██╔════╝ ██╔════╝██╔══██╗██╔══██╗
+  ██    ██  ██║  ██║██║  ███╗██║     ██║  ██║██║  ██║
+  ▀█▄  ▄█▀  ██║  ██║██║   ██║██║     ██║  ██║██║  ██║
+   ▀████▀   ██████╔╝╚██████╔╝╚██████╗╚█████╔╝██████╔╝
+            ╚═════╝  ╚═════╝  ╚═════╝ ╚════╝ ╚═════╝
+           2D LITE  ·  FORK ACAD R10  ·  v1.0
+```
+
+**Desktop 2D CAD profesional. Hecho en Zipaquirá, Cundinamarca 🇨🇴. 99 tests. 8,953 líneas. 30+ herramientas. 0 dólares a Autodesk.**
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Instalación
 
 ```bash
 git clone https://github.com/gcorrea2005/cad2d-lite.git
@@ -18,58 +28,91 @@ python -m src.main
 
 ---
 
-## 🎨 Features
-
-| Categoría | Tools |
-|-----------|-------|
-| **Draw** | LINE, ARC, CIRCLE, PLINE, RECTANG, TEXT, DIM, POINT, HATCH, SOLID |
-| **Modify** | ERASE, MOVE, COPY, ROTATE, MIRROR, SCALE, OFFSET, TRIM, EXTEND, FILLET, CHAMFER, BREAK, EXPLODE, ARRAY |
-| **Display** | ZOOM E, ZOOM W, ZOOM P, PAN, REDRAW, REGEN |
-| **Inquiry** | DIST, AREA, ID, LIST |
-| **Layers** | LAYER, CLAYER, MAKE, SET, NEW, ON, OFF, COLOR, FREEZE, THAW, LOCK, UNLOCK, DELETE |
-| **Snaps** | END, MID, CEN, NOD, QUA, INT, INS, PER, TAN, NEA, QUI (11 modos ACAD R10) |
-| **SETVAR** | 43 system variables (OSMODE, PDMODE, PDSIZE, CECOLOR, FILLETRAD, DIMSCALE...) |
-| **Colors** | ACI 256-color palette (AutoCAD Color Index) |
-| **Cursor** | Full-screen crosshair + pickbox verde 8px |
-| **I/O** | .cadlite (JSON), DXF export (ezdxf), SCRIPT (.scr) |
-| **Undo** | Command pattern, undo/redo ilimitado |
-
----
-
-## ⌨️ Commands
+## 📊 Stats
 
 ```
-LINE 0,0 10,5          Draw line
-CIRCLE 5,5 3           Draw circle
-RECTANG 0,0 10,5       Draw rectangle
-COLOR 1                Set current color (1=Red, 2=Yellow, 3=Green...)
-CLAYER walls           Set current layer
-LAYER                  List all layers
-SETVAR OSMODE 35       Set running OSNAP (END+MID+INT+NEA)
-SETVAR PDMODE 35       Point style: X with circle
-SETVAR PDSIZE 2        Point size: 2 units
-HELP                   Open documentation in Safari
-ABOUT                  Psychedelic about dialog
-TEXTSCR / GRAPHSCR     Toggle text screen (F2)
-SNAP / ORTHO           Toggle snap/ortho (also F9/F8)
-ZOOM E                 Zoom extents
-UNDO / REDO            (Ctrl+Z / Ctrl+Y)
-SAVE / OPEN            File operations
+  99 tests ✅  |  101 archivos .py  |  8,953 líneas
+  30+ tools    |  43 vars SETVAR    |  11 modos OSNAP
+  15 linetypes |  ACI 256 colores   |  4 tipos de cota
+  BLOQUES      |  PLOT PDF A4-A0   |  DXF IN/OUT
 ```
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## 🔧 Todas las herramientas
 
-| Tecla | Acción |
-|-------|--------|
-| `L` `C` `A` `P` `R` `T` `D` `M` `O` `X` | Tools |
-| `Esc` | Cancel tool → command line |
-| `F2` | Text screen toggle |
-| `F8` | Ortho toggle |
-| `F9` | Snap toggle |
-| `Ctrl+Z` / `Ctrl+Y` | Undo / Redo |
-| `↑` / `↓` | Command history |
+| Menú | Comandos |
+|------|----------|
+| **DRAW** | LINE, ARC, CIRCLE, PLINE, RECTANG, TEXT, DIM, POINT, ELLIPSE, HATCH, SOLID, DONUT |
+| **DIM** | LINEAR, ALIGNED, RADIUS, DIAMETER, ANGULAR, BASELINE |
+| **MODIFY** | ERASE, MOVE, COPY, ROTATE, MIRROR, SCALE, OFFSET, TRIM, EXTEND, FILLET, CHAMFER, BREAK, EXPLODE, ARRAY, STRETCH |
+| **DISPLAY** | ZOOM E, ZOOM W, ZOOM P, ZOOM IN, ZOOM OUT, PAN, REDRAW, REGEN |
+| **INQUIRY** | DIST, AREA, ID, LIST, STATUS |
+| **LAYER** | LAYER, CLAYER, ON, OFF, FREEZE, THAW, LOCK, UNLOCK, COLOR, LINETYPE, DELETE |
+| **BLOQUES** | BLOCK, INSERT, DOOR, WINDOW |
+| **SETTINGS** | COLOR, LINETYPE, SNAP, GRID, ORTHO, UNITS, LIMITS, SETVAR, TEMPLATE |
+| **I/O** | SAVE, OPEN, PLOT (PDF), DXF IN, DXF OUT, SCRIPT |
+
+---
+
+## 🎯 OSNAP — 11 modos con prioridad
+
+```
+ENDPOINT > MIDPOINT > CENTER > NODE > QUADRANT > INTERSECTION
+> INSERTION > PERPENDICULAR > TANGENT > NEAREST (+ QUICK)
+```
+
+---
+
+## ⚙️ SETVAR — 43 variables de sistema
+
+```
+SETVAR OSMODE 7        → END+MID+CEN
+SETVAR PDMODE 35       → X con círculo
+SETVAR CECOLOR 1       → Rojo
+SETVAR FILLETRAD 0.5   → Radio de empalme
+SETVAR OFFSETDIST 2    → Distancia de offset
+SETVAR DIMSCALE 1      → Escala de cotas
+SETVAR ? DIM*          → Listar vars de dimensión
+```
+
+---
+
+## 🎨 ACI 256 colores
+
+Paleta completa AutoCAD Color Index. `COLOR 1` (rojo) a `COLOR 255` (blanco). BYLAYER y BYBLOCK.
+
+---
+
+## ⌨️ Atajos
+
+```
+L C A P R T D M O X S  → Tools (S=Stretch)
+Esc                    → Cancelar → línea de comandos
+Click Derecho          → Repetir último comando
+F2                     → Text screen
+F7 F8 F9               → Grid / Ortho / Snap
+↑ ↓                    → Historial de comandos
+Ctrl+Z / Ctrl+Y        → Undo / Redo
+```
+
+---
+
+## 📟 Comandos rápidos
+
+```
+LINE 0,0 100,50        → Línea
+CIRCLE 50,50 25        → Círculo
+RECTANG 0,0 10,5       → Rectángulo
+@100,0                 → Relativo cartesiano
+@200<45                → Relativo polar
+COLOR 1                → ACI red
+LINETYPE CENTER        → Línea de eje
+UNITS 5                → Metros
+TEMPLATE               → 12 capas arquitectónicas
+DOOR 0.9               → Puerta 90cm
+HELP                   → Documentación en Safari
+```
 
 ---
 
@@ -77,60 +120,35 @@ SAVE / OPEN            File operations
 
 ```bash
 python -m pytest tests/ -v
-# 74 passed
+# 99 passed in 2.50s
 ```
 
 ---
 
-## 🗂️ Project Structure
+## 🗂️ Estructura
 
 ```
 src/
-├── model/          # Entidades, capas, snap engine, ACI palette, SETVAR, document
-│   ├── aci.py          # AutoCAD Color Index (256 colors)
-│   ├── sysvars.py      # 43 system variables (SETVAR engine)
-│   └── snap.py         # 11 OSNAP modes with priority
+├── model/          # Entidades, capas, snap, ACI, SETVAR, linetypes, hatch
 ├── view/           # Qt GUI, CadView, CrosshairOverlay, GfxItems, pug icon
-├── controller/     # 30 herramientas + command pattern
-├── io/             # .cadlite JSON, DXF export, SCRIPT engine
-└── main.py         # Entry point
-tests/              # 74 pytest tests
-scripts/            # Demo: generate_apto.py, apto_66m2.scr
-docs/               # HTML documentation (open with HELP command)
+├── controller/     # 30+ tools, command pattern, undo/redo
+├── io/             # .cadlite JSON, DXF in/out, SCRIPT engine
+└── main.py
+tests/              # 99 tests
+docs/               # HTML doc (HELP command → Safari)
 ```
-
----
-
-## 🎨 Retro UI Colors
-
-| Elemento | Color |
-|----------|-------|
-| Screen menu | `#0000AA` (VGA blue) |
-| Grid | `#0a1a2a` |
-| Text | `#FFFFFF` |
-| Headers | `#44AAFF` |
-| Status bar | `#000088` |
-| Accent | `#FFCC00` |
-| Crosshair | White (alpha 180) |
-| Pickbox | `#00FF00` (green) |
-| Cursor | `#00FF00` (green blink) |
-
----
-
-## 🧠 Tech Stack
-
-`Python 3.12` · `PySide6 6.11` · `ezdxf 1.1` · `pytest 9.1`
 
 ---
 
 ## 👨‍💻 Autor
 
-**Giovanni Correa** — Ingeniero civil, Zipaquirá, Cundinamarca.
-Hecho con Python, vicio, y pan de sagú.
-Dedicado a la memoria de AutoCAD R10 (1988) — DOS, EGA/VGA.
+**Ing. Giovanni Correa Mejía** — Zipaquirá, Cundinamarca 🇨🇴
+
+Hecho con Python, PySide6, ezdxf, pan de sagú y puro vicio.
+Dedicado a la memoria de AutoCAD R10 (1988) — DOS, EGA/VGA, diskettes de 5¼.
 
 ---
 
 ## 📜 Licencia
 
-MIT — dibuje sin miedo.
+MIT — dibuje sin miedo, exporte sin culpa.
