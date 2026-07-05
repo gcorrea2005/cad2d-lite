@@ -22,15 +22,26 @@ class OffsetTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        # Read distance from OFFSETDIST
-        try:
-            distance = float(self.document.sysvars["OFFSETDIST"])
-        except Exception:
-            distance = 1.0
-        if distance <= 0:
-            distance = 1.0
-
         if self._step == 0:
+            # Ask distance first
+            if self._distance is None:
+                try:
+                    default = float(self.document.sysvars["OFFSETDIST"])
+                except Exception:
+                    default = 1.0
+                from PySide6.QtWidgets import QInputDialog
+                dist, ok = QInputDialog.getDouble(
+                    self.view, "Offset", "Offset distance:",
+                    default, 0.001, 10000, 4)
+                if not ok:
+                    return
+                self._distance = abs(dist)
+                try:
+                    self.document.sysvars["OFFSETDIST"] = self._distance
+                except Exception:
+                    pass
+                # Fall through to pick entity on same click
+
             # Pick entity
             items = self.view.scene().items(scene_pos)
             for item in items:
@@ -39,7 +50,6 @@ class OffsetTool(BaseTool):
                 ent = item.entity
                 if isinstance(ent, (Line, Circle, Arc, Polyline)):
                     self._entity = ent
-                    self._distance = distance
                     self._step = 1
                     return
         else:
