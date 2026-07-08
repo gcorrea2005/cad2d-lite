@@ -39,6 +39,16 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
                 "Use ODA FileConverter to convert to DXF first."
             )
 
+    # Patch oversized/corrupt preview sections before conversion
+    # Work on a copy — never modify the user's original file
+    import shutil
+    tmp_dwg = tempfile.NamedTemporaryFile(suffix='.dwg', delete=False)
+    tmp_dwg.close()
+    shutil.copy2(dwg_path, tmp_dwg.name)
+    from src.io.dwg_patcher import patch_dwg_preview_section
+    patch_dwg_preview_section(tmp_dwg.name)
+    dwg_path = tmp_dwg.name
+
     tmp = tempfile.NamedTemporaryFile(suffix='.dxf', delete=False)
     tmp.close()
 
@@ -70,6 +80,10 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
         if os.path.exists(tmp.name):
             os.unlink(tmp.name)
         return None, f"System error: {e}"
+    finally:
+        # Clean up the temporary DWG copy
+        if os.path.exists(tmp_dwg.name):
+            os.unlink(tmp_dwg.name)
 
 
 def _detect_dwg_version(path: str) -> str | None:
