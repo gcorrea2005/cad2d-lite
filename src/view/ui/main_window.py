@@ -284,7 +284,7 @@ class MainWindow(QMainWindow):
         m.addAction("SAVE AS", self._on_save_as, "Ctrl+Shift+S")
         m.addSeparator()
         m.addAction("DXF OUT", self._on_export_dxf)
-        m.addAction("DWG IN", self._on_dwgin)
+        m.addAction("DXF/DWG IN", self._cmd_dxfin)
         m.addSeparator()
         m.addAction("SCRIPT", self._on_script)
         m.addSeparator()
@@ -1880,19 +1880,53 @@ class MainWindow(QMainWindow):
         lm.set_current("0")
 
     def _cmd_dxfin(self):
-        """DXFIN command: import DXF file via file dialog."""
+        """DXFIN command: import DXF (or DWG via bridge)."""
         from PySide6.QtWidgets import QFileDialog
         from pathlib import Path
-        from src.io.dxf_import import import_dxf
 
         path, _ = QFileDialog.getOpenFileName(
-            self, "Import DXF", "", "DXF Files (*.dxf);;All Files (*)")
+            self, "Import DXF/DWG", "",
+            "DXF/DWG Files (*.dxf *.dwg);;DXF Files (*.dxf);;DWG Files (*.dwg);;All Files (*)")
         if not path:
             self._echo("DXFIN cancelled.")
             self._echo("Command:")
             return
 
+        # Route DWG to DWGFIN
+        if path.lower().endswith('.dwg'):
+            from src.io.dwg_io import dwg_to_dxf, _has_libredwg, get_libredwg_version
+            if not _has_libredwg():
+                self._echo("DXFIN: DWG requires LibreDWG. Install: brew install libredwg")
+                self._echo("  Or use ODA FileConverter to convert DWG→DXF first.")
+                self._echo("Command:")
+                return
+            ver = get_libredwg_version() or "LibreDWG"
+            self._echo(f"DXFIN: {Path(path).name} via {ver}...")
+            dxf_path, error = dwg_to_dxf(path)
+            if dxf_path is None:
+                self._echo(f"DXFIN: {error}")
+                self._echo("  Tip: R2018+ → ODA FileConverter → DXF")
+                self._echo("Command:")
+                return
+            try:
+                from src.io.dxf_import import import_dxf
+                count = import_dxf(Path(dxf_path), self._document)
+                layers = len(self._document.layer_manager.layers)
+                self._echo(f"DXFIN: {count} entities, {layers} layers imported")
+                self._rebuild_scene()
+                self._view.zoom_extents()
+            except Exception as e:
+                self._echo(f"DXFIN error: {e}")
+            finally:
+                import os
+                if os.path.exists(dxf_path):
+                    os.unlink(dxf_path)
+            self._echo("Command:")
+            return
+
+        # Native DXF import
         try:
+            from src.io.dxf_import import import_dxf
             count = import_dxf(Path(path), self._document)
             self._echo(f"DXFIN: {count} entities imported from {Path(path).name}")
             self._rebuild_scene()
@@ -1904,38 +1938,65 @@ class MainWindow(QMainWindow):
     def _cmd_dwgin(self):
         """DWGFIN command: import DWG via LibreDWG bridge."""
         from PySide6.QtWidgets import QFileDialog
-        from src.io.dwg_io import dwg_to_dxf, _has_libredwg
+        from src.io.dwg_io import dwg_to_dxf, _has_libredwg, get_libredwg_version
 
         if not _has_libredwg():
             self._echo("DWGFIN: LibreDWG not installed.")
             self._echo("  Install: brew install libredwg")
+            self._echo("  Download: github.com/LibreDWG/libredwg/releases")
             self._echo("Command:")
             return
 
         path, _ = QFileDialog.getOpenFileName(
-            self, "Import DWG", "", "DWG Files (*.dwg);;All Files (*)")
+            self, "Import DWG", "",
+            "DWG/DXF Files (*.dwg *.dxf);;DWG Files (*.dwg);;DXF Files (*.dxf);;All Files (*)")
         if not path:
             self._echo("DWGFIN cancelled.")
             self._echo("Command:")
             return
 
-        self._echo(f"Converting DWG to DXF...")
-        dxf_path = dwg_to_dxf(path)
-        if dxf_path is None:
-            self._echo("DWGFIN: conversion failed. File may be corrupted or newer than R2013.")
-            self._echo("  LibreDWG 0.13 reads DWG R12-R2013. R2018 support is in development.")
+        from pathlib import Path
+        fname = Path(path).name
+        fsize = Path(path).stat().st_size
+        is_dxf = path.lower().endswith('.dxf')
+
+        # If user picked a DXF, import it directly
+        if is_dxf:
+            self._echo(f"DWGFIN: detected DXF file, importing directly...")
+            try:
+                from src.io.dxf_import import import_dxf
+                count = import_dxf(Path(path), self._document)
+                self._echo(f"DWGFIN: {count} entities imported from {fname}")
+                self._rebuild_scene()
+                self._view.zoom_extents()
+            except Exception as e:
+                self._echo(f"DWGFIN error: {e}")
             self._echo("Command:")
             return
 
+        ver = get_libredwg_version() or "LibreDWG"
+        self._echo(f"DWGFIN: {fname} ({fsize:,} bytes) via {ver}...")
+
+        dxf_path, error = dwg_to_dxf(path)
+        if dxf_path is None:
+            self._echo(f"DWGFIN: {error}")
+            self._echo("  Tip: R2018+ files → use ODA FileConverter → DXF → DXFIN")
+            self._echo("Command:")
+            return
+
+        dxf_size = Path(dxf_path).stat().st_size
+        self._echo(f"  Converted: {fsize:,}b DWG → {dxf_size:,}b DXF")
+        self._echo(f"  Importing entities...")
+
         try:
-            from pathlib import Path
             from src.io.dxf_import import import_dxf
             count = import_dxf(Path(dxf_path), self._document)
-            self._echo(f"DWGFIN: {count} entities imported from {Path(path).name}")
+            layers = len(self._document.layer_manager.layers)
+            self._echo(f"DWGFIN: {count} entities, {layers} layers imported from {fname}")
             self._rebuild_scene()
             self._view.zoom_extents()
         except Exception as e:
-            self._echo(f"DWGFIN error: {e}")
+            self._echo(f"DWGFIN error during import: {e}")
         finally:
             import os
             if os.path.exists(dxf_path):
@@ -2387,9 +2448,6 @@ class MainWindow(QMainWindow):
         if path:
             export_dxf(self._document, Path(path))
             self._echo(f"DXF exported: {path}")
-
-    def _on_dwgin(self):
-        self._cmd_dwgin()
 
     def _on_script(self):
         """SCRIPT — run a .scr command file (with file dialog)."""

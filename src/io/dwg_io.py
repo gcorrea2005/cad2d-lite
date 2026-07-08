@@ -1,34 +1,43 @@
 """
-DWG Import/Export bridge via LibreDWG CLI tools.
+DWG Import bridge via LibreDWG CLI tools.
 
-DogCAD delegates DWG I/O to LibreDWG's battle-tested command-line tools:
-- dwg2dxf: DWG → DXF (import)
-- dxf2dwg: DXF → DWG (export)
+DogCAD delegates DWG reading to LibreDWG's battle-tested dwg2dxf:
+  DWG → dwg2dxf → temporary DXF → DogCAD's ezdxf import
 
-This is an optional dependency. Without LibreDWG installed, DogCAD
-degrades gracefully with a helpful error message.
+Optional dependency. Without LibreDWG, degrades gracefully.
 
 Install:
   macOS:  brew install libredwg
   Linux:  apt install libredwg
-  Win:    download binaries from github.com/LibreDWG/libredwg/releases
+  Win:    download from github.com/LibreDWG/libredwg/releases
 """
 
 import subprocess
 import tempfile
 import os
 import shutil
+import struct
 
 
-def dwg_to_dxf(dwg_path: str) -> str | None:
+def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
     """
-    Convert a DWG file to DXF using LibreDWG's dwg2dxf.
+    Convert DWG to DXF. Returns (dxf_path, error_message).
 
-    Returns path to temporary DXF file, or None if conversion failed.
-    Caller is responsible for deleting the temp file.
+    On success: dxf_path is the temp DXF file, error_message is empty.
+    On failure: dxf_path is None, error_message explains why.
     """
     if not _has_libredwg():
-        return None
+        return None, "LibreDWG not installed. Install: brew install libredwg"
+
+    # Detect DWG version for better error messages
+    version = _detect_dwg_version(dwg_path)
+    if version:
+        if version.startswith("AC1032"):  # R2018
+            return None, (
+                f"DWG version: {version} (R2018+). "
+                "LibreDWG 0.13 reads R12-R2013 only. "
+                "Use ODA FileConverter to convert to DXF first."
+            )
 
     tmp = tempfile.NamedTemporaryFile(suffix='.dxf', delete=False)
     tmp.close()
@@ -36,48 +45,59 @@ def dwg_to_dxf(dwg_path: str) -> str | None:
     try:
         result = subprocess.run(
             ['dwg2dxf', dwg_path, '-o', tmp.name],
-            capture_output=True, text=True, timeout=60
+            capture_output=True, text=True, timeout=120
         )
         if result.returncode == 0:
-            return tmp.name
+            return tmp.name, ""
         else:
-            # Clean up failed conversion
+            # Extract meaningful error from stderr
+            error = _extract_error(result.stderr)
+            if version:
+                error = f"DWG {version}: {error}" if error else f"DWG {version}: conversion failed"
             os.unlink(tmp.name)
-            return None
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            return None, error or "Conversion failed (unknown error)"
+    except subprocess.TimeoutExpired:
         if os.path.exists(tmp.name):
             os.unlink(tmp.name)
+        return None, "Conversion timed out (>120s). File may be too large or corrupted."
+    except FileNotFoundError:
+        return None, "dwg2dxf not found. Install LibreDWG: brew install libredwg"
+    except OSError as e:
+        if os.path.exists(tmp.name):
+            os.unlink(tmp.name)
+        return None, f"System error: {e}"
+
+
+def _detect_dwg_version(path: str) -> str | None:
+    """Read DWG header bytes to detect version string (e.g. 'AC1027' for R2013)."""
+    try:
+        with open(path, 'rb') as f:
+            header = f.read(128)
+        # DWG signature: "AC" + version digits starting at byte 0
+        if header[:2] == b'AC':
+            # Find the version string (AC followed by 4 digits)
+            for i in range(0, len(header) - 6):
+                if header[i:i+2] == b'AC' and header[i+2:i+6].isdigit():
+                    return header[i:i+6].decode('ascii')
+        return None
+    except Exception:
         return None
 
 
-def dxf_to_dwg(dxf_path: str, dwg_path: str, version: str = "r2010") -> bool:
-    """
-    Convert a DXF file to DWG using LibreDWG's dxf2dwg.
-
-    Args:
-        dxf_path: Path to source DXF file
-        dwg_path: Path for output DWG file
-        version:  DWG version: r12, r14, r2000, r2010, r2013, r2018
-                  r2010 is default (best compatibility with modern AutoCAD).
-                  Note: r2004-r2018 are 'planned' in LibreDWG 0.13 — encoding
-                  may have warnings but geometry is preserved.
-
-    Returns True on success.
-    """
-    if not _has_libredwg():
-        return False
-
-    # Strip ezdxf-specific objects that LibreDWG can't handle
-    _sanitize_dxf_for_libredwg(dxf_path)
-
-    try:
-        result = subprocess.run(
-            ['dxf2dwg', dxf_path, '--as', version, '-y', '-o', dwg_path],
-            capture_output=True, text=True, timeout=60
-        )
-        return result.returncode == 0
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        return False
+def _extract_error(stderr: str) -> str:
+    """Extract the most relevant error line from dwg2dxf stderr."""
+    for line in stderr.split('\n'):
+        line = line.strip()
+        if not line:
+            continue
+        # Skip warnings, keep errors
+        if 'ERROR' in line:
+            return line
+    # Fallback: first non-empty line
+    for line in stderr.split('\n'):
+        if line.strip():
+            return line.strip()
+    return ""
 
 
 def _has_libredwg() -> bool:
@@ -86,7 +106,7 @@ def _has_libredwg() -> bool:
 
 
 def get_libredwg_version() -> str | None:
-    """Get installed LibreDWG version string, or None."""
+    """Get installed LibreDWG version string."""
     if not _has_libredwg():
         return None
     try:
@@ -94,38 +114,6 @@ def get_libredwg_version() -> str | None:
             ['dwg2dxf', '--version'],
             capture_output=True, text=True, timeout=5
         )
-        return result.stdout.strip() or result.stderr.strip()
+        return (result.stdout or result.stderr).strip()
     except Exception:
         return None
-
-
-def _sanitize_dxf_for_libredwg(dxf_path: str):
-    """
-    Strip DXF sections/objects that LibreDWG's dxf2dwg can't handle.
-    ezdxf 1.4+ emits MATERIAL, MLEADERSTYLE, and extended HEADER vars
-    that cause corruption in the DWG output.
-
-    This modifies the file in-place.
-    """
-    with open(dxf_path, 'r') as f:
-        content = f.read()
-
-    # Remove MATERIAL objects (entire OBJECT section entries for MATERIAL)
-    import re
-    # Remove MATERIAL blocks: from "  0\nMATERIAL" to the next "  0\n" that's not MATERIAL
-    content = re.sub(
-        r'  0\nMATERIAL\n.*?(?=\n  0\n(?!MATERIAL))',
-        '',
-        content,
-        flags=re.DOTALL
-    )
-    # Remove MLEADERSTYLE blocks
-    content = re.sub(
-        r'  0\nMLEADERSTYLE\n.*?(?=\n  0\n(?!MLEADERSTYLE))',
-        '',
-        content,
-        flags=re.DOTALL
-    )
-
-    with open(dxf_path, 'w') as f:
-        f.write(content)
