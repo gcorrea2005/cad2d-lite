@@ -2032,7 +2032,7 @@ class MainWindow(QMainWindow):
         """PLOT command: export viewport to PDF."""
         from PySide6.QtWidgets import QFileDialog, QInputDialog
         from PySide6.QtPrintSupport import QPrinter
-        from PySide6.QtGui import QPainter, QColor
+        from PySide6.QtGui import QPageSize, QPainter, QColor
         from PySide6.QtCore import QRectF, Qt
         from pathlib import Path
 
@@ -2089,7 +2089,7 @@ class MainWindow(QMainWindow):
             printer = QPrinter(QPrinter.PrinterMode.HighResolution)
             printer.setOutputFormat(QPrinter.OutputFormat.PdfFormat)
             printer.setOutputFileName(path)
-            printer.setPageSize(QPrinter.PageSize.A4)
+            printer.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
 
             painter = QPainter()
             if not painter.begin(printer):
@@ -2360,9 +2360,9 @@ class MainWindow(QMainWindow):
     def _on_plot(self):
         """PLOT — print current view."""
         from PySide6.QtPrintSupport import QPrintDialog, QPrinter
-        from PySide6.QtGui import QPainter
+        from PySide6.QtGui import QPageSize, QPainter
         printer = QPrinter()
-        printer.setPageSize(QPrinter.PageSize.A4)
+        printer.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
         dlg = QPrintDialog(printer, self)
         if dlg.exec() == QPrintDialog.DialogCode.Accepted:
             painter = QPainter(printer)
