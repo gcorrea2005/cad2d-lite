@@ -283,16 +283,20 @@ class MainWindow(QMainWindow):
         m.addAction("SAVE", self._on_save, QKeySequence.StandardKey.Save)
         m.addAction("SAVE AS", self._on_save_as, "Ctrl+Shift+S")
         m.addSeparator()
-        m.addAction("DXF OUT", self._on_export_dxf)
         m.addAction("DXF/DWG IN", self._cmd_dxfin)
+        m.addAction("DXF OUT", self._on_export_dxf)
         m.addSeparator()
+        m.addAction("PLOT", self._on_plot)
         m.addAction("SCRIPT", self._on_script)
+        m.addSeparator()
+        m.addAction("PURGE", self._on_purge)
+        m.addAction("TEMPLATE", self._on_template)
         m.addSeparator()
         m.addAction("APPLOAD", self._on_appload)
         m.addSeparator()
-        m.addAction("ACERCA DE", self._on_about)
+        m.addAction("HELP", self._cmd_help)
+        m.addAction("ABOUT", self._on_about)
         m.addSeparator()
-        m.addAction("VERSION", self._on_version)
         m.addAction("QUIT", self.close, QKeySequence.StandardKey.Quit)
 
         # Edit
@@ -419,7 +423,11 @@ class MainWindow(QMainWindow):
                 ("", None),
                 ("  SAVE  ", "save"),
                 ("  OPEN  ", "open"),
+                ("  DXFIN ", "dxfin_cmd"),
                 ("  DXF OUT","dxf"),
+                ("  PLOT  ", "plot"),
+                ("  PURGE ", "purge"),
+                ("  TEMPLATE","ni_template"),
                 ("", None),
                 ("  QUIT  ", "quit"),
             ]
@@ -1141,83 +1149,87 @@ class MainWindow(QMainWindow):
 
         # Tool switching (bare commands without coordinates)
         aliases = {
-            "L": "line", "LINE": "line",
-            "C": "circle", "CIRCLE": "circle",
+            # ── Draw tools ──
             "A": "arc", "ARC": "arc",
-            "P": "polyline", "PL": "polyline", "PLINE": "polyline",
-            "R": "rectangle", "REC": "rectangle", "RECTANG": "rectangle",
-            "T": "text", "TEXT": "text",
+            "C": "circle", "CIRCLE": "circle",
             "D": "dim", "DIM": "dim",
-            "DIMALIGNED": "dim_aligned",
-            "DIMRADIUS": "dim_radius",
-            "DIMDIAMETER": "dim_diameter",
-            "DIMANGULAR": "dim_angular",
-            "M": "move", "MOVE": "move",
-            "CO": "copy", "COPY": "copy",
-            "RO": "rotate", "ROTATE": "rotate",
-            "E": "delete", "ERASE": "delete",
-            "Z": "zoom_extents", "ZOOM": "zoom_extents",
-            "PAN": "pan_cmd",
-            "LIST": "list_entities",
-            "AREA": "area", "DIST": "dist", "ID": "id_cmd",
-            "STATUS": "status_cmd",
-            "REDRAW": "redraw", "REGEN": "regen",
-            "PURGE": "purge", "SCRIPT": "script_cmd",
-            "TEMPLATE": "layer_template",
-            "DIMBASELINE": "dimbase", "DIMBASE": "dimbase",
-            "ELLIPSE": "ellipse", "DONUT": "donut",
-            "DOOR": "door_cmd", "WINDOW": "win_cmd",
-            "CHPROP": "chprop_cmd",
-            "S": "stretch", "STRETCH": "stretch",
-            "ZOOMIN": "zoom_in",
-            "ZOOMOUT": "zoom_out",
-            "U": "undo", "UNDO": "undo",
-            "REDO": "redo",
-            "SAVE": "save", "OPEN": "open",
-            "Q": "quit", "QUIT": "quit",
-            "X": "explode", "EXPLODE": "explode",
-            "O": "offset", "OFFSET": "offset",
-            "B": "break", "BREAK": "break",
+            "DONUT": "donut",
+            "ELLIPSE": "ellipse",
             "H": "hatch", "HATCH": "hatch",
-            "SC": "scale", "SCALE": "scale",
-            "MI": "mirror", "MIRROR": "mirror",
-            "TR": "trim", "TRIM": "trim",
+            "L": "line", "LINE": "line",
+            "P": "polyline", "PL": "polyline", "PLINE": "polyline",
+            "POINT": "point",
+            "R": "rectangle", "REC": "rectangle", "RECTANG": "rectangle",
+            "SOLID": "solid",
+            "T": "text", "TEXT": "text",
+            # ── Dimension tools ──
+            "DIMALIGNED": "dim_aligned",
+            "DIMANGULAR": "dim_angular",
+            "DIMBASE": "dimbase", "DIMBASELINE": "dimbase",
+            "DIMDIAMETER": "dim_diameter",
+            "DIMRADIUS": "dim_radius",
+            # ── Modify tools ──
+            "AR": "array", "ARRAY": "array",
+            "B": "break", "BREAK": "break",
+            "CHA": "chamfer", "CHAMFER": "chamfer",
+            "CHPROP": "chprop_cmd",
+            "CO": "copy", "COPY": "copy",
+            "E": "delete", "ERASE": "delete",
             "EX": "extend", "EXTEND": "extend",
             "F": "fillet", "FILLET": "fillet",
-            "CHA": "chamfer", "CHAMFER": "chamfer",
-            "AR": "array", "ARRAY": "array",
-            "CLAYER": "clayer",
-            "SETVAR": "setvar",
+            "M": "move", "MOVE": "move",
+            "MI": "mirror", "MIRROR": "mirror",
+            "O": "offset", "OFFSET": "offset",
+            "RO": "rotate", "ROTATE": "rotate",
+            "S": "stretch", "STRETCH": "stretch",
+            "SC": "scale", "SCALE": "scale",
+            "TR": "trim", "TRIM": "trim",
+            "X": "explode", "EXPLODE": "explode",
+            # ── Display ──
+            "PAN": "pan_cmd",
+            "REDRAW": "redraw", "REGEN": "regen",
+            "Z": "zoom_extents", "ZOOM": "zoom_extents",
+            "ZOOMIN": "zoom_in", "ZOOMOUT": "zoom_out",
+            # ── Inquiry ──
+            "AREA": "area", "DIST": "dist", "ID": "id_cmd",
+            "LIST": "list_entities", "STATUS": "status_cmd",
+            # ── Blocks ──
+            "BLOCK": "block_cmd", "INSERT": "insert_cmd",
+            "DOOR": "door_cmd", "WINDOW": "win_cmd",
+            # ── I/O ──
+            "DXFIN": "dxfin_cmd", "DWGFIN": "dwgin_cmd",
+            "DXFOUT": "dxfout_cmd",
+            "PLOT": "plot_cmd", "PRINT": "plot_cmd",
+            "SCRIPT": "script_cmd",
+            # ── File ──
+            "NEW": "new_cmd",
+            "OPEN": "open",
+            "Q": "quit", "QUIT": "quit",
+            "SAVE": "save", "SAVEAS": "saveas_cmd",
+            "U": "undo", "UNDO": "undo", "REDO": "redo",
+            # ── Layer / Settings ──
+            "CLAYER": "clayer", "LAYER": "layer_cmd",
+            "COLOR": "color_cmd", "COLOUR": "color_cmd",
+            "LINETYPE": "linetype_cmd", "LTYPE": "linetype_cmd",
             "LIMITS": "limits",
-            "LAYER": "layer_cmd",
-            "TEXTSCR": "textscr",
-            "GRAPHSCR": "graphscr",
-            "COLOR": "color_cmd",
-            "COLOUR": "color_cmd",
-            "ABOUT": "about",
-            "HELP": "help",
-            "VERSION": "version_cmd",
-            "SNAP": "snap_toggle",
-            "OSNAP": "osnap_cmd",
-            "ORTHO": "ortho_toggle",
-            "GRID": "grid_toggle_cmd",
-            "DXFIN": "dxfin_cmd",
-            "PLOT": "plot_cmd",
-            "PRINT": "plot_cmd",
-            "HATCH": "hatch",
-            "LINETYPE": "linetype_cmd",
-            "LTYPE": "linetype_cmd",
-            "TEMPLATE": "layer_template",
+            "SETVAR": "setvar",
             "UNITS": "units_cmd",
-            "BLOCK": "block_cmd",
-            "INSERT": "insert_cmd",
-            "DOOR": "door_cmd",
-            "WINDOW": "win_cmd",
-            "LISP": "lisp_cmd",
-            "LSPLOAD": "lspload_cmd",
+            # ── Toggles ──
+            "GRID": "grid_toggle_cmd",
+            "ORTHO": "ortho_toggle",
+            "OSNAP": "osnap_cmd",
+            "SNAP": "snap_toggle",
+            "TEXTSCR": "textscr", "GRAPHSCR": "graphscr",
+            # ── Scripting ──
             "APPLOAD": "appload_cmd",
             "CAL": "calc_cmd", "CALC": "calc_cmd",
-            "DWGFIN": "dwgin_cmd",
+            "LISP": "lisp_cmd",
+            "LSPLOAD": "lspload_cmd",
+            # ── Utility ──
+            "PURGE": "purge",
+            "TEMPLATE": "layer_template",
+            # ── Help ──
+            "ABOUT": "about", "HELP": "help", "VERSION": "version_cmd",
         }
         action = aliases.get(cmd)
         if not action:
@@ -1239,6 +1251,16 @@ class MainWindow(QMainWindow):
             self._echo("Command:")
         elif action == "save":
             self._on_save()
+            self._echo("Command:")
+        elif action == "saveas_cmd":
+            self._on_save_as()
+            return
+        elif action == "dxfout_cmd":
+            self._on_export_dxf()
+            self._echo("Command:")
+            return
+        elif action == "new_cmd":
+            self._on_new()
             self._echo("Command:")
         elif action == "open":
             self._on_open()
@@ -2257,6 +2279,10 @@ class MainWindow(QMainWindow):
             self._echo(f"Purged layers: {', '.join(purged)}")
         else:
             self._echo("No unused layers to purge.")
+        self._echo("Command:")
+
+    def _on_template(self):
+        self._cmd_layer_template()
         self._echo("Command:")
 
     def _on_units(self):
