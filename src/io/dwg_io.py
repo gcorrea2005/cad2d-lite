@@ -44,7 +44,7 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
 
     try:
         result = subprocess.run(
-            ['dwg2dxf', dwg_path, '-o', tmp.name],
+            ['dwg2dxf', '--minimal', dwg_path, '-o', tmp.name],
             capture_output=True, text=True, timeout=120
         )
         if result.returncode == 0:
