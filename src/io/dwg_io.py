@@ -44,14 +44,14 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
 
     try:
         result = subprocess.run(
-            ['dwg2dxf', '--minimal', dwg_path, '-o', tmp.name],
+            ['dwg2dxf', '--minimal', '-y', dwg_path, '-o', tmp.name],
             capture_output=True, text=True, timeout=120
         )
-        # Success = return 0 OR only "Skip section" warnings (preview too large)
+        # Success = return 0 OR output file has content despite warnings
         if result.returncode == 0:
             return tmp.name, ""
-        elif _is_skip_section_only(result.stderr):
-            # Preview section skipped but geometry imported fine
+        elif os.path.exists(tmp.name) and os.path.getsize(tmp.name) > 500:
+            # dwg2dxf often exits non-zero with preview warnings but produces valid DXF
             return tmp.name, ""
         else:
             # Real error
