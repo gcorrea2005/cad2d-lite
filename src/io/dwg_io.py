@@ -39,17 +39,6 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
                 "Use ODA FileConverter to convert to DXF first."
             )
 
-    # Patch oversized/corrupt preview sections before conversion
-    # Work on a copy — never modify the user's original file
-    import shutil
-    original_path = dwg_path
-    tmp_dwg = tempfile.NamedTemporaryFile(suffix='.dwg', delete=False)
-    tmp_dwg.close()
-    shutil.copy2(dwg_path, tmp_dwg.name)
-    from src.io.dwg_patcher import patch_dwg_preview_section
-    patch_dwg_preview_section(tmp_dwg.name)
-    dwg_path = tmp_dwg.name
-
     tmp = tempfile.NamedTemporaryFile(suffix='.dxf', delete=False)
     tmp.close()
 
@@ -81,13 +70,9 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
         if os.path.exists(tmp.name):
             os.unlink(tmp.name)
         return None, f"System error: {e}"
-    finally:
-        # Clean up the temporary DWG copy
-        if os.path.exists(tmp_dwg.name):
-            os.unlink(tmp_dwg.name)
 
     # ── LibreDWG failed, try ODA FileConverter as fallback ──
-    return _oda_fallback(original_path, version)
+    return _oda_fallback(dwg_path, version)
 
 
 def _oda_fallback(original_path: str, version: str | None) -> tuple[str | None, str]:
@@ -103,22 +88,25 @@ def _oda_fallback(original_path: str, version: str | None) -> tuple[str | None, 
             "  https://www.opendesign.com/guestfiles/oda_file_converter"
         )
 
-    tmp_dxf = tempfile.NamedTemporaryFile(suffix='.dxf', delete=False)
-    tmp_dxf.close()
+    tmp_dir = tempfile.mkdtemp(prefix='oda_')
+    tmp_dxf = os.path.join(tmp_dir, 'output.dxf')
 
     try:
         result = subprocess.run(
-            [oda, str(original_path), tmp_dxf.name, "ACAD2018", "DXF", "0", "1"],
+            [oda, str(original_path), tmp_dir, "ACAD2018", "DXF", "0", "1"],
             capture_output=True, text=True, timeout=120
         )
-        if result.returncode == 0 and os.path.getsize(tmp_dxf.name) > 100:
-            return tmp_dxf.name, ""
-        else:
-            os.unlink(tmp_dxf.name)
-            return None, "LibreDWG and ODA FileConverter both failed."
+        # ODA names output after input file
+        import glob
+        dxf_files = glob.glob(os.path.join(tmp_dir, '*.dxf'))
+        if dxf_files:
+            actual_dxf = dxf_files[0]
+            if os.path.getsize(actual_dxf) > 100:
+                return actual_dxf, ""
+        return None, "ODA FileConverter produced no output."
     except Exception:
-        if os.path.exists(tmp_dxf.name):
-            os.unlink(tmp_dxf.name)
+        import shutil
+        shutil.rmtree(tmp_dir, ignore_errors=True)
         return None, "ODA FileConverter error."
 
 
