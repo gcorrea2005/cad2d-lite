@@ -38,9 +38,11 @@ python -m src.main
 
 **DWG Import (opcional):**
 ```bash
-brew install libredwg    # macOS
+brew install libredwg    # macOS — archivos R12-R2013 simples
 apt install libredwg     # Linux
 ```
+
+**DWG complejos (R2010+):** usar [ODA FileConverter](https://www.opendesign.com/guestfiles/oda_file_converter) (gratuito) para convertir DWG→DXF, luego `DXFIN` en DogCAD.
 
 ---
 
@@ -297,21 +299,26 @@ Al seleccionar una entidad, cuadrados azules en sus puntos clave. Hover → imá
 
 ## 📦 DWG Import
 
-DogCAD importa archivos DWG via LibreDWG bridge.
+DogCAD importa archivos DWG via LibreDWG bridge (archivos simples R12-R2013).
 
 ```bash
 # Instalar LibreDWG
 brew install libredwg
 
 # En DogCAD:
-DWGFIN          # comando → diálogo → elegir .dwg
-# o FILE → DWG IN
-# o UTILITY → DWGFIN (screen menu)
+DXFIN          # comando unificado → acepta .dxf y .dwg
+DWGFIN         # alias específico para DWG
+# o FILE → DXF/DWG IN
 ```
 
-**Soporte:** DWG R12 hasta R2013 (30 años de archivos). R2018+ requiere convertir a DXF con ODA FileConverter primero.
+**Soporte:** DWG R12-R2013 para archivos simples. Para DWG complejos (R2010+ con previews grandes, bloques anidados, objetos proxy), usar [ODA FileConverter](https://www.opendesign.com/guestfiles/oda_file_converter) (gratuito):
 
-**Exportar a DWG:** No soportado directamente (dxf2dwg es experimental). Usá `DXFOUT` → DXF → AutoCAD o ODA FileConverter para convertir a DWG.
+```bash
+ODAFileConverter drawing.dwg drawing.dxf ACAD2018 DXF 0 1
+# Luego en DogCAD: DXFIN → drawing.dxf
+```
+
+ODA es el estándar industrial — lo usan QCAD, BricsCAD, y todos los CAD no-Autodesk.
 
 ---
 

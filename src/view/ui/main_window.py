@@ -1897,7 +1897,8 @@ class MainWindow(QMainWindow):
             from src.io.dwg_io import dwg_to_dxf, _has_libredwg, get_libredwg_version
             if not _has_libredwg():
                 self._echo("DXFIN: DWG requires LibreDWG. Install: brew install libredwg")
-                self._echo("  Or use ODA FileConverter to convert DWG→DXF first.")
+                self._echo("  Complex R2010+ DWG files may need ODA FileConverter:")
+                self._echo("  https://www.opendesign.com/guestfiles/oda_file_converter")
                 self._echo("Command:")
                 return
             ver = get_libredwg_version() or "LibreDWG"
@@ -1905,7 +1906,8 @@ class MainWindow(QMainWindow):
             dxf_path, error = dwg_to_dxf(path)
             if dxf_path is None:
                 self._echo(f"DXFIN: {error}")
-                self._echo("  Tip: R2018+ → ODA FileConverter → DXF")
+                self._echo("  Tip: complex DWG → ODA FileConverter (free) → DXF → DXFIN")
+                self._echo("  https://www.opendesign.com/guestfiles/oda_file_converter")
                 self._echo("Command:")
                 return
             try:
@@ -1980,7 +1982,8 @@ class MainWindow(QMainWindow):
         dxf_path, error = dwg_to_dxf(path)
         if dxf_path is None:
             self._echo(f"DWGFIN: {error}")
-            self._echo("  Tip: R2018+ files → use ODA FileConverter → DXF → DXFIN")
+            self._echo("  Tip: complex DWG files → ODA FileConverter (free) → DXF → DXFIN")
+            self._echo("  https://www.opendesign.com/guestfiles/oda_file_converter")
             self._echo("Command:")
             return
 
