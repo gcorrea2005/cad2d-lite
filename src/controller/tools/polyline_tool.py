@@ -17,7 +17,8 @@ class PolylineTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        pt = self._snap(scene_pos)
+        pt = self._snap(scene_pos, self._points[-1] if self._points else None)
+        self._clear_transient_snap()
         if event.button() == Qt.MouseButton.RightButton:
             if len(self._points) >= 2:
                 pl = Polyline(self._points.copy(), closed=False,
@@ -32,7 +33,7 @@ class PolylineTool(BaseTool):
     def mouse_move(self, event, scene_pos: QPointF):
         if len(self._points) >= 1:
             self._clear_preview()
-            pt = self._snap(scene_pos)
+            pt = self._snap(scene_pos, self._points[-1])
             preview_pts = self._points + [pt]
             preview = Polyline(preview_pts, color="#888888")
             self._preview_item = GfxPolylineItem(preview)

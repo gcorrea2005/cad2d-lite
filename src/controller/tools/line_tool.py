@@ -17,7 +17,8 @@ class LineTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        pt = self._snap(scene_pos)
+        pt = self._snap(scene_pos, self._first_point)
+        self._clear_transient_snap()  # consumed after this pick
         if self._first_point is None:
             self._first_point = pt
         else:
@@ -35,7 +36,7 @@ class LineTool(BaseTool):
     def mouse_move(self, event, scene_pos: QPointF):
         if self._first_point is not None:
             self._clear_preview()
-            pt = self._snap(scene_pos)
+            pt = self._snap(scene_pos, self._first_point)
             preview_entity = Line(self._first_point, pt, color="#888888")
             self._preview_item = GfxLineItem(preview_entity)
             self.view.scene().addItem(self._preview_item)

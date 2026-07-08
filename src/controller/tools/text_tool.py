@@ -21,11 +21,9 @@ class TextTool(BaseTool):
             self.view, "Text", "Enter text:",
         )
         if ok and text.strip():
-            entity = TextEntity(
-                text = TextEntity(pt, content,
-                                         layer_name=self._current_layer, color=self._current_color,
-                                         linetype=self._current_linetype)
-            )
+            entity = TextEntity(pt, text,
+                                layer_name=self._current_layer, color=self._current_color,
+                                linetype=self._current_linetype)
             self.document.add_entity(entity)
             gfx = GfxTextItem(entity)
             self.view.scene().addItem(gfx)

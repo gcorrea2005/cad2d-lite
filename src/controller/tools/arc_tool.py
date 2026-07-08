@@ -20,7 +20,8 @@ class ArcTool(BaseTool):
         return QCursor(Qt.CursorShape.CrossCursor)
 
     def mouse_press(self, event, scene_pos: QPointF):
-        pt = self._snap(scene_pos)
+        pt = self._snap(scene_pos, self._start if self._start else self._center)
+        self._clear_transient_snap()
         if self._center is None:
             self._center = pt
         elif self._start is None:
@@ -52,7 +53,7 @@ class ArcTool(BaseTool):
     def mouse_move(self, event, scene_pos: QPointF):
         if self._center is not None:
             self._clear_preview()
-            pt = self._snap(scene_pos)
+            pt = self._snap(scene_pos, self._start if self._start else self._center)
             if self._start is None:
                 radius = self._center.distance_to(pt)
                 preview = Arc(self._center, radius, 0, math.pi * 1.5, color="#888888")

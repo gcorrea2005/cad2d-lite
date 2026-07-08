@@ -101,6 +101,15 @@ class CadView(QGraphicsView):
         event.ignore()
 
     def mousePressEvent(self, event: QMouseEvent):
+        # ── Pick callback (for CAL, etc.) ──
+        if hasattr(self, '_pick_callback') and self._pick_callback is not None:
+            if event.button() == Qt.MouseButton.LeftButton:
+                scene_pos = self.mapToScene(event.pos())
+                cb = self._pick_callback
+                self._pick_callback = None
+                cb(scene_pos)
+                event.accept()
+                return
         if self.tool_manager and self.tool_manager._active_tool:
             if event.button() == Qt.MouseButton.LeftButton:
                 scene_pos = self.mapToScene(event.pos())

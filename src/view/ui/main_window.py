@@ -76,7 +76,14 @@ class MainWindow(QMainWindow):
         self.resize(1280, 800)
 
         self._document = Document()
+        self._lisp_repl = None  # lazy-init Lisp REPL
         self._filename: Path | None = None
+
+        # CALC state machine
+        self._calc_engine = None
+        self._calc_queue: list[str] = []       # snap tokens pending
+        self._calc_points: list = []     # collected snap points
+        self._calc_expr: str = ""               # original expression
 
         self._init_scene()
         self._init_tools()
@@ -277,11 +284,15 @@ class MainWindow(QMainWindow):
         m.addAction("SAVE AS", self._on_save_as, "Ctrl+Shift+S")
         m.addSeparator()
         m.addAction("DXF OUT", self._on_export_dxf)
+        m.addAction("DWG IN", self._on_dwgin)
         m.addSeparator()
         m.addAction("SCRIPT", self._on_script)
         m.addSeparator()
+        m.addAction("APPLOAD", self._on_appload)
+        m.addSeparator()
         m.addAction("ACERCA DE", self._on_about)
         m.addSeparator()
+        m.addAction("VERSION", self._on_version)
         m.addAction("QUIT", self.close, QKeySequence.StandardKey.Quit)
 
         # Edit
@@ -299,6 +310,12 @@ class MainWindow(QMainWindow):
         m.addAction("ARC", lambda: self._activate_tool("arc"))
         m.addAction("PLINE", lambda: self._activate_tool("polyline"))
         m.addAction("RECTANG", lambda: self._activate_tool("rectangle"))
+        m.addAction("DONUT", lambda: self._activate_tool("donut"))
+        m.addAction("ELLIPSE", lambda: self._activate_tool("ellipse"))
+        m.addAction("HATCH", lambda: self._activate_tool("hatch"))
+        m.addAction("POINT", lambda: self._activate_tool("point"))
+        m.addAction("SOLID", lambda: self._activate_tool("solid"))
+        m.addSeparator()
         m.addAction("TEXT", lambda: self._activate_tool("text"))
         m.addAction("DIM", lambda: self._activate_tool("dim"))
 
@@ -307,15 +324,37 @@ class MainWindow(QMainWindow):
         m.addAction("MOVE", lambda: self._activate_tool("move"), "M")
         m.addAction("COPY", lambda: self._activate_tool("copy"))
         m.addAction("ROTATE", lambda: self._activate_tool("rotate"))
+        m.addAction("SCALE", lambda: self._activate_tool("scale"))
+        m.addAction("MIRROR", lambda: self._activate_tool("mirror"))
+        m.addAction("OFFSET", lambda: self._activate_tool("offset"))
+        m.addSeparator()
+        m.addAction("TRIM", lambda: self._activate_tool("trim"))
+        m.addAction("EXTEND", lambda: self._activate_tool("extend"))
+        m.addAction("FILLET", lambda: self._activate_tool("fillet"))
+        m.addAction("CHAMFER", lambda: self._activate_tool("chamfer"))
+        m.addAction("ARRAY", lambda: self._activate_tool("array"))
+        m.addSeparator()
+        m.addAction("BREAK", lambda: self._activate_tool("break"))
+        m.addAction("EXPLODE", lambda: self._activate_tool("explode"))
+        m.addAction("STRETCH", lambda: self._activate_tool("stretch"))
 
         # Display
         m = mb.addMenu("DISPLAY")
         m.addAction("ZOOM EXTENTS", self._view.zoom_extents)
+        m.addAction("ZOOM IN", self._view.zoom_in)
+        m.addAction("ZOOM OUT", self._view.zoom_out)
+        m.addAction("PAN", lambda: self._activate_tool("pan"))
+        m.addSeparator()
         m.addAction("REDRAW", self._rebuild_scene)
+        m.addAction("REGEN", self._rebuild_scene)
 
         # Inquiry
         m = mb.addMenu("INQUIRY")
         m.addAction("LIST ENTITIES", self._on_list_entities)
+        m.addAction("DISTANCE", lambda: self._activate_tool("dist"))
+        m.addAction("AREA", lambda: self._activate_tool("area"))
+        m.addAction("ID POINT", self._on_id)
+        m.addAction("STATUS", self._on_status)
 
         # Layer
         m = mb.addMenu("LAYER")
@@ -388,17 +427,21 @@ class MainWindow(QMainWindow):
             items = [
                 ("  DRAW  ", None), ("", None),
                 (" ARC    ", "arc"),
+                (" BLOCK  ", "block_cmd"),
                 (" CIRCLE ", "circle"),
                 (" DIM    ", "dim"),
                 (" DONUT  ", "donut"),
+                (" DOOR   ", "door_cmd"),
                 (" ELLIPSE", "ellipse"),
                 (" HATCH  ", "hatch"),
+                (" INSERT ", "insert_cmd"),
                 (" LINE   ", "line"),
                 (" PLINE  ", "polyline"),
                 (" POINT  ", "point"),
                 (" RECTANG", "rectangle"),
                 (" SOLID  ", "solid"),
                 (" TEXT   ", "text"),
+                (" WINDOW ", "win_cmd"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -408,6 +451,7 @@ class MainWindow(QMainWindow):
                 (" ARRAY  ", "array"),
                 (" BREAK  ", "break"),
                 (" CHAMFER", "chamfer"),
+                (" CHPROP ", "chprop_cmd"),
                 (" COPY   ", "copy"),
                 (" ERASE  ", "erase"),
                 (" EXPLODE", "explode"),
@@ -472,7 +516,7 @@ class MainWindow(QMainWindow):
                 (" DIM    ", None), ("", None),
                 (" ALIGNED", "dim_aligned"),
                 (" ANGULAR", "dim_angular"),
-                (" BASELINE","dimbase"),
+                (" BASELINE", "dimbase"),
                 (" DIAMETR", "dim_diameter"),
                 (" LINEAR ", "dim"),
                 (" RADIUS ", "dim_radius"),
@@ -499,14 +543,18 @@ class MainWindow(QMainWindow):
         elif S == "menu_utility":
             items = [
                 (" UTILITY ", None), ("", None),
+                (" APPLOAD", "appload_cmd"),
+                (" LISP    ", "lisp_prompt"),
                 (" DXF OUT", "ni_dxfout"),
                 (" DXFIN  ", "dxfin_cmd"),
+                (" DWGFIN ", "dwgin_cmd"),
                 (" PLOT   ", "plot"),
                 (" PURGE  ", "purge"),
                 (" REDO   ", "redo"),
                 (" SCRIPT ", "script_cmd"),
                 (" TEMPLATE","ni_template"),
                 (" UNDO   ", "undo"),
+                (" VERSION", "version_cmd"),
                 ("", None),
                 (" [<-BACK]", "root"),
             ]
@@ -586,25 +634,6 @@ class MainWindow(QMainWindow):
             self._toggle_ortho()
         elif action == "grid_toggle":
             self._grid.setVisible(not self._grid.isVisible())
-        elif action == "layer_set":
-            # Set current layer from menu
-            layers = list(self._document.layer_manager.layers.keys())
-            name, ok = QInputDialog.getItem(self, "Set Layer", "Layer:", layers, 0, False)
-            if ok and name:
-                self._document.layer_manager.set_current(name)
-        elif action == "layer_new":
-            name, ok = QInputDialog.getText(self, "New Layer", "Layer name:")
-            if ok and name.strip():
-                try:
-                    self._document.layer_manager.add_layer(name.strip())
-                except ValueError as e:
-                    QMessageBox.warning(self, "Error", str(e))
-        elif action == "layer_del":
-            layers = [n for n in self._document.layer_manager.layers if n != "0"]
-            if layers:
-                name, ok = QInputDialog.getItem(self, "Delete Layer", "Layer:", layers, 0, False)
-                if ok and name:
-                    self._document.layer_manager.delete_layer(name)
         elif action == "list_entities":
             self._on_list_entities()
         # ── Layer operations ──
@@ -658,6 +687,24 @@ class MainWindow(QMainWindow):
             self._on_plot()
         elif action == "script_cmd":
             self._on_script()
+        elif action == "appload_cmd":
+            self._cmd_appload("")
+        elif action == "lisp_prompt":
+            self._cmd_input.setFocus()
+            self._cmd_input.setPlainText("(")
+            self._move_cursor_to_end()
+            self._echo("LISP — type a Lisp expression:")
+        elif action == "dimbase":
+            self._tool_manager._aligned_dim = False
+            self._activate_tool("dimbaseline")
+        elif action == "block_cmd":
+            self._cmd_block("")
+        elif action == "door_cmd":
+            self._cmd_library("DOOR", "")
+        elif action == "win_cmd":
+            self._cmd_library("WINDOW", "")
+        elif action == "chprop_cmd":
+            self._cmd_chprop("")
         elif action == "insert_cmd":
             self._activate_tool("insert")
         # ── Not implemented echo ──
@@ -736,6 +783,9 @@ class MainWindow(QMainWindow):
             if ok:
                 self._document.sysvars["DIMTXT"] = v
                 self._echo(f"DIMTXT = {v}")
+            self._echo("Command:")
+        elif action == "version_cmd":
+            self._echo("DogCAD 2D Lite v0.1.0")
             self._echo("Command:")
         elif action and action.startswith("ni_"):
             cmd_name = action[3:].upper()
@@ -870,7 +920,185 @@ class MainWindow(QMainWindow):
         }
         self._echo(f"Command: {name_map.get(tool_name, tool_name.upper())}")
 
+    def _get_lisp_repl(self):
+        """Lazy-init the Lisp REPL with document and view."""
+        if self._lisp_repl is None:
+            from src.scripting.repl import Repl
+            self._lisp_repl = Repl(self._document, self._view)
+        return self._lisp_repl
+
+    def _cmd_appload(self, args: str):
+        """APPLOAD command: load a .lsp file. No args = file dialog."""
+        filepath = args.strip()
+        if not filepath:
+            filepath, _ = QFileDialog.getOpenFileName(
+                self, "Load Lisp Application", "",
+                "Lisp Files (*.lsp);;All Files (*)")
+            if not filepath:
+                self._echo("APPLOAD cancelled.")
+                self._echo("Command:")
+                return
+
+        self._echo(f"Loading {filepath}...")
+        repl = self._get_lisp_repl()
+        results = repl.load_file(filepath)
+        for r in results:
+            self._echo(f"  {r}")
+        self._autosave()
+        self._rebuild_scene()
+        self._echo("Command:")
+
+    def _on_appload(self):
+        """Menu callback for APPLOAD."""
+        self._cmd_appload("")
+
+    def _on_version(self):
+        """Menu callback for VERSION."""
+        self._echo("DogCAD 2D Lite v0.1.0")
+        self._echo("Command:")
+
+    def _cmd_osnap(self, args: str):
+        """OSNAP command: set OSMODE by name or value.
+        OSNAP END,MID,CEN  → OSMODE=7
+        OSNAP 7            → OSMODE=7
+        OSNAP OFF          → OSMODE=0
+        OSNAP              → show current
+        """
+        from src.model.snap import OSMODE_NAMES
+
+        arg = args.strip().upper()
+        if not arg:
+            osmode = int(self._document.sysvars["OSMODE"])
+            active = []
+            for name, bit in OSMODE_NAMES.items():
+                if osmode & bit:
+                    active.append(name)
+            names = ",".join(active) if active else "OFF"
+            self._echo(f"OSMODE = {osmode}  ({names})")
+            self._echo("Command:")
+            return
+
+        if arg == "OFF":
+            self._document.sysvars["OSMODE"] = 0
+            self._echo("OSNAP OFF (OSMODE=0)")
+            self._echo("Command:")
+            return
+
+        # Try numeric
+        try:
+            val = int(arg)
+            self._document.sysvars["OSMODE"] = val
+            active = [n for n, b in OSMODE_NAMES.items() if val & b]
+            names = ",".join(active) if active else "OFF"
+            self._echo(f"OSMODE = {val}  ({names})")
+            self._echo("Command:")
+            return
+        except ValueError:
+            pass
+
+        # Parse comma-separated names
+        parts = [p.strip() for p in arg.split(",")]
+        val = 0
+        for p in parts:
+            if p in OSMODE_NAMES:
+                val |= OSMODE_NAMES[p]
+            else:
+                self._echo(f"Unknown snap: {p}")
+                self._echo("Valid: END MID CEN NOD QUA INT INS PER TAN NEA")
+                self._echo("Command:")
+                return
+
+        self._document.sysvars["OSMODE"] = val
+        self._echo(f"OSMODE = {val}  ({arg})")
+        self._echo("Command:")
+
+    def _cmd_calc(self, args: str):
+        """CALC command: evaluate a geometry expression with snapping."""
+        expr = args.strip()
+        if not expr:
+            self._echo("Usage: CALC END+PER/2")
+            self._echo("Snaps: END, MID, CEN, INT, PER, NEA, QUA, TAN, NOD, INS")
+            self._echo("Command:")
+            return
+
+        from src.controller.calc_engine import CalcEngine, SNAP_NAME_MAP
+        from src.model.snap import SnapEngine
+
+        snap_eng = SnapEngine(snap_distance=15.0)
+        self._calc_engine = CalcEngine(snap_eng, self._document)
+
+        # Find all snap tokens in the expression
+        tokens = CalcEngine._tokenize(expr)
+        snap_tokens = [t for t in tokens if t in SNAP_NAME_MAP]
+
+        if not snap_tokens:
+            # Pure math: evaluate directly
+            result = self._calc_engine.eval_text(expr, lambda s: None)
+            if result:
+                self._echo(f"= {result.x:.4f}, {result.y:.4f}")
+                self._document.sysvars._values["LASTPOINT"] = f"{result.x},{result.y}"
+            self._echo("Command:")
+            return
+
+        self._calc_queue = list(snap_tokens)
+        self._calc_points = []
+        self._calc_expr = expr
+        self._echo(f"CAL >> {expr}")
+        self._echo(f"  Snaps needed: {' '.join(snap_tokens)}")
+        self._next_calc_pick()
+
+    def _next_calc_pick(self):
+        """Set up the next pick for the CALC command."""
+        if not self._calc_queue:
+            self._finish_calc()
+            return
+
+        snap_name = self._calc_queue.pop(0)
+        self._echo(f"  Pick {snap_name} point...")
+
+        def on_pick(scene_pos):
+            from src.model.entities.base import Point
+            raw = Point(scene_pos.x(), scene_pos.y())
+            pt = self._calc_engine.snap_at(raw, snap_name)
+            if pt:
+                self._calc_points.append(pt)
+                self._echo(f"    -> {pt.x:.4f}, {pt.y:.4f}")
+            else:
+                self._calc_points.append(raw)
+            self._next_calc_pick()
+
+        self._view._pick_callback = on_pick
+
+    def _finish_calc(self):
+        """All snaps collected — evaluate and display result."""
+        from src.model.entities.base import Point
+
+        # Build pick_fn that returns collected points in order
+        point_iter = iter(self._calc_points)
+        def pick_fn(snap_name):
+            try:
+                return next(point_iter)
+            except StopIteration:
+                return None
+
+        result = self._calc_engine.eval_text(self._calc_expr, pick_fn)
+        if result:
+            self._echo(f"= {result.x:.4f}, {result.y:.4f}")
+            self._document.sysvars._values["LASTPOINT"] = f"{result.x},{result.y}"
+        self._calc_engine = None
+        self._echo("Command:")
+
     def _process_command(self, text: str):
+        # ── Lisp dispatch: if text starts with '(' ──
+        if text.startswith("("):
+            repl = self._get_lisp_repl()
+            result = repl.eval_text(text)
+            if result:
+                self._echo(result)
+            self._autosave()
+            self._rebuild_scene()
+            self._echo("Command:")
+            return
         parts = text.strip().split(None, 1)
         if not parts:
             return
@@ -884,7 +1112,7 @@ class MainWindow(QMainWindow):
             "PLINE", "POLYLINE", "PL", "P",
             "TEXT", "T", "MTEXT", "POINT",
             "DIM", "DIMENSION", "D", "DIMALIGNED", "DIMLIN",
-            "ERASE", "E", "LAYER", "ZOOM",
+            "ERASE", "E", "ZOOM",
             "UNDO", "U", "REDO", "SAVE", "SAVEAS", "DELAY",
         }
 
@@ -897,6 +1125,17 @@ class MainWindow(QMainWindow):
             engine._exec_line(text)
             self._autosave()
             self._rebuild_scene()
+            self._echo("Command:")
+            return
+
+        # Transient OSNAP override during active tool (e.g. LINE END → pick → PER → pick)
+        if cmd in {"END", "MID", "CEN", "NOD", "QUA", "INT", "INS", "PER", "TAN", "NEA"}:
+            active = self._tool_manager._active_tool
+            if active is not None:
+                if active.set_transient_snap(cmd):
+                    self._echo(cmd)
+                    return
+            self._echo(f"No active tool for {cmd}")
             self._echo("Command:")
             return
 
@@ -949,14 +1188,17 @@ class MainWindow(QMainWindow):
             "AR": "array", "ARRAY": "array",
             "CLAYER": "clayer",
             "SETVAR": "setvar",
+            "LIMITS": "limits",
+            "LAYER": "layer_cmd",
             "TEXTSCR": "textscr",
             "GRAPHSCR": "graphscr",
-            "LAYER": "layer_list",
             "COLOR": "color_cmd",
             "COLOUR": "color_cmd",
             "ABOUT": "about",
             "HELP": "help",
+            "VERSION": "version_cmd",
             "SNAP": "snap_toggle",
+            "OSNAP": "osnap_cmd",
             "ORTHO": "ortho_toggle",
             "GRID": "grid_toggle_cmd",
             "DXFIN": "dxfin_cmd",
@@ -971,6 +1213,11 @@ class MainWindow(QMainWindow):
             "INSERT": "insert_cmd",
             "DOOR": "door_cmd",
             "WINDOW": "win_cmd",
+            "LISP": "lisp_cmd",
+            "LSPLOAD": "lspload_cmd",
+            "APPLOAD": "appload_cmd",
+            "CAL": "calc_cmd", "CALC": "calc_cmd",
+            "DWGFIN": "dwgin_cmd",
         }
         action = aliases.get(cmd)
         if not action:
@@ -981,6 +1228,9 @@ class MainWindow(QMainWindow):
         if action == "zoom_extents":
             self._view.zoom_extents()
             self._echo("Command:")
+        elif action == "limits":
+            self._cmd_limits(args)
+            return
         elif action == "undo":
             self._on_undo()
             self._echo("Command:")
@@ -1009,8 +1259,8 @@ class MainWindow(QMainWindow):
             self._text_screen_off()
             self._echo("Command:")
             return
-        elif action == "layer_list":
-            self._cmd_layer_list()
+        elif action == "layer_cmd":
+            self._cmd_layer(args)
             return
         elif action == "color_cmd":
             self._cmd_color(args)
@@ -1022,10 +1272,17 @@ class MainWindow(QMainWindow):
         elif action == "help":
             self._cmd_help()
             return
+        elif action == "version_cmd":
+            self._echo("DogCAD 2D Lite v0.1.0")
+            self._echo("Command:")
+            return
         elif action == "snap_toggle":
             self._toggle_snap()
             self._echo(f"Snap {'ON' if self._snap_active else 'OFF'}")
             self._echo("Command:")
+            return
+        elif action == "osnap_cmd":
+            self._cmd_osnap(args)
             return
         elif action == "ortho_toggle":
             self._toggle_ortho()
@@ -1097,11 +1354,41 @@ class MainWindow(QMainWindow):
         elif action == "win_cmd":
             self._cmd_library("WINDOW", args)
             return
+        elif action == "lisp_cmd":
+            repl = self._get_lisp_repl()
+            result = repl.eval_text(args)
+            if result:
+                self._echo(result)
+            self._autosave()
+            self._rebuild_scene()
+            self._echo("Command:")
+            return
+        elif action == "lspload_cmd":
+            repl = self._get_lisp_repl()
+            results = repl.load_file(args.strip())
+            for r in results:
+                self._echo(r)
+            self._autosave()
+            self._rebuild_scene()
+            self._echo("Command:")
+            return
+        elif action == "appload_cmd":
+            self._cmd_appload(args)
+            return
+        elif action == "calc_cmd":
+            self._cmd_calc(args)
+            return
+        elif action == "dwgin_cmd":
+            self._cmd_dwgin()
+            return
         elif action == "chprop_cmd":
             self._cmd_chprop(args)
             return
         elif action == "chamfer_cmd":
             self._activate_tool("chamfer")
+            return
+        elif action == "script_cmd":
+            self._run_script_cmd(args)
             return
         elif action in self._tool_manager._tools:
             self._activate_tool(action)
@@ -1130,6 +1417,52 @@ class MainWindow(QMainWindow):
             self._echo("Command:")
         except (KeyError, ValueError, TypeError) as e:
             self._echo(f"Invalid layer name: {args}")
+
+    def _cmd_limits(self, args: str):
+        """LIMITS — set drawing limits from coordinates or open dialog."""
+        if not args:
+            self._on_limits()
+            return
+
+        from src.io.script_engine import ScriptEngine
+        from PySide6.QtCore import QRectF
+        from src.view.graphics.grid_item import GridItem
+        engine = ScriptEngine(self._document, self._view, self._echo, self._rebuild_scene)
+        pts = args.strip().split()
+        if len(pts) >= 2:
+            p1 = engine._parse_point(pts[0])
+            p2 = engine._parse_point(pts[1])
+            if p1 and p2:
+                self._document.sysvars["LIMMIN"] = f"{p1.x},{p1.y}"
+                self._document.sysvars["LIMMAX"] = f"{p2.x},{p2.y}"
+                self._update_limits_from_sysvars()
+                x1, y1 = min(p1.x, p2.x), min(p1.y, p2.y)
+                x2, y2 = max(p1.x, p2.x), max(p1.y, p2.y)
+                self._echo(f"Limits: ({x1:.2f},{y1:.2f}) to ({x2:.2f},{y2:.2f})")
+                self._echo("Command:")
+                return
+        self._echo("LIMITS: specify lower-left and upper-right corners")
+        self._echo("Command:")
+
+    def _update_limits_from_sysvars(self):
+        """Sync scene rect and grid from LIMMIN/LIMMAX sysvars."""
+        from PySide6.QtCore import QRectF
+        from src.view.graphics.grid_item import GridItem
+        sv = self._document.sysvars
+        try:
+            min_parts = sv["LIMMIN"].split(",")
+            max_parts = sv["LIMMAX"].split(",")
+            x1, y1 = float(min_parts[0]), float(min_parts[1])
+            x2, y2 = float(max_parts[0]), float(max_parts[1])
+        except (ValueError, KeyError, IndexError):
+            return
+        x1, x2 = min(x1, x2), max(x1, x2)
+        y1, y2 = min(y1, y2), max(y1, y2)
+        rect = QRectF(x1, y1, x2 - x1, y2 - y1)
+        self._scene.setSceneRect(rect)
+        self._scene.removeItem(self._grid)
+        self._grid = GridItem(rect, spacing=10.0)
+        self._scene.addItem(self._grid)
 
     def _cmd_setvar(self, args: str):
         """SETVAR command: list/query/set system variables."""
@@ -1179,6 +1512,8 @@ class MainWindow(QMainWindow):
                 lm.set_current(layer_name)
             if name == "ORTHOMODE":
                 self._ortho_active = bool(int(val))
+            if name in ("LIMMIN", "LIMMAX"):
+                self._update_limits_from_sysvars()
             if isinstance(val, float):
                 self._echo(f"{name} = {val:.4f}")
             else:
@@ -1209,6 +1544,39 @@ class MainWindow(QMainWindow):
         self._text_screen_active = False
         self._view.show()
         self._cmd_output.setFixedHeight(80)
+
+    def _cmd_layer(self, args: str):
+        """LAYER command — handle all subcommands from command line."""
+        if not args:
+            self._cmd_layer_list()
+            return
+        parts = args.split(None, 1)
+        sub = parts[0].upper()
+        val = parts[1] if len(parts) > 1 else ""
+
+        if sub == "?":
+            self._cmd_layer_list()
+        elif sub == "NEW" and val:
+            lm = self._document.layer_manager
+            if val not in lm.layers:
+                lm.add_layer(val)
+            lm.set_current(val)
+            self._document.sysvars["CLAYER"] = val
+            self._sb_layer.setText(f"LAYER:{val}")
+            self._echo(f"New layer: {val}")
+            self._echo("Command:")
+        elif sub == "SET" and val:
+            lm = self._document.layer_manager
+            if val in lm.layers:
+                lm.set_current(val)
+                self._document.sysvars["CLAYER"] = val
+                self._sb_layer.setText(f"LAYER:{val}")
+                self._echo(f"Current layer: {val}")
+            else:
+                self._echo(f"Layer not found: {val}")
+            self._echo("Command:")
+        else:
+            self._cmd_layer_list()
 
     def _cmd_layer_list(self):
         """LAYER command: list all layers with status."""
@@ -1390,7 +1758,7 @@ class MainWindow(QMainWindow):
                 # Door: arc + line, 90cm wide, opens counterclockwise
                 ents = [
                     Line(Point(0, 0), Point(size, 0)),  # door panel
-                    Arc(Point(0, 0), Point(size, 0), Point(size / 2, size / 2)),  # swing arc
+                    Arc(Point(0, 0), size, 0, math.pi / 2),  # swing arc 90°
                 ]
                 self._document.block_defs[name] = BlockDefinition(name, ents, Point(0, 0))
                 self._echo(f"Library: {name} created")
@@ -1533,6 +1901,47 @@ class MainWindow(QMainWindow):
             self._echo(f"DXFIN error: {e}")
         self._echo("Command:")
 
+    def _cmd_dwgin(self):
+        """DWGFIN command: import DWG via LibreDWG bridge."""
+        from PySide6.QtWidgets import QFileDialog
+        from src.io.dwg_io import dwg_to_dxf, _has_libredwg
+
+        if not _has_libredwg():
+            self._echo("DWGFIN: LibreDWG not installed.")
+            self._echo("  Install: brew install libredwg")
+            self._echo("Command:")
+            return
+
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Import DWG", "", "DWG Files (*.dwg);;All Files (*)")
+        if not path:
+            self._echo("DWGFIN cancelled.")
+            self._echo("Command:")
+            return
+
+        self._echo(f"Converting DWG to DXF...")
+        dxf_path = dwg_to_dxf(path)
+        if dxf_path is None:
+            self._echo("DWGFIN: conversion failed. File may be corrupted or newer than R2013.")
+            self._echo("  LibreDWG 0.13 reads DWG R12-R2013. R2018 support is in development.")
+            self._echo("Command:")
+            return
+
+        try:
+            from pathlib import Path
+            from src.io.dxf_import import import_dxf
+            count = import_dxf(Path(dxf_path), self._document)
+            self._echo(f"DWGFIN: {count} entities imported from {Path(path).name}")
+            self._rebuild_scene()
+            self._view.zoom_extents()
+        except Exception as e:
+            self._echo(f"DWGFIN error: {e}")
+        finally:
+            import os
+            if os.path.exists(dxf_path):
+                os.unlink(dxf_path)
+        self._echo("Command:")
+
     def _cmd_plot(self, args: str):
         """PLOT command: export viewport to PDF."""
         from PySide6.QtWidgets import QFileDialog, QInputDialog
@@ -1659,16 +2068,11 @@ class MainWindow(QMainWindow):
         self._snap_active = not self._snap_active
         self._snap_action.setChecked(self._snap_active)
         self._sb_snap.setText("SNAP" if self._snap_active else "")
-        # Toggle active snaps on current tool
-        if self._tool_manager._active_tool:
-            from src.model.snap import SnapType
-            if self._snap_active:
-                self._tool_manager._active_tool._active_snaps = {
-                    SnapType.ENDPOINT, SnapType.MIDPOINT,
-                    SnapType.CENTER, SnapType.NEAREST,
-                }
-            else:
-                self._tool_manager._active_tool._active_snaps = set()
+        if self._snap_active:
+            # Default running snaps: END + MID + CEN + INT + PER
+            self._document.sysvars["OSMODE"] = 1 + 2 + 4 + 32 + 128  # 167
+        else:
+            self._document.sysvars["OSMODE"] = 0
 
     def _toggle_ortho(self):
         self._ortho_active = not self._ortho_active
@@ -1825,10 +2229,19 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(dlg)
         form = QFormLayout()
 
-        xmin = QDoubleSpinBox(); xmin.setRange(-100000, 100000); xmin.setValue(-100)
-        ymin = QDoubleSpinBox(); ymin.setRange(-100000, 100000); ymin.setValue(-100)
-        xmax = QDoubleSpinBox(); xmax.setRange(-100000, 100000); xmax.setValue(100)
-        ymax = QDoubleSpinBox(); ymax.setRange(-100000, 100000); ymax.setValue(100)
+        # Read current limits from sysvars
+        sv = self._document.sysvars
+        try:
+            cur_min = [float(v) for v in sv["LIMMIN"].split(",")]
+            cur_max = [float(v) for v in sv["LIMMAX"].split(",")]
+        except (ValueError, KeyError, IndexError):
+            cur_min = [0.0, 0.0]
+            cur_max = [12.0, 9.0]
+
+        xmin = QDoubleSpinBox(); xmin.setRange(-100000, 100000); xmin.setValue(cur_min[0])
+        ymin = QDoubleSpinBox(); ymin.setRange(-100000, 100000); ymin.setValue(cur_min[1])
+        xmax = QDoubleSpinBox(); xmax.setRange(-100000, 100000); xmax.setValue(cur_max[0])
+        ymax = QDoubleSpinBox(); ymax.setRange(-100000, 100000); ymax.setValue(cur_max[1])
 
         form.addRow("Lower-left X:", xmin)
         form.addRow("Lower-left Y:", ymin)
@@ -1975,8 +2388,11 @@ class MainWindow(QMainWindow):
             export_dxf(self._document, Path(path))
             self._echo(f"DXF exported: {path}")
 
+    def _on_dwgin(self):
+        self._cmd_dwgin()
+
     def _on_script(self):
-        """SCRIPT — run a .scr command file."""
+        """SCRIPT — run a .scr command file (with file dialog)."""
         path, _ = QFileDialog.getOpenFileName(self, "Run Script", "",
                                                "Script Files (*.scr);;All Files (*)")
         if path:
@@ -1985,6 +2401,18 @@ class MainWindow(QMainWindow):
                 self._document, self._view,
                 self._echo, self._rebuild_scene)
             engine.run(Path(path))
+
+    def _run_script_cmd(self, args: str):
+        """SCRIPT from command line — with optional file path."""
+        if not args:
+            self._on_script()
+            return
+        scr_path = Path(args.strip())
+        from src.io.script_engine import ScriptEngine
+        engine = ScriptEngine(
+            self._document, self._view,
+            self._echo, self._rebuild_scene)
+        engine.run(scr_path)
 
     def _on_about(self):
         """ACERCA DE — psychedelic about dialog."""
@@ -2031,6 +2459,7 @@ class MainWindow(QMainWindow):
         from src.model.entities.text import TextEntity
         from src.model.entities.dimension import Dimension
         from src.model.entities.point_entity import PointEntity
+        from src.model.entities.ellipse import Ellipse
         from src.model.entities.block import BlockInstance
 
         for entity in self._document.entities:

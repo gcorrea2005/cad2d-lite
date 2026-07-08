@@ -31,6 +31,42 @@ class SnapResult:
     entity: CadEntity | None = None
 
 
+# ── OSMODE ↔ SnapType mapping (AutoCAD-compatible bitmask) ────
+# END=1  MID=2  CEN=4  NOD=8  QUA=16  INT=32  INS=64
+# PER=128  TAN=256  NEA=512  QUI=1024
+_OSMODE_MAP: dict[SnapType, int] = {
+    SnapType.ENDPOINT: 1,      SnapType.MIDPOINT: 2,
+    SnapType.CENTER: 4,        SnapType.NODE: 8,
+    SnapType.QUADRANT: 16,     SnapType.INTERSECTION: 32,
+    SnapType.INSERTION: 64,    SnapType.PERPENDICULAR: 128,
+    SnapType.TANGENT: 256,     SnapType.NEAREST: 512,
+}
+_OSMODE_REVERSE: dict[int, SnapType] = {v: k for k, v in _OSMODE_MAP.items()}
+
+OSMODE_NAMES: dict[str, int] = {
+    "END": 1, "MID": 2, "CEN": 4, "NOD": 8,
+    "QUA": 16, "INT": 32, "INS": 64,
+    "PER": 128, "TAN": 256, "NEA": 512, "QUI": 1024,
+}
+
+
+def osmode_to_snaps(osmode: int) -> set[SnapType]:
+    """Convert AutoCAD OSMODE integer to set of SnapTypes."""
+    snaps = set()
+    for bit, st in _OSMODE_REVERSE.items():
+        if osmode & bit:
+            snaps.add(st)
+    return snaps
+
+
+def snaps_to_osmode(snaps: set[SnapType]) -> int:
+    """Convert set of SnapTypes to OSMODE integer."""
+    val = 0
+    for st in snaps:
+        val |= _OSMODE_MAP.get(st, 0)
+    return val
+
+
 class SnapEngine:
     _PRIORITY = {
         SnapType.ENDPOINT: 0,
@@ -50,7 +86,9 @@ class SnapEngine:
         self.snap_distance = snap_distance
 
     def find_snap(self, cursor: Point, entities: list[CadEntity],
-                  active_snaps: set[SnapType]) -> SnapResult | None:
+                  active_snaps: set[SnapType],
+                  ref_point: Point | None = None) -> SnapResult | None:
+        """Find best snap. ref_point = first point of line-in-progress (for PER/TAN)."""
         quick = SnapType.QUICK in active_snaps
         candidates: list[SnapResult] = []
 
@@ -108,10 +146,11 @@ class SnapEngine:
                             if quick: break
 
             if SnapType.PERPENDICULAR in active_snaps:
-                pt = self._perpendicular(ent, cursor)
+                pt = self._perpendicular(ent, ref_point if ref_point else cursor)
                 if pt is not None:
                     d = cursor.distance_to(pt)
-                    if d <= self.snap_distance:
+                    # PER gets 2x tolerance — foot can be far from cursor
+                    if d <= self.snap_distance * 2.0:
                         candidates.append(SnapResult(pt, SnapType.PERPENDICULAR, ent))
                         if quick: break
 
@@ -218,14 +257,24 @@ class SnapEngine:
             return self._circle_circle_intersect(ent_a, ent_b)
         return []
 
-    def _perpendicular(self, ent: CadEntity, cursor: Point) -> Point | None:
-        """PERPENDICULAR snap: foot of perpendicular from cursor to entity."""
+    def _perpendicular(self, ent: CadEntity, ref: Point) -> Point | None:
+        """PERPENDICULAR snap: foot of perpendicular from ref point to entity."""
         if isinstance(ent, Line):
-            return self._foot_of_perpendicular(ent.start, ent.end, cursor)
+            return self._foot_of_perpendicular(ent.start, ent.end, ref)
+        if isinstance(ent, Polyline):
+            best = None
+            best_dist = float('inf')
+            for seg in ent.segments():
+                a, b = seg
+                pt = self._foot_of_perpendicular(a, b, ref)
+                d = ref.distance_to(pt)
+                if d < best_dist:
+                    best_dist = d
+                    best = pt
+            return best
         if isinstance(ent, Circle):
-            # Perpendicular to circle = closest point on circle (radial line)
-            dx = cursor.x - ent.center.x
-            dy = cursor.y - ent.center.y
+            dx = ref.x - ent.center.x
+            dy = ref.y - ent.center.y
             dist = math.hypot(dx, dy)
             if dist == 0:
                 return ent.point_at_angle(0)
@@ -233,6 +282,18 @@ class SnapEngine:
                 ent.center.x + dx / dist * ent.radius,
                 ent.center.y + dy / dist * ent.radius,
             )
+        if isinstance(ent, Arc):
+            dx = ref.x - ent.center.x
+            dy = ref.y - ent.center.y
+            ang = math.atan2(dy, dx)
+            if ent.contains_angle(ang):
+                return Point(
+                    ent.center.x + math.cos(ang) * ent.radius,
+                    ent.center.y + math.sin(ang) * ent.radius,
+                )
+            pts = [ent.start_point(), ent.end_point()]
+            dists = [(ref.distance_to(p), p) for p in pts]
+            return min(dists)[1] if dists else None
         return None
 
     def _tangents(self, ent: CadEntity, cursor: Point) -> list[Point]:

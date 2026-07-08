@@ -224,11 +224,13 @@ class ScriptEngine:
                     if val in lm.layers:
                         lm.set_current(val)
                         self.layer = val
+                        self.doc.sysvars["CLAYER"] = val
                 elif sub == "NEW" and val:
                     if val not in lm.layers:
                         lm.add_layer(val)
                     lm.set_current(val)
                     self.layer = val
+                    self.doc.sysvars["CLAYER"] = val
                 elif sub == "ON" and val:
                     if val in lm.layers:
                         lm.layers[val].visible = True
@@ -286,6 +288,16 @@ class ScriptEngine:
                 time.sleep(ms / 1000.0)
             except ValueError:
                 pass
+
+        elif cmd == "LIMITS":
+            # LIMITS x_min,y_min x_max,y_max
+            pts = args.split()
+            if len(pts) >= 2:
+                p1 = self._parse_point(pts[0])
+                p2 = self._parse_point(pts[1])
+                if p1 and p2:
+                    self.doc.sysvars["LIMMIN"] = f"{p1.x},{p1.y}"
+                    self.doc.sysvars["LIMMAX"] = f"{p2.x},{p2.y}"
 
         elif cmd == "UNDO":
             self.doc.undo()
