@@ -103,15 +103,22 @@ def _extract_error(stderr: str) -> str:
 
 
 def _is_skip_section_only(stderr: str) -> bool:
-    """Check if all errors are just 'Skip section' warnings (preview too large)."""
+    """Check if all errors are just preview-section warnings (safe to ignore)."""
     if not stderr.strip():
         return True
     for line in stderr.split('\n'):
         line = line.strip()
         if not line:
             continue
-        if 'ERROR' in line and 'Skip section' not in line:
-            return False
+        if 'ERROR' not in line:
+            continue
+        # These preview-section errors are non-fatal — geometry still imports
+        if 'AcDb:Preview' in line:
+            continue
+        if 'Skip section' in line:
+            continue
+        # Any other ERROR is fatal
+        return False
     return True
 
 
