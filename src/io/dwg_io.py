@@ -47,10 +47,14 @@ def dwg_to_dxf(dwg_path: str) -> tuple[str | None, str]:
             ['dwg2dxf', '--minimal', dwg_path, '-o', tmp.name],
             capture_output=True, text=True, timeout=120
         )
+        # Success = return 0 OR only "Skip section" warnings (preview too large)
         if result.returncode == 0:
             return tmp.name, ""
+        elif _is_skip_section_only(result.stderr):
+            # Preview section skipped but geometry imported fine
+            return tmp.name, ""
         else:
-            # Extract meaningful error from stderr
+            # Real error
             error = _extract_error(result.stderr)
             if version:
                 error = f"DWG {version}: {error}" if error else f"DWG {version}: conversion failed"
@@ -85,19 +89,30 @@ def _detect_dwg_version(path: str) -> str | None:
 
 
 def _extract_error(stderr: str) -> str:
-    """Extract the most relevant error line from dwg2dxf stderr."""
+    """Extract the most relevant error line from dwg2dxf stderr, skipping Skip section warnings."""
+    for line in stderr.split('\n'):
+        line = line.strip()
+        if not line or 'Skip section' in line:
+            continue
+        if 'ERROR' in line:
+            return line
+    for line in stderr.split('\n'):
+        if line.strip() and 'Skip section' not in line:
+            return line.strip()
+    return ""
+
+
+def _is_skip_section_only(stderr: str) -> bool:
+    """Check if all errors are just 'Skip section' warnings (preview too large)."""
+    if not stderr.strip():
+        return True
     for line in stderr.split('\n'):
         line = line.strip()
         if not line:
             continue
-        # Skip warnings, keep errors
-        if 'ERROR' in line:
-            return line
-    # Fallback: first non-empty line
-    for line in stderr.split('\n'):
-        if line.strip():
-            return line.strip()
-    return ""
+        if 'ERROR' in line and 'Skip section' not in line:
+            return False
+    return True
 
 
 def _has_libredwg() -> bool:
