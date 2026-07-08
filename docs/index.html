@@ -262,10 +262,13 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <a href="#grips">GRIPS</a>
     <a href="#bloques">BLOQUES</a>
     <a href="#script">SCRIPT</a>
+    <a href="#dwg-import">DWG</a>
+    <a href="#screen-menu">MENU</a>
     <a href="#tutorial">MANUAL</a>
     <a href="#roadmap">ROADMAP</a>
     <a href="#impresiones">IMPRESIONES</a>
     <a href="#osnap">OSNAP</a>
+    <a href="#transient-osnap">TR-OSNAP</a>
     <a href="#easter">🥚</a>
   </div>
   <button id="theme-toggle" title="Modo claro/oscuro" style="background:none;border:1px solid var(--blue);color:var(--accent);cursor:pointer;padding:.2rem .5rem;border-radius:3px;font-size:.7rem;letter-spacing:1px">☀️</button>
@@ -287,7 +290,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
   <p class="tagline">
     Fork de AutoCAD R10 (1988) en <span style="color:var(--accent)">Python + PySide6 + ezdxf</span>.
     35 herramientas, 163 tests, DogLISP, CALC, Grips, BLOQUES, Script .scr,
-    SETVAR (43 vars), ACI 256, 11 OSNAP, 15 linetypes, HATCH, DXF IN/OUT, PLOT PDF.
+    SETVAR (43 vars), ACI 256, 11 OSNAP, 15 linetypes, HATCH, DXF/DWG IN, DXF OUT, PLOT PDF.
     Porque no necesitas AutoCAD para producir planos reales en 2026.
   </p>
   <div class="typewriter" id="typewriter">
@@ -316,6 +319,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <tr><td>pytest</td><td>9.1</td><td>163 tests</td></tr>
     <tr><td style="color:var(--accent)">DogLISP</td><td>—</td><td>Lisp/Scheme interpreter</td></tr>
     <tr><td style="color:var(--accent)">Script .scr</td><td>—</td><td>Batch command runner</td></tr>
+    <tr><td style="color:var(--accent)">DWG/DXF IN</td><td>—</td><td>LibreDWG + ODA fallback</td></tr>
   </table>
 </section>
 
@@ -330,7 +334,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <tr><td style="color:var(--cyan)"><b>INQUIRY</b></td><td>DIST AREA ID LIST STATUS</td><td><code>DIST</code></td></tr>
     <tr><td style="color:var(--magenta)"><b>LAYER</b></td><td>CLAYER LAYER NEW SET ON OFF COLOR FREEZE THAW LOCK UNLOCK DELETE</td><td><code>CLAYER walls</code></td></tr>
     <tr><td style="color:var(--green)"><b>SETTINGS</b></td><td>COLOR LINETYPE SETVAR SNAP ORTHO GRID UNITS TEMPLATE</td><td><code>COLOR 1</code></td></tr>
-    <tr><td style="color:var(--pink)"><b>I/O</b></td><td>DXFIN PLOT SAVE SAVEAS OPEN SCRIPT</td><td><code>PLOT</code></td></tr>
+    <tr><td style="color:var(--pink)"><b>I/O</b></td><td>DWGFIN DXFIN PLOT SAVE SAVEAS OPEN SCRIPT</td><td><code>DWGFIN</code> (DWG+DXF unificado)</td></tr>
     <tr><td style="color:var(--accent)"><b>BLOCKS</b></td><td>BLOCK INSERT DOOR WINDOW</td><td><code>DOOR 0.9</code></td></tr>
     <tr><td style="color:var(--accent)"><b>LISP</b></td><td>LISP LSPLOAD APPLOAD CALC</td><td><code>(line (p 0 0) (p 100 50))</code></td></tr>
     <tr><td><b>UTIL</b></td><td>UNDO REDO PURGE TEXTSCR GRAPHSCR HELP ABOUT</td><td>F2 / Ctrl+Z</td></tr>
@@ -380,6 +384,48 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
   </table>
 </section>
 
+
+<section id="transient-osnap">
+  <h2>🎯 TRANSIENT OSNAP — Snap de un Solo Pick</h2>
+  <p style="color:#aabbcc;margin-bottom:1rem">
+    Ademas del OSNAP persistente (<code>OSNAP END,MID,INT</code> que queda activo para siempre),
+    DogCAD soporta <b>transient OSNAP</b>: escribis el nombre del snap en la command line
+    mientras una herramienta esta activa, y el proximo pick usa SOLO ese snap.
+    Despues del pick, volves a tus snaps normales. Es como pedirle "esta vez soloEndpoint".
+  </p>
+  <h3>Como funciona</h3>
+  <div class="code-block">
+    <span class="comment">;; Activa LINE y usa transient snaps para cada punto:</span>
+    LINE
+    <span class="comment">;; Escribi END y Enter → el proximo click snappea SOLO a endpoints</span>
+    END
+    <span class="comment">;; Click en un extremo... la linea empieza ahi</span>
+    <span class="comment">;; Escribi PER y Enter → ahora el cursor busca perpendicular</span>
+    PER
+    <span class="comment">;; Click en la linea objetivo → pie de perpendicular perfecto</span>
+    <span class="comment">;; Escribi MID y Enter → punto medio</span>
+    MID
+    <span class="comment">;; Click en una linea → punto medio exacto</span>
+    <span class="comment">;; Esc para cancelar la herramienta</span>
+  </div>
+  <h3>Snaps transient disponibles</h3>
+  <p style="color:#aabbcc">
+    <code>END</code> <code>MID</code> <code>CEN</code> <code>INT</code>
+    <code>PER</code> <code>NEA</code> <code>QUA</code> <code>TAN</code>
+    <code>NOD</code> <code>INS</code>
+  </p>
+  <h3>Diferencia vs OSNAP persistente</h3>
+  <table>
+    <tr><th>Modo</th><th>Comando</th><th>Duracion</th><th>Cuando usarlo</th></tr>
+    <tr><td style="color:var(--accent)">Persistente</td><td><code>OSNAP END,MID,INT</code></td><td>Hasta que lo cambies</td><td>Dibujo general: siempre querés snap a extremos y centros</td></tr>
+    <tr><td style="color:var(--orange)">Transient</td><td><code>END</code> (en medio de LINE)</td><td>Solo el proximo pick</td><td>Un punto especifico: "este punto es perpendicular", "acá necesito el centro"</td></tr>
+  </table>
+  <p style="color:var(--accent);margin-top:1rem">
+    <b>Pro tip:</b> El transient OSNAP <b>reemplaza</b> los snaps activos para ese pick,
+    no los complementa. Si tenes <code>OSNAP END,MID,INT</code> y escribis <code>PER</code>,
+    el proximo pick SOLO buscara perpendiculares — ignora END/MID/INT.
+  </p>
+</section>
 
 <section id="dim">
   <h2>📏 DIMENSIONADO</h2>
@@ -602,6 +648,87 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
   </p>
 </section>
 
+<section id="dwg-import">
+  <h2>📦 DWG IMPORT — Abrí Archivos de AutoCAD Directamente</h2>
+  <p style="color:#aabbcc;margin-bottom:1rem">
+    DogCAD lee archivos <b>.dwg</b> (el formato nativo de AutoCAD) y <b>.dxf</b>
+    con un solo comando: <code>DWGFIN</code>. Usa LibreDWG como bridge principal
+    y ODA FileConverter como fallback automático. DWG y DXF comparten la misma
+    interfaz unificada.
+  </p>
+  <h3>Comandos</h3>
+  <table>
+    <tr><th>Comando</th><th>Qué hace</th></tr>
+    <tr><td style="color:var(--accent)">DWGFIN</td><td>Abrí diálogo para importar .dwg o .dxf (detecta automáticamente)</td></tr>
+    <tr><td style="color:var(--accent)">DXFIN</td><td>Abrí diálogo para importar solo .dxf</td></tr>
+    <tr><td style="color:var(--green)">FILE → DXFIN</td><td>Menú screen: FILE submenu → DXFIN</td></tr>
+    <tr><td style="color:var(--green)">UTILITY → DWGFIN</td><td>Menú screen: UTILITY submenu → DWGFIN</td></tr>
+  </table>
+  <h3>Flujo de importación</h3>
+  <div class="code-block">
+    <span class="comment">;; Abrí cualquier DWG o DXF:</span>
+    DWGFIN
+    <span class="comment">;; DogCAD detecta la versión del DWG y elige el mejor bridge:</span>
+    <span class="comment">;;   1. LibreDWG (dwg2dxf --minimal -y) — rápido, para DWG R12-2018</span>
+    <span class="comment">;;   2. ODA FileConverter (fallback automático) — para DWGs complejos</span>
+    <span class="comment">;; Si el archivo ya es .dxf, lo importa directamente sin conversión</span>
+    <span class="comment">;; Resultado: tus capas, líneas, círculos, arcos, polilíneas y textos</span>
+    <span class="comment">;; aparecen en DogCAD listos para editar</span>
+  </div>
+  <h3>Requisitos</h3>
+  <table>
+    <tr><th>Bridge</th><th>Instalación</th><th>Soporte</th></tr>
+    <tr><td style="color:var(--accent)">LibreDWG</td><td><code>brew install libredwg</code> (macOS)</td><td>R12 a 2018, flag <code>--minimal</code> para previews grandes</td></tr>
+    <tr><td style="color:var(--orange)">ODA FileConverter</td><td>Descargar de opendesign.com, instalar en <code>/Applications/</code></td><td>R9 a 2025, fallback automático si LibreDWG falla</td></tr>
+  </table>
+  <h3>SAVEAS DXF — Exportá a formato de intercambio</h3>
+  <p style="color:#aabbcc;margin-bottom:1rem">
+    El comando <code>SAVEAS</code> ahora detecta automáticamente la extensión.
+    Si guardás como <code>mi_plano.dxf</code>, exporta DXF en vez de .cadlite.
+    Sin pasos extra.
+  </p>
+  <div class="code-block">
+    <span class="comment">;; Guardar como .cadlite (formato nativo JSON)</span>
+    SAVEAS mi_plano          <span class="comment">→ mi_plano.cadlite</span>
+    <span class="comment">;; Guardar como .dxf (intercambio con AutoCAD)</span>
+    SAVEAS mi_plano.dxf      <span class="comment">→ mi_plano.dxf (detecta .dxf autom.)</span>
+    <span class="comment">;; O usá el diálogo: FILE → SAVEAS → elegí "DXF (*.dxf)" en el filtro</span>
+  </div>
+  <h3>Limitaciones conocidas</h3>
+  <p style="color:#aabbcc;font-size:.8rem">
+    La importación de DWG trae geometría 2D básica: LINE, CIRCLE, ARC, LWPOLYLINE,
+    TEXT, MTEXT, INSERT, POINT. Entidades 3D, layouts, paper space, xrefs, hatches
+    complejos y dimensiones no se importan — se saltan silenciosamente.
+    Para planos arquitectónicos y estructurales 2D, funciona perfecto.
+  </p>
+</section>
+
+<section id="screen-menu">
+  <h2>📋 SCREEN MENU — Menú Vertical Estilo AutoCAD R10</h2>
+  <p style="color:#aabbcc;margin-bottom:1rem">
+    El panel azul de la derecha es el <b>screen menu</b>, idéntico al del AutoCAD R10 de 1988.
+    Navegás entre submenús con un click. Cada submenú tiene sus herramientas.
+    La organización actual incluye:
+  </p>
+  <h3>Estructura de menús</h3>
+  <table>
+    <tr><th>Menú</th><th>Herramientas</th></tr>
+    <tr><td style="color:var(--accent)">FILE</td><td>NEW, OPEN, SAVE, SAVEAS, DXFIN, DXF OUT, PLOT, PURGE, TEMPLATE, QUIT</td></tr>
+    <tr><td style="color:var(--accent)">DRAW</td><td>ARC, BLOCK, CIRCLE, DIM, DONUT, DOOR, ELLIPSE, HATCH, INSERT, LINE, PLINE, POINT, RECTANG, SOLID, TEXT, WINDOW</td></tr>
+    <tr><td style="color:var(--orange)">EDIT</td><td>ARRAY, BREAK, CHAMFER, CHPROP, COPY, ERASE, EXPLODE, EXTEND, FILLET, MIRROR, MOVE, OFFSET, ROTATE, SCALE, STRETCH, TRIM</td></tr>
+    <tr><td style="color:var(--header)">DISPLAY</td><td>PAN, REDRAW, REGEN, ZOOM E, ZOOM IN, ZOOM OUT, ZOOM P, ZOOM W</td></tr>
+    <tr><td style="color:var(--green)">INQUIRY</td><td>AREA, DIST, ID, LIST, STATUS</td></tr>
+    <tr><td style="color:var(--cyan)">LAYER</td><td>?, COLOR, DELETE, FREEZE, LINETYPE, LOCK, MAKE, NEW, OFF, ON, SET, THAW, UNLOCK</td></tr>
+    <tr><td style="color:var(--magenta)">DIM</td><td>ALIGNED, ANGULAR, BASELINE, DIAMETR, LINEAR, RADIUS + DIMSCALE/DIMTXT setters</td></tr>
+    <tr><td style="color:var(--pink)">SETTINGS</td><td>COLOR, GRID, LIMITS, LINETYPE, ORTHO, SNAP, UNITS</td></tr>
+    <tr><td style="color:var(--accent)">UTILITY</td><td>APPLOAD, DWGFIN, LISP, REDO, SCRIPT, UNDO, VERSION</td></tr>
+  </table>
+  <p style="color:#aabbcc;margin-top:1rem">
+    Los comandos SAVE y QUIT aparecen directamente en ROOT (sin entrar a FILE) para acceso rápido.
+    El resto de operaciones de archivo están agrupadas bajo FILE como submenú.
+  </p>
+</section>
+
 <section id="roadmap">
   <h2>🗺️ ROADMAP</h2>
   <table>
@@ -613,7 +740,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <tr><td style="color:var(--green)">E-LAYER</td><td>✅</td><td>MAKE SET NEW ON OFF COLOR FREEZE THAW LOCK UNLOCK DELETE CLAYER LAYER</td></tr>
     <tr><td style="color:var(--green)">F-SETTINGS</td><td>✅</td><td>SNAP GRID ORTHO COLOR LINETYPE SETVAR(43) TEMPLATE</td></tr>
     <tr><td style="color:var(--green)">G-LINETYPE</td><td>✅</td><td>15 tipos: CONTINUOUS DASHED HIDDEN CENTER PHANTOM DASHDOT DOT...</td></tr>
-    <tr><td style="color:var(--green)">H-I/O</td><td>✅</td><td>.cadlite JSON DXF OUT DXF IN PLOT PDF SCRIPT .scr</td></tr>
+    <tr><td style="color:var(--green)">H-I/O</td><td>✅</td><td>.cadlite JSON DXF OUT DXF/DWG IN PLOT PDF SCRIPT .scr</td></tr>
     <tr><td style="color:var(--green)">I-ADVANCED</td><td>✅</td><td>DONUT ELLIPSE STRETCH GRIPS DIMBASELINE BLOQUES DOOR WINDOW CHPROP</td></tr>
     <tr><td style="color:var(--green)">J-LISP</td><td>✅</td><td>DogLISP interpreter CALC geometry calculator LSPLOAD APPLOAD REPL</td></tr>
     <tr><td style="color:var(--accent)">K-FUTURE</td><td>🔲</td><td>DIMANGULAR arco SPLINE XREF PAPER SPACE ATTDEF LAYOUT viewports</td></tr>
@@ -1231,8 +1358,9 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <tr><td>TEMPLATE</td><td>—</td><td>Cargar capas template</td></tr>
     <tr><td>LIMITS</td><td>—</td><td>Límites del dibujo</td></tr>
     <tr><td>PLOT</td><td>—</td><td>Exportar PDF</td></tr>
+    <tr><td>DWGFIN</td><td>—</td><td>Importar DWG+DXF unificado</td></tr>
     <tr><td>DXFIN</td><td>—</td><td>Importar DXF</td></tr>
-    <tr><td>SAVE / SAVEAS</td><td>—</td><td>Guardar .cadlite</td></tr>
+    <tr><td>SAVE / SAVEAS</td><td>—</td><td>Guardar .cadlite o .dxf (auto-detecta)</td></tr>
     <tr><td>OPEN</td><td>—</td><td>Abrir .cadlite</td></tr>
     <tr><td>UNDO</td><td>Ctrl+Z</td><td>Deshacer</td></tr>
     <tr><td>REDO</td><td>Ctrl+Y</td><td>Rehacer</td></tr>
@@ -1255,6 +1383,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <tr><td>LASTPOINT</td><td>Coordenada del último punto dibujado. Usado por @relativas.</td></tr>
     <tr><td>SETVAR</td><td>Variable de sistema que controla el comportamiento del CAD</td></tr>
     <tr><td>ACI</td><td>AutoCAD Color Index — paleta de 256 colores</td></tr>
+    <tr><td>DWG</td><td>DraWinG — formato nativo binario de AutoCAD (.dwg)</td></tr>
     <tr><td>DXF</td><td>Drawing eXchange Format — formato de intercambio entre CADs</td></tr>
     <tr><td>PLOT</td><td>Imprimir o exportar a PDF con escala</td></tr>
     <tr><td>.cadlite</td><td>Formato nativo de DogCAD (JSON)</td></tr>
@@ -1301,6 +1430,10 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
       <td>"No encuentro el PDF que plotée"</td>
       <td>Se abre solo al generarse. Si no, revisá el directorio donde está el .cadlite.</td>
     </tr>
+    <tr>
+      <td>"El DWG no abre / da error"</td>
+      <td>Instalá LibreDWG: <code>brew install libredwg</code>. Si el DWG es muy nuevo (2018+), instalá ODA FileConverter como fallback. Usá <code>DWGFIN</code> (no DXFIN) para DWGs.</td>
+    </tr>
   </table>
 
   <h3>💡 Tips y Trucos</h3>
@@ -1316,6 +1449,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
     <tr><td style="color:var(--accent)">.scr para repetitivo</td><td>Si dibujás la misma estructura muchas veces, escribí un .scr una vez y reutilizalo.</td></tr>
     <tr><td style="color:var(--accent)">SETVAR salva vidas</td><td><code>SETVAR ? DIM*</code> lista todas las variables de dimensión. <code>SETVAR DIMSCALE 50</code> ajusta escala.</td></tr>
     <tr><td style="color:var(--green)">DogLISP power-user</td><td><code>(defun mi_comando () ...)</code> — creá tus propias funciones y cargalas con LSPLOAD.</td></tr>
+    <tr><td style="color:var(--accent)">Transient OSNAP</td><td>Escribí <code>END</code>, <code>MID</code>, <code>PER</code> en medio de LINE/CIRCLE para un snap de un solo pick. Más rápido que cambiar OSMODE cada vez.</td></tr>
     <tr><td style="color:var(--accent)">TEMPLATE cada vez</td><td>Empezá siempre con TEMPLATE para tener las 12 capas arquitectónicas listas.</td></tr>
     <tr><td style="color:var(--accent)">ZOOM E frecuente</td><td>Después de cada bloque de dibujo, ZOOM E para ver todo. Ctrl+scroll también funciona.</td></tr>
   </table>
@@ -1324,7 +1458,7 @@ nav a.active-section{color:var(--accent)!important;text-shadow:0 0 8px var(--acc
 <section id="impresiones">
   <h2>💬 IMPRESIONES</h2>
   <div class="impression">
-    <p class="quote">"11,450 lineas, 163 tests, 43 SETVAR, 11 OSNAP, 15 linetypes, ACI 256, PLOT PDF, DXF IN, DogLISP, CALC, Grips, BLOQUES... y $0 dolares a Autodesk. Esto es el sueño."</p>
+    <p class="quote">"11,450 lineas, 163 tests, 43 SETVAR, 11 OSNAP, transient snap, 15 linetypes, ACI 256, PLOT PDF, DWG/DXF IN, DXF OUT, DogLISP, CALC, Grips, BLOQUES... y $0 dolares a Autodesk. Esto es el sueño."</p>
     <p class="author">— Ing. Giovanni Correa, creador 🐾</p>
   </div>
   <div class="impression">
@@ -1980,6 +2114,8 @@ function toast(msg) {
       'DogLISP: intérprete Lisp/Scheme embebido',
       'CALC: calculadora geométrica con snaps',
       'Grips: stretch/move/rotate/scale con imán',
+      'DWG/DXF IN: LibreDWG + ODA FileConverter',
+      'Transient OSNAP: snap de un solo pick',
       'UI: Retro AutoCAD 10 (screen menu azul, info bar, command line)',
       'Autor: Ing. Giovanni Correa — Bogotá, Colombia 🇨🇴',
       ''
@@ -2167,7 +2303,7 @@ console.log('%c DogCAD 2D Lite %c v1.0 "Pug Edition" %c 🔥💀',
   'color:#FFCC00;font-size:14px;',
   'color:#FF4400;font-size:16px;'
 );
-console.log('%c 35 tools | 163 tests | 11,450 lines | DogLISP | CALC | Grips | BLOQUES | SETVAR | ACI 256 | 11 OSNAP | LINETYPE | PLOT | DXF IN | 0 Autodesk dependencies', 'color:#44AAFF;');
+console.log('%c 35 tools | 163 tests | 11,450 lines | DogLISP | CALC | Grips | BLOQUES | SETVAR | ACI 256 | 11 OSNAP | transient snap | LINETYPE | PLOT | DWG/DXF IN | 0 Autodesk dependencies', 'color:#44AAFF;');
 console.log('%c Konami → Matrix | DOOM → Infierno | ` → Terminal | ACAD → CRT Flash', 'color:#00FF88;');
 console.log('%c Hecho con ❤️ en Bogotá, Colombia 🇨🇴 — por Giovanni Correa', 'color:#CC44FF;');
 console.log('%c Ya que estás en la consola: probá escribir DOOM en la página 😈', 'color:#FF8800;font-size:12px;');
@@ -2178,8 +2314,8 @@ console.log('%c Ya que estás en la consola: probá escribir DOOM en la página 
 (function buildTOC() {
   const toc = document.getElementById('sidebar-toc');
   const sections = document.querySelectorAll('section[id]');
-  const cats = {stats:'📊 STATS',comandos:'📟 COMANDOS',setvar:'⚙️ SETVAR',osnap:'🎯 OSNAP',dim:'📏 DIM',
-                doglisp:'🦎 LISP',calc:'🔢 CALC',grips:'🔲 GRIPS',bloques:'📦 BLOQUES',script:'📜 SCRIPT',
+  const cats = {stats:'📊 STATS',comandos:'📟 COMANDOS',setvar:'⚙️ SETVAR',osnap:'🎯 OSNAP','transient-osnap':'🎯 TR-OSNAP',dim:'📏 DIM',
+                doglisp:'🦎 LISP',calc:'🔢 CALC',grips:'🔲 GRIPS',bloques:'📦 BLOQUES',script:'📜 SCRIPT','dwg-import':'📦 DWG','screen-menu':'📋 MENU',
                 roadmap:'🗺️ ROADMAP',flujo:'📐 FLUJO',tutorial:'📖 MANUAL',impresiones:'💬 IMPRESIONES',easter:'🥚 EASTER'};
   let html = '';
   sections.forEach(s => {

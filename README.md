@@ -38,11 +38,11 @@ python -m src.main
 
 **DWG Import (opcional):**
 ```bash
-brew install libredwg    # macOS — archivos R12-R2013 simples
+brew install libredwg    # macOS — bridge principal, DWG R12-2018
 apt install libredwg     # Linux
 ```
 
-**DWG complejos (R2010+):** usar [ODA FileConverter](https://www.opendesign.com/guestfiles/oda_file_converter) (gratuito) para convertir DWG→DXF, luego `DXFIN` en DogCAD.
+**DWG complejos (R2010+, o si LibreDWG falla):** [ODA FileConverter](https://www.opendesign.com/guestfiles/oda_file_converter) (gratuito) se usa como fallback automático. Instalalo en `/Applications/` y DogCAD lo invoca solo.
 
 ---
 
@@ -299,26 +299,30 @@ Al seleccionar una entidad, cuadrados azules en sus puntos clave. Hover → imá
 
 ## 📦 DWG Import
 
-DogCAD importa archivos DWG via LibreDWG bridge (archivos simples R12-R2013).
+DogCAD lee archivos DWG (nativo de AutoCAD) y DXF con un solo comando unificado. Usa LibreDWG como bridge principal y ODA FileConverter como fallback automático.
 
 ```bash
 # Instalar LibreDWG
 brew install libredwg
 
 # En DogCAD:
-DXFIN          # comando unificado → acepta .dxf y .dwg
-DWGFIN         # alias específico para DWG
-# o FILE → DXF/DWG IN
+DWGFIN         # comando unificado → acepta .dwg y .dxf (auto-detecta)
+DXFIN          # alias para solo DXF
+# o FILE → DXFIN o UTILITY → DWGFIN en el screen menu
 ```
 
-**Soporte:** DWG R12-R2013 para archivos simples. Para DWG complejos (R2010+ con previews grandes, bloques anidados, objetos proxy), usar [ODA FileConverter](https://www.opendesign.com/guestfiles/oda_file_converter) (gratuito):
+**Bridge automático:**
+1. **LibreDWG** (`dwg2dxf --minimal -y`) — rápido, para DWG R12-2018. El flag `--minimal` omite previews grandes que antes causaban error. El `-y` sobrescribe archivos temporales sin preguntar.
+2. **ODA FileConverter** — fallback automático si LibreDWG falla. Soporta R9 a 2025. DogCAD lo invoca solo, sin intervención manual.
+
+**SAVEAS DXF:** El comando `SAVEAS` auto-detecta la extensión. Si guardás como `mi_plano.dxf`, exporta DXF en vez de .cadlite. Sin pasos extra.
 
 ```bash
-ODAFileConverter drawing.dwg drawing.dxf ACAD2018 DXF 0 1
-# Luego en DogCAD: DXFIN → drawing.dxf
+SAVEAS mi_plano           # → mi_plano.cadlite (JSON nativo)
+SAVEAS mi_plano.dxf       # → mi_plano.dxf (DXF, detecta .dxf autom.)
 ```
 
-ODA es el estándar industrial — lo usan QCAD, BricsCAD, y todos los CAD no-Autodesk.
+**Entidades importadas:** LINE, CIRCLE, ARC, LWPOLYLINE, TEXT, MTEXT, INSERT, POINT. Entidades 3D, layouts, xrefs y hatches complejos se saltan silenciosamente.
 
 ---
 
@@ -492,7 +496,8 @@ WINDOW 1.2                # Ventana 120cm
 CHPROP COLOR 1            # Cambiar color selección
 DIMALIGNED                # Cota alineada
 DIMBASELINE               # Cadena cotas
-DXFIN / DWGFIN            # Importar DXF/DWG
+DWGFIN / DXFIN            # Importar DWG+DXF unificado / solo DXF
+SAVEAS plano.dxf           # Exportar DXF (auto-detecta .dxf)
 PLOT                      # PDF
 ZOOM E / ZOOM W / ZOOM P / ZOOM IN / ZOOM OUT
 PAN / REDRAW / REGEN
