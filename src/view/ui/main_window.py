@@ -2436,14 +2436,24 @@ class MainWindow(QMainWindow):
 
     def _on_save_as(self):
         path, _ = QFileDialog.getSaveFileName(self, "Save Drawing As", "",
-                                               "DogCAD Files (*.cadlite);;All Files (*)")
-        if path:
-            p = Path(path)
-            if p.suffix != ".cadlite":
-                p = p.with_suffix(".cadlite")
+                                               "DogCAD (*.cadlite);;DXF (*.dxf);;All Files (*)")
+        if not path:
+            return
+        p = Path(path)
+
+        # Auto-detect format from extension
+        if p.suffix.lower() == '.dxf':
+            from src.io.dxf_export import export_dxf
+            if p.suffix.lower() != '.dxf':
+                p = p.with_suffix('.dxf')
+            export_dxf(self._document, p)
+            self._echo(f"DXF exported: {p.name}")
+        else:
+            if p.suffix.lower() != '.cadlite':
+                p = p.with_suffix('.cadlite')
             save_document(self._document, p)
             self._filename = p
-            self._echo(f"Saved: {p}")
+            self._echo(f"Saved: {p.name}")
 
     def _on_export_dxf(self):
         path, _ = QFileDialog.getSaveFileName(self, "Export DXF", "",
