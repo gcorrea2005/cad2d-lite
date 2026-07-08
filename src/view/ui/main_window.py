@@ -412,6 +412,7 @@ class MainWindow(QMainWindow):
             items = [
                 ("DogCAD 2D", None),
                 ("* * * *", None), ("", None),
+                ("FILE    ", "menu_file"),
                 ("DRAW    ", "menu_draw"),
                 ("EDIT    ", "menu_edit"),
                 ("DISPLAY ", "menu_display"),
@@ -422,14 +423,25 @@ class MainWindow(QMainWindow):
                 ("UTILITY ", "menu_utility"),
                 ("", None),
                 ("  SAVE  ", "save"),
-                ("  OPEN  ", "open"),
-                ("  DXFIN ", "dxfin_cmd"),
-                ("  DXF OUT","dxf"),
-                ("  PLOT  ", "plot"),
-                ("  PURGE ", "purge"),
-                ("  TEMPLATE","ni_template"),
-                ("", None),
                 ("  QUIT  ", "quit"),
+            ]
+        elif S == "menu_file":
+            items = [
+                ("  FILE  ", None), ("", None),
+                (" NEW    ", "new_cmd"),
+                (" OPEN   ", "open"),
+                (" SAVE   ", "save"),
+                (" SAVEAS ", "saveas_cmd"),
+                ("", None),
+                (" DXFIN  ", "dxfin_cmd"),
+                (" DXF OUT", "dxf"),
+                (" PLOT   ", "plot"),
+                (" PURGE  ", "purge"),
+                (" TEMPLATE","ni_template"),
+                ("", None),
+                (" QUIT   ", "quit"),
+                ("", None),
+                (" [<-BACK]", "root"),
             ]
         elif S == "menu_draw":
             items = [
@@ -597,7 +609,7 @@ class MainWindow(QMainWindow):
         if not action:
             return
 
-        if action in ("menu_draw", "menu_edit", "menu_display",
+        if action in ("menu_file", "menu_draw", "menu_edit", "menu_display",
                        "menu_layer", "menu_dimension", "menu_settings",
                        "menu_inquiry", "menu_utility", "root"):
             self._screen_menu_state = action
